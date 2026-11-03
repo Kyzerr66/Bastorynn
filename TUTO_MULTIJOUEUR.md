@@ -173,6 +173,10 @@ Les niveaux des défenses utilisent les chiffres 1 à 3, sont centrés sous les 
 
 ## Validation Google Search Console
 
-Pour la propriété **Préfixe de l’URL** `https://own-197c.onrender.com/`, le ZIP contient le fichier de validation Google d’origine. Après avoir remplacé **tout le projet** sur Render et attendu la fin du déploiement, ouvre `https://own-197c.onrender.com/googlea6c20ef694929c4d.html` : la page doit afficher `google-site-verification: googlea6c20ef694929c4d.html`. Reviens alors à Search Console et clique **Valider**. Conserve ce fichier dans `dist/` lors des prochaines mises à jour pour que la validation reste active.
+Pour la propriété **Préfixe de l’URL** `https://bastorynn.onrender.com/`, le ZIP contient le fichier de validation Google d’origine. Après avoir remplacé **tout le projet** sur Render et attendu la fin du déploiement, ouvre `https://bastorynn.onrender.com/googlea6c20ef694929c4d.html` : la page doit afficher `google-site-verification: googlea6c20ef694929c4d.html`. Reviens alors à Search Console et clique **Valider**. Conserve ce fichier dans `dist/` lors des prochaines mises à jour pour que la validation reste active.
 
 La validation prouve que tu contrôles le site ; elle ne garantit pas son apparition immédiate dans Google. Après validation, utilise **Inspection de l’URL** sur la page d’accueil et **Demander une indexation**. Ne publie pas seulement le fichier HTML du jeu : le serveur Node et le fichier Google placé dans `dist/` sont nécessaires.
+
+## Retrouver Bastorynn dans Google
+
+La propriété validée ne place pas automatiquement le jeu dans les résultats. Cette version affiche **Bastorynn** dans le titre et l’en-tête et fournit une description du jeu aux moteurs de recherche. Après le déploiement sur la nouvelle adresse `https://bastorynn.onrender.com/`, ouvre cette propriété dans Google Search Console, colle **l’URL de la page d’accueil** dans « Inspection de l’URL », lance le test de l’URL en ligne puis choisis **Demander une indexation**. Consulte ensuite l’état d’indexation dans Search Console. Google peut prendre plusieurs jours ou semaines et ne garantit pas l’affichage ou un rang précis.

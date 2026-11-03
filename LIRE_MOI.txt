@@ -101,3 +101,8 @@ CAMPAGNE ET DECKS
 GOOGLE SEARCH CONSOLE
 Le fichier dist/googlea6c20ef694929c4d.html doit rester dans le projet déployé.
 Après redéploiement, ouvre son URL sur le domaine Render avant de cliquer Valider.
+
+VISIBILITÉ GOOGLE
+Le jeu porte le nom Bastorynn dans le titre de page, sa description et son en-tête.
+Après déploiement sur bastorynn.onrender.com : Search Console → Inspection de l’URL
+→ Demander une indexation. L’indexation peut prendre plusieurs jours.
