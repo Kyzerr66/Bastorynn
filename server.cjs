@@ -26,6 +26,12 @@ const server=http.createServer(async(req,res)=>{try{
  if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host)return json(res,403,{error:'Origine refusée'});
  if(req.headers['sec-fetch-site']==='cross-site'&&u.pathname.startsWith('/api/'))return json(res,403,{error:'Origine refusée'});
  if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,version:'frontieres-2',accounts:true,authority:'server'});
+ if(req.method==='GET'&&(u.pathname==='/sitemap.xml'||u.pathname==='/robots.txt')){
+  const file=path.join(__dirname,'dist',u.pathname.slice(1));
+  const body=fs.readFileSync(file);
+  res.writeHead(200,{'Content-Type':u.pathname.endsWith('.xml')?'application/xml; charset=utf-8':'text/plain; charset=utf-8','Cache-Control':'public, max-age=3600','X-Content-Type-Options':'nosniff'});
+  return res.end(body);
+ }
  // Google Search Console requires the original verification file at the site root.
  if(req.method==='GET'&&/^\/google[a-zA-Z0-9]+\.html$/.test(u.pathname)){
   const file=path.join(__dirname,'dist',u.pathname.slice(1));

@@ -179,4 +179,6 @@ La validation prouve que tu contrôles le site ; elle ne garantit pas son appari
 
 ## Retrouver Bastorynn dans Google
 
+Le sitemap du site est `https://bastorynn.onrender.com/sitemap.xml`. Après avoir déployé **le ZIP multijoueur entier**, vérifie que cette adresse affiche un XML contenant `https://bastorynn.onrender.com/`. Dans Google Search Console, sélectionne la propriété `https://bastorynn.onrender.com/`, ouvre **Sitemaps**, puis saisis `sitemap.xml` dans « Ajouter un sitemap » et clique **Envoyer**. Le fichier `robots.txt` indique également cette adresse aux moteurs de recherche.
+
 La propriété validée ne place pas automatiquement le jeu dans les résultats. Cette version affiche **Bastorynn** dans le titre et l’en-tête et fournit une description du jeu aux moteurs de recherche. Après le déploiement sur la nouvelle adresse `https://bastorynn.onrender.com/`, ouvre cette propriété dans Google Search Console, colle **l’URL de la page d’accueil** dans « Inspection de l’URL », lance le test de l’URL en ligne puis choisis **Demander une indexation**. Consulte ensuite l’état d’indexation dans Search Console. Google peut prendre plusieurs jours ou semaines et ne garantit pas l’affichage ou un rang précis.
