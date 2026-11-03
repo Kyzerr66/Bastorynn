@@ -1,3 +1,5 @@
+> **Mise à jour sauvegarde :** avec DATABASE_URL, le niveau, la collection et les decks du compte sont désormais synchronisés. Pour installer et tester Supabase, suivre INSTALLER_SUPABASE.md dans le ZIP. Les anciens passages décrivant une collection uniquement locale concernent le mode invité ou HTML seul.
+
 # OWNED — Jouer à plusieurs
 
 ## Démarrer avec des amis

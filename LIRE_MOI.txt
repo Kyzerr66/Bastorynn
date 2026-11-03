@@ -33,16 +33,23 @@ châteaux mats sans plaques d’approche ; HUD compact portrait/paysage ; minica
 agrandissable ; packs scellés et révélation progressive ; enchères corrigées ;
 quatre difficultés dont Apocalypse ; modèles 3D et effets de combat.
 
-CONSERVATION DES DONNÉES
-Le compte, les amis et les invitations sont enregistrés par ce serveur dans
-DATA_DIR, ou le dossier data par défaut. Préserve ce dossier lors des mises à jour.
-Il doit être sur un stockage persistant en hébergement. Ne le publie pas dans
-un dépôt. La collection, la campagne solo, les crédits, les decks et les réglages restent locaux
-au navigateur. Les parties en cours ne survivent pas à un redémarrage serveur.
+CONSERVATION DES DONNÉES — NOUVELLE VERSION
+Avec DATABASE_URL, comptes, sessions, amis, campagne, collection, niveau, XP,
+crédits et decks sont enregistrés dans PostgreSQL/Supabase. La table privée
+est créée automatiquement au premier démarrage. Aucun mot de passe de base
+ne doit être ajouté au dépôt ou au HTML.
+Sans DATABASE_URL, le mode serveur local utilise data/accounts.json (ou DATA_DIR).
+Le HTML ouvert seul reste local. Les réglages graphiques/audio restent propres
+à l’appareil. Les parties en cours ne survivent pas à un redémarrage serveur.
+Lis INSTALLER_SUPABASE.md avant le premier déploiement : l’ancienne progression
+locale peut être associée au compte, mais les comptes d’un ancien serveur
+éphémère ne sont pas récupérables si leurs fichiers ont déjà disparu.
 
 FICHIERS NÉCESSAIRES AU MULTIJOUEUR
-server.cjs : serveur Node.js sans dépendance externe.
-accounts.cjs : comptes, sessions et amis.
+server.cjs : serveur Node.js ; npm install installe le pilote PostgreSQL pg.
+accounts.cjs : comptes, sessions, amis et progression.
+account-store.cjs : stockage PostgreSQL ou fichier local.
+progress.cjs : validation des sauvegardes.
 simulation.js : moteur de combat commun au serveur et au jeu.
 dist/index.html : jeu servi aux navigateurs (identique à index.html).
 package.json : commande npm start. PORT et DATA_DIR sont configurables.
@@ -51,10 +58,11 @@ TUTO_MULTIJOUEUR.md : tutoriel détaillé.
 conception-3d/ : documents de conception conservés de la version précédente.
 
 À DISTANCE
-Héberge le dossier complet sur un service Node.js durable avec disque persistant
-et HTTPS. Un dépôt HTML statique ne suffit pas. Aucun serveur public n’a été créé
+Héberge le dossier complet sur un service Node.js avec HTTPS et configure
+DATABASE_URL vers Supabase, ou DATA_DIR sur un disque persistant. Un dépôt HTML statique ne suffit pas. Aucun serveur public n’a été créé
 avec cette livraison. Cette version vise les salons privés entre amis ; les
-collections restent locales et ne constituent pas un classement compétitif sécurisé.
+sauvegardes sont synchronisées, mais les gains du jeu restent calculés côté client :
+ce système ne constitue pas une protection complète contre la triche.
 
 VÉRIFICATIONS
 Moteur : 16 cartes, placement et routes, énergie individuelle en coopération,
@@ -92,7 +100,7 @@ HUD MOBILE ET RENDU
 CAMPAGNE ET DECKS
 • Combat → Campagne avec des amis : 2 à 4 joueurs, citadelle partagée et énergie personnelle.
 • Victoires et étoiles coop sauvegardées sur chaque compte ; même salon pour la mission suivante.
-• Arsenal → Mes decks : jusqu’à 12 decks nommés de 6 défenses + 6 unités, sauvegardés sur cet appareil.
+• Arsenal → Mes decks : jusqu’à 12 decks nommés de 6 défenses + 6 unités, synchronisés avec le compte connecté.
 • Utiliser ce deck choisit les cartes de la prochaine partie, en PvE comme en PvP.
 • Changer de deck au salon puis se déclarer prêt actualise l’équipement personnel.
 • Projectiles animés entre les mises à jour réseau ; collisions des missiles rapides corrigées.

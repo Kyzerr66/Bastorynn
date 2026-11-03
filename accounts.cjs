@@ -2,11 +2,15 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{promisify}=require('node:util');
 const scrypt=promisify(crypto.scrypt),hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 module.exports=function accounts({json,rooms,publicRoom}){
- const dir=process.env.DATA_DIR||path.join(__dirname,'data'),file=path.join(dir,'accounts.json');
- fs.mkdirSync(dir,{recursive:true,mode:0o700});let db={version:1,users:[],sessions:[]};
- if(fs.existsSync(file)){db=JSON.parse(fs.readFileSync(file,'utf8'));if(db.version!==1||!Array.isArray(db.users)||!Array.isArray(db.sessions))throw Error('Fichier de comptes invalide : sauvegarde conservée.');}
+ const {AsyncLocalStorage}=require('node:async_hooks'),scope=new AsyncLocalStorage();
+ let db={version:1,users:[],sessions:[]},store,queue=Promise.resolve(),storageOK=false;
  const presence=new Map(),limits=new Map(),inviteLimits=new Map();
- function save(){const temp=file+'.tmp';fs.writeFileSync(temp,JSON.stringify(db),{mode:0o600});fs.renameSync(temp,file);}
+ const ready=require('./account-store.cjs')().then(async value=>{store=value;db=await store.begin();await store.commit(db,false);storageOK=true;});
+ function save(){const ctx=(scope.getStore()?.active?scope.getStore():null);if(!ctx)throw Error('Écriture hors transaction');ctx.dirty=true;}
+ function defer(fn){const ctx=(scope.getStore()?.active?scope.getStore():null);if(ctx)ctx.after.push(fn);else fn();}
+ function transaction(fn){if((scope.getStore()?.active?scope.getStore():null))return fn();const work=queue.then(async()=>{await ready;let before,stage='database';const ctx={active:true,dirty:false,after:[]};try{before=db;db=await store.begin();stage='action';const result=await scope.run(ctx,fn);stage='database';await store.commit(db,ctx.dirty);storageOK=true;ctx.active=false;for(const after of ctx.after){try{after();}catch{}}return result;}catch(e){ctx.active=false;await store.rollback().catch(()=>{});if(before)db=before;if(stage==='database'){storageOK=false;console.error('Échec sauvegarde :',e.code||e.name);const safeError=Error('Sauvegarde indisponible. Réessaie sans fermer le jeu.');safeError.status=503;throw safeError;}throw e;}});queue=work.catch(()=>{});return work;}
+ function background(fn){return transaction(fn).catch(()=>{console.error('Mise à jour de compte en attente.');setTimeout(()=>background(fn),10000).unref();});}
+ function status(){return {type:store?.kind||'initializing',connected:storageOK,persistent:store?.kind==='postgres'};}
  function user(id){return db.users.find(u=>u.id===id);}
  function cookie(req){const raw=(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith('owned_session='))?.slice(14);if(!raw||raw.length>128)return null;const ses=db.sessions.find(s=>s.hash===hash(raw)&&s.expires>Date.now());return ses?user(ses.user):null;}
  function requireUser(req){const u=cookie(req);if(!u){const e=Error('Connecte-toi à ton compte pour jouer avec tes amis.');e.status=401;throw e;}return u;}
@@ -14,16 +18,26 @@ module.exports=function accounts({json,rooms,publicRoom}){
  function ended(r){return !!(r?.ended||r?.state?.ended||r?.game?.Frontier?.session?.ended);}
  function activeRoom(id){return [...rooms.values()].reverse().find(r=>!ended(r)&&r.players.some(p=>p?.accountId===id))||null;}
  function validInvite(i,recipient){const r=rooms.get(i.room),sender=user(i.from);return !!(i.expires>Date.now()&&r&&!r.started&&!ended(r)&&sender&&recipient.friends.includes(sender.id)&&r.players.some(p=>p?.accountId===sender.id)&&!r.players.some(p=>p?.accountId===recipient.id));}
- function roomChanged(){const changed=[];for(const u of db.users){const next=u.invites.filter(i=>validInvite(i,u));if(next.length!==u.invites.length){u.invites=next;changed.push(u.id);}}if(changed.length){save();notify(changed);}return changed;}
+ function roomChanged(){if(!(scope.getStore()?.active?scope.getStore():null)){background(roomChanged);return [];}const changed=[];for(const u of db.users){const next=u.invites.filter(i=>validInvite(i,u));if(next.length!==u.invites.length){u.invites=next;changed.push(u.id);}}if(changed.length){save();notify(changed);}return changed;}
 
  function online(id){return !!presence.get(id)?.size;}
  function view(u){const r=activeRoom(u.id);return {user:safe(u),campaign:u.campaign||{},friends:u.friends.map(id=>user(id)).filter(Boolean).map(f=>({...safe(f),online:online(f.id),status:activeRoom(f.id)?.started?'En partie':online(f.id)?'En ligne':'Hors ligne'})),requests:u.requests.map(id=>user(id)).filter(Boolean).map(safe),sent:db.users.filter(f=>f.requests.includes(u.id)).map(safe),invitations:u.invites.filter(i=>validInvite(i,u)).map(i=>({...i,from:safe(user(i.from))})),activeRoom:r?{code:r.code,started:r.started,config:r.config}:null};}
- function emit(u){for(const stream of presence.get(u.id)||[]){try{if(stream.writableLength>1e6)stream.end();else stream.write('data: '+JSON.stringify({type:'social',data:view(u)})+'\n\n');}catch{}}}
+ function emit(u){if((scope.getStore()?.active?scope.getStore():null)){defer(()=>emit(u));return;}for(const stream of presence.get(u.id)||[]){try{if(stream.writableLength>1e6)stream.end();else stream.write('data: '+JSON.stringify({type:'social',data:view(u)})+'\n\n');}catch{}}}
  function notify(ids){for(const id of new Set(ids)){const u=user(id);if(u)emit(u);}}
  function onlineChanged(u){notify([u.id,...u.friends]);}
  function setSession(req,res,u,remember){const key=crypto.randomBytes(32).toString('base64url'),expires=Date.now()+(remember?30:1)*86400000;db.sessions=db.sessions.filter(s=>s.expires>Date.now());db.sessions.push({hash:hash(key),user:u.id,expires});if(db.sessions.filter(s=>s.user===u.id).length>12){const i=db.sessions.findIndex(s=>s.user===u.id);db.sessions.splice(i,1);}save();const secure=req.socket.encrypted||req.headers['x-forwarded-proto']==='https';res.setHeader('Set-Cookie',`owned_session=${key}; Path=/; HttpOnly; SameSite=Lax${remember?'; Max-Age=2592000':''}${secure?'; Secure':''}`);}
  function rate(req,label,max,period){const key=req.socket.remoteAddress+':'+label,now=Date.now(),r=limits.get(key)||{n:0,until:now+period};if(now>r.until){r.n=0;r.until=now+period;}limits.set(key,r);if(++r.n>max){const e=Error('Trop de tentatives. Réessaie dans quelques minutes.');e.status=429;throw e;}}
  async function route(req,res,u,data){const p=u.pathname;
+  if(p==='/api/account/progress'&&['GET','POST'].includes(req.method)){
+   const account=requireUser(req);
+   if(req.method==='GET'){json(res,200,{accountId:account.id,revision:account.progressRevision||0,progress:account.progress||null,storage:status()});return true;}
+   if(data.accountId!==account.id){const e=Error('Le compte actif a changé. Recharge la page.');e.status=409;throw e;}
+   if(!Number.isSafeInteger(data.revision)||data.revision!==(account.progressRevision||0)){const e=Error('Une autre session a modifié ta progression. Recharge pour récupérer sa sauvegarde.');e.status=409;throw e;}
+   const progress=require('./progress.cjs').validate(data.progress);
+   account.progress=progress;account.progressRevision=(account.progressRevision||0)+1;save();
+   json(res,200,{accountId:account.id,revision:account.progressRevision,savedAt:new Date().toISOString(),storage:status()});return true;
+  }
+
   if(req.method==='GET'&&p==='/api/account/me'){const account=cookie(req);json(res,200,account?view(account):{user:null});return true;}
   if(req.method==='GET'&&p==='/api/social/events'){
    const account=requireUser(req);res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache, no-transform','Connection':'keep-alive','X-Accel-Buffering':'no'});res.write(': social\n\n');if(!presence.has(account.id))presence.set(account.id,new Set());presence.get(account.id).add(res);onlineChanged(account);
@@ -58,6 +72,6 @@ module.exports=function accounts({json,rooms,publicRoom}){
   if(p==='/api/social/dismiss'){account.invites=account.invites.filter(i=>i.id!==data.invitation);save();emit(account);json(res,200,view(account));return true;}
   return false;
  }
- function recordCampaign(ids,result){for(const id of new Set(ids)){const u=user(id);if(!u)continue;u.campaign||={};const p=u.campaign[result.map]||={};p.best=Math.max(p.best||0,result.waves);if(result.win){p.win=true;p.stars=Math.max(p.stars||0,result.stars);p.d=Math.max(p.d||0,result.diff+1);}}save();notify(ids);}
- return {route,requireUser,cookie,view,safe,activeRoom,roomChanged,ended,notify,user,recordCampaign};
+ function recordCampaign(ids,result){if(!(scope.getStore()?.active?scope.getStore():null)){background(()=>recordCampaign(ids,result));return;}for(const id of new Set(ids)){const u=user(id);if(!u)continue;u.campaign||={};const p=u.campaign[result.map]||={};p.best=Math.max(p.best||0,result.waves);if(result.win){p.win=true;p.stars=Math.max(p.stars||0,result.stars);p.d=Math.max(p.d||0,result.diff+1);}}save();notify(ids);}
+ return {ready,transaction,defer,status,close:async()=>{await queue;await store.close();},route,requireUser,cookie,view,safe,activeRoom,roomChanged,ended,notify,user,recordCampaign};
 };
