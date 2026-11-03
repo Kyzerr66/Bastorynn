@@ -1,0 +1,259 @@
+{
+  "schema": "game-room.room-final-report.v1",
+  "roomId": "owned-citadel-runtime",
+  "gates": {
+    "function": false,
+    "form": false,
+    "runtime": false
+  },
+  "runtimeValidation": {
+    "maps": 16,
+    "roadAprons": 0,
+    "gates": 52,
+    "maximumCitadelTriangles": 1708,
+    "physicalApproachIntersections": 0,
+    "browser": "software-rendered production camera checked; native WebGL unavailable in test browser",
+    "territorialOwnership": "Three nearest sectors initially free; buying unlocks construction and income; ownership synchronized per team.",
+    "mapSidesMeters": [
+      75,
+      78,
+      82.5,
+      87
+    ],
+    "hudViewports": [
+      "1280x720",
+      "390x844",
+      "844x390",
+      "320x568",
+      "568x320"
+    ],
+    "hudDesktopHeightPx": 100,
+    "hudLandscapeHeightPx": 74,
+    "renderBuffers": "Reused independently per canvas; pixel/depth clearing, occlusion and resize verified.",
+    "captureFortGeometry": {
+      "counts": [
+        3,
+        5
+      ],
+      "maximumTriangles": 3080,
+      "trianglesPerFort": 616,
+      "sharedPrimitiveGeometry": true,
+      "openEntranceRayCheck": true,
+      "groundDrapedCaptureRing": true,
+      "finiteVerticesAndTransforms": true,
+      "ownershipMaterialUpdate": true,
+      "geometryAndMaterialDisposal": true,
+      "test": "verify_outpost_models.cjs",
+      "browserReview": "Integrated production-camera software-renderer review: three routes and forts visible; capture controls and team flags checked. GPU visual review unavailable."
+    },
+    "conquestRegression": {
+      "maps": 16,
+      "validDeploymentRoutes": 416,
+      "troops": 160,
+      "defenses": 160,
+      "rapidDeployments": 55,
+      "remoteAnnex": true,
+      "amphibiousMovementWithTowers": true,
+      "captureContestRecapture": true
+    },
+    "coopScaling": {
+      "cases": 768,
+      "players": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "difficulties": 4,
+      "serverRosterCompactionAndReconnect": true
+    },
+    "troopResearch": {
+      "types": 160,
+      "additionalLevels": 3,
+      "activeAndFutureUnits": true,
+      "personalEnergyAndTypeIsolation": true,
+      "networkAuthorityAndReplication": true
+    },
+    "towerUpgradeFix": {
+      "oldFailureReproduced": true,
+      "families": 36,
+      "upgrades": 72,
+      "idleStateFinite": true,
+      "browserLevelBadgeAndGeometryChecked": true
+    },
+    "currentUIReview": [
+      "Desktop navigation and filters",
+      "390x844 portrait troop research and six-card HUD",
+      "844x390 landscape troop research with sticky purchase action",
+      "Tower upgrade panel and level-II world badge"
+    ],
+    "performanceTarget": "Adaptive render quality targeting 60 FPS; bounded visual effects and spatial targeting. Not a guarantee; GPU and physical-device FPS unmeasured.",
+    "hudMobileRevision": {
+      "date": "2026-11-03",
+      "viewportsReviewed": [
+        "390x844 portrait",
+        "844x390 landscape",
+        "1363x936 desktop"
+      ],
+      "portraitBeforePx": {
+        "top": 95,
+        "bottom": 133,
+        "radar": 70
+      },
+      "portraitAfterPx": {
+        "top": 47,
+        "bottom": 76,
+        "radar": 44
+      },
+      "landscapeAfterPx": {
+        "top": 47,
+        "pveBottom": 64,
+        "pvpBottom": 70,
+        "radar": 44
+      },
+      "onDemand": [
+        "tools",
+        "minimap",
+        "placement statistics",
+        "PvP target and route"
+      ],
+      "functionalChecks": [
+        "six defense and troop cards",
+        "minimap open and close",
+        "placement detail expansion",
+        "launch wave",
+        "speed control",
+        "PvP route selection",
+        "troop research purchase",
+        "portrait/landscape rotation",
+        "desktop controls untouched"
+      ],
+      "graphics": [
+        "automatic touch/small-viewport profile",
+        "DPR 1.25–2 with mobile resolution preserved before effect reductions",
+        "no bloom or depth-of-field on mobile",
+        "512px shadow maps, off on slower tiers",
+        "unit animations retained",
+        "hidden minimap skips drawing"
+      ],
+      "test": "verify_mobile_graphics.cjs",
+      "limitations": "Browser review used the software 3D renderer. Native WebGL flags covered by executable/source checks; physical-phone GPU FPS unmeasured."
+    },
+    "pvpFairness": {
+      "passed": true,
+      "tests": [
+        "verify_pvp_fairness.cjs: 48 map/mode combinations",
+        "verify_conquest_integration.cjs: 16 maps, 416 routes, 55 rapid deployments"
+      ],
+      "checks": [
+        "Equal duel distances to all three capture bases",
+        "Equal four-player objective distance distributions",
+        "Symmetric terrain, hills, starting territories and prices",
+        "Routes clear capture fort buildings",
+        "Individual energy, capture/contest/recapture, guest sync and amphibious movement with towers preserved"
+      ],
+      "browserReview": "Delta duel opened with three capture objectives and symmetric road layout in minimap; software renderer",
+      "performance": "200 armies / 120 simulation steps: 564 ms total (4.70 ms/step), container only; not phone FPS"
+    },
+    "unitCardStyle": {
+      "passed": true,
+      "changes": [
+        "Shared tcg card structure in catalogue, unit details, packs and equipped deck",
+        "Matching rarity gems, typography, border, role line, cost and locked treatment",
+        "Rarity-aware thumbnail cache and backgrounds",
+        "Increased GPU thumbnail camera distance to avoid cropped models"
+      ],
+      "browserReview": [
+        "Eight mythic units shown with five rarity gems",
+        "Equipped six-unit deck uses full card style",
+        "Locked unit detail opens with equip disabled"
+      ],
+      "limitations": "Browser visual QA uses software renderer; native GPU thumbnail framing not visually measured on a physical phone"
+    },
+    "mobileSharpness": {
+      "passed": true,
+      "test": "verify_mobile_graphics.cjs",
+      "changes": [
+        "WebGL DPR 1.25–2; 2.2M pixel target",
+        "First three adaptive tiers preserve resolution while reducing effects",
+        "Mobile antialiasing enabled; no bloom or DOF",
+        "Software renderer mobile scale 1.25 with 1.2M pixel budget"
+      ],
+      "limitations": "No physical phone FPS or GPU visual benchmark"
+    },
+    "projectileMotion": {
+      "passed": true,
+      "test": "verify_projectiles.cjs",
+      "checks": [
+        "Per-frame motion at source update rates 30 Hz, 8.6 Hz and 5 Hz",
+        "Stable visual identity across snapshot replacement; authority state untouched",
+        "Delayed salvos, swept missile collision, pause, stale cleanup and shot serialization"
+      ],
+      "limitations": "No physical phone or GPU FPS guarantee."
+    },
+    "towerLevelLabels": {
+      "passed": true,
+      "test": "verify_level_labels.cjs",
+      "checks": [
+        "Numeric centered levels 1–3 and maximum-level badge",
+        "120 Hz mock camera updates, overlap suppression and cleanup",
+        "Browser upgrade 1 to 2 updates accessible label"
+      ],
+      "modelRegression": "verify_upgrade_models.cjs: 72 upgrades across 36 families"
+    },
+    "campaignAndDecks": {
+      "passed": true,
+      "tests": [
+        "verify_campaign_decks.cjs",
+        "verify_online_upgrades.cjs",
+        "Campaign client result/progress/dedup VM checks"
+      ],
+      "checks": [
+        "Named presets save, overwrite, load, ownership validation and isolated persistent selection",
+        "Different personal defense decks in coop, duel, 2v2 and FFA; chosen troop decks in PvP",
+        "Browser named deck remains active after reload",
+        "Two account campaign room, ready-time equipment refresh, midgame deck lock",
+        "Finished-match progress recorded for both accounts and retained after server restart",
+        "Host-only next mission in same room with readiness reset and new match ID",
+        "Client completion and loss-wave result, duplicate local reward guard"
+      ],
+      "limitations": [
+        "Completed-state QA fixture tests the persistence flow; it is excluded from the package and does not validate campaign balance by playing every wave.",
+        "Decks, collection and solo progression remain browser-local; only completed cooperative campaign progress is account-persistent."
+      ]
+    }
+  },
+  "postmortem": {
+    "observations": [
+      "Adjacent gates initially overlapped",
+      "Factory color converted sRGB twice",
+      "User found approach slabs unclear and castle overexposed",
+      "Territory boundaries were decorative for placement"
+    ],
+    "corrections": [
+      "Excluded gateposts/walls from neighboring approach corridors",
+      "Single sRGB conversion; geometry cache added",
+      "Removed all approach slabs; existing roads retained",
+      "Matte stone with bounded shader radiance; no bright halo",
+      "Purchase required for the whole tower footprint; clear price and ownership UI",
+      "Added compact matte field forts with actual courtyard entrance gaps and team-colored flags.",
+      "Capture rings conform to terrain and remain separate from physical footprint.",
+      "GPU and software views consume the same geometry; five forts add 3080 triangles.",
+      "Preserved finite idle animation phase when upgrading tower rigs; missing state caused a NaN rotation and an invisible turret."
+    ],
+    "remainingRisks": [
+      "No physical device FPS benchmark",
+      "No paid external generated meshes or formal room-gate approval"
+    ]
+  },
+  "formalGateValidator": {
+    "command": "validate_room.py conception-3d --gate runtime",
+    "passed": false,
+    "errors": [
+      "Missing plan-metadata.json",
+      "Missing props.json",
+      "Missing room-layout.json"
+    ],
+    "scopeLimitation": "The export validator expects a Meshy/Blender room evidence package. This change is runtime-native procedural gameplay code with no paid generation, no mesh export and no deployment. Formal room gates remain pending and are not claimed passed."
+  }
+}

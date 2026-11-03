@@ -1,0 +1,19 @@
+{
+  "schema": "game-room.milestone-reviews.v1",
+  "roomId": "owned-citadel-runtime",
+  "function": {
+    "status": "pending",
+    "approvedBy": "",
+    "notes": "User requested iterative runtime-native gameplay and procedural 3D edits. Capture forts and navigation added without paid generation, mesh export or public deployment. Formal room gate approval remains pending."
+  },
+  "form": {
+    "status": "pending",
+    "approvedBy": "",
+    "notes": "User requested iterative runtime-native gameplay and procedural 3D edits. Capture forts and navigation added without paid generation, mesh export or public deployment. Formal room gate approval remains pending."
+  },
+  "runtime": {
+    "status": "pending",
+    "approvedBy": "",
+    "notes": "User requested iterative runtime-native gameplay and procedural 3D edits. Capture forts and navigation added without paid generation, mesh export or public deployment. Formal room gate approval remains pending."
+  }
+}

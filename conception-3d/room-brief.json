@@ -1,0 +1,76 @@
+{
+  "schema": "game-room.room-brief.v1",
+  "roomId": "owned-citadel-runtime",
+  "family": "gameplay-room",
+  "purpose": "Iterative runtime-native outdoor strategy game: multi-route PvP and 3 or 5 contested capture forts alongside the existing player citadels. No paid generation, Blender export or publishing.",
+  "runtimeSurface": "Standalone Three.js HTML and Node private multiplayer",
+  "boundsMeters": [
+    87,
+    4,
+    87
+  ],
+  "hero": {
+    "id": "citadel",
+    "role": "defended objective",
+    "reservedBoundsMeters": [
+      3.52,
+      2.6,
+      3.52
+    ]
+  },
+  "symmetry": {
+    "mode": "none",
+    "order": 1,
+    "appliesTo": [
+      "architecture",
+      "circulation",
+      "repeatedProps"
+    ],
+    "exceptions": [
+      "Outdoor island navigation follows each existing map shoreline and relief; symmetric object meshes do not imply symmetric terrain."
+    ]
+  },
+  "circulation": {
+    "description": "Every route joins a traversable courtyard through a real open gate",
+    "minimumClearanceMeters": 1.34,
+    "captureFort": "Actual open front courtyard; roads remain outside fortress footprint while armies enter capture radius."
+  },
+  "productionCamera": {
+    "viewport": [
+      1363,
+      936
+    ],
+    "verticalFovDegrees": 38
+  },
+  "performanceBudget": {
+    "maxCitadelTriangles": 15000,
+    "maxGeneratedTextureBytes": 0,
+    "maxOutpostTriangles": 9000,
+    "testedFiveOutpostTriangles": 3080
+  },
+  "creditBudget": {
+    "maximumCredits": 0,
+    "approvalRequired": true
+  },
+  "scope": "Runtime-native procedural code only. Room-export approval gates remain pending and are not claimed as passed.",
+  "captureForts": {
+    "counts": [
+      3,
+      5
+    ],
+    "buildingReservedRadiusMeters": 1.18,
+    "captureRadiusMeters": 3.5,
+    "dimensionsMeters": [
+      2.36,
+      1.82,
+      2.36
+    ],
+    "role": "Territorial control and team income; ownership is communicated by flags, perimeter and readable UI.",
+    "attachmentFace": "floor",
+    "semanticFront": "negative-z",
+    "productionSource": "outpost-3d.js",
+    "geometryBudgetTrianglesPerFort": 1800,
+    "testedTrianglesPerFort": 616,
+    "referenceArt": "Existing matte citadel and game scene supplied by user; no generated image or external asset submission."
+  }
+}

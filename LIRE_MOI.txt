@@ -1,0 +1,99 @@
+OWNED — FRONTIÈRES 3D · SIÈGES PvP
+
+DÉMARRAGE
+• Solo / IA : ouvre index.html dans le navigateur.
+• Entre appareils : extrais tout le ZIP, installe Node.js 20+, puis lance
+  OUVRIR_MULTIJOUER.bat (Windows) ou node server.cjs (macOS/Linux).
+• Garde la fenêtre du serveur ouverte. Tous les amis ouvrent son adresse
+  réseau affichée. Ne partage pas localhost à un autre appareil.
+• Lis TUTO_MULTIJOUEUR.md pour créer un compte, ajouter des amis et les inviter.
+
+NOUVEAUTÉS
+• Un château par joueur en PvP, y compris quatre châteaux en 2 contre 2.
+• Six défenses et six troupes différentes équipées au maximum.
+• 160 troupes : 87 types PvE et 73 spécialistes, autant que les défenses ; une troupe bonus dans
+  chaque pack, six troupes de départ offertes.
+• Les troupes combattent entre elles et infligent des dégâts en atteignant
+  le château. Elles ne ciblent, ne détruisent ni ne neutralisent les tourelles.
+• Les tourelles attaquent les troupes adverses, jamais les troupes alliées.
+• Point de départ libre près de sa base pour les unités hors-piste, aériennes
+  et amphibies ; trajet praticable court, ou vol direct pour les aériennes.
+• Énergie personnelle pour tous les joueurs, y compris en coopération.
+• Simulation multijoueur exécutée sur le serveur : changer d’onglet ne l’arrête plus.
+• Comptes persistants, demandes d’amis, présence et invitations reçues en jeu.
+• Réglages mémorisés : taille du HUD, volume du jeu et volume de la musique.
+• Neige moins éblouissante, routes et armées contrastées.
+• Les trajets de préparation disparaissent lorsque la vague commence.
+
+CONTENU CONSERVÉ
+16 cartes de 75 à 87 m de côté ; collines constructibles ; territoires achetables ;
+pose interdite sur les routes, l’eau, les bâtiments et les pentes fortes ; socles
+séparés par 0,10 m ; six défenses équipées ; cinq familles de défenses ajoutées ;
+châteaux mats sans plaques d’approche ; HUD compact portrait/paysage ; minicarte
+agrandissable ; packs scellés et révélation progressive ; enchères corrigées ;
+quatre difficultés dont Apocalypse ; modèles 3D et effets de combat.
+
+CONSERVATION DES DONNÉES
+Le compte, les amis et les invitations sont enregistrés par ce serveur dans
+DATA_DIR, ou le dossier data par défaut. Préserve ce dossier lors des mises à jour.
+Il doit être sur un stockage persistant en hébergement. Ne le publie pas dans
+un dépôt. La collection, la campagne solo, les crédits, les decks et les réglages restent locaux
+au navigateur. Les parties en cours ne survivent pas à un redémarrage serveur.
+
+FICHIERS NÉCESSAIRES AU MULTIJOUEUR
+server.cjs : serveur Node.js sans dépendance externe.
+accounts.cjs : comptes, sessions et amis.
+simulation.js : moteur de combat commun au serveur et au jeu.
+dist/index.html : jeu servi aux navigateurs (identique à index.html).
+package.json : commande npm start. PORT et DATA_DIR sont configurables.
+OUVRIR_MULTIJOUER.bat / ouvrir-multijoueur.sh : lanceurs.
+TUTO_MULTIJOUEUR.md : tutoriel détaillé.
+conception-3d/ : documents de conception conservés de la version précédente.
+
+À DISTANCE
+Héberge le dossier complet sur un service Node.js durable avec disque persistant
+et HTTPS. Un dépôt HTML statique ne suffit pas. Aucun serveur public n’a été créé
+avec cette livraison. Cette version vise les salons privés entre amis ; les
+collections restent locales et ne constituent pas un classement compétitif sécurisé.
+
+VÉRIFICATIONS
+Moteur : 16 cartes, placement et routes, énergie individuelle en coopération,
+quatre châteaux, combat entre armées, absence de ciblage des tourelles par les
+troupes, 160 modèles déployables, sérialisation et autorité du serveur.
+Comptes : sessions mémorisées, reprise, amis, invitations, quatre clients,
+persistance après redémarrage, contrôles d’accès et absence de mot de passe en clair.
+Interface : essais sur ordinateur et en formats mobiles portrait/paysage,
+réglages, neige, déploiement et ouverture de packs.
+Le rendu 3D compatible a été contrôlé visuellement. L’environnement de contrôle
+ne disposait pas de WebGL : le rendu GPU n’a pas été vérifié visuellement.
+Aucune mesure de performance n’a été faite sur un téléphone physique.
+
+CONQUÊTE : 3 ou 5 avant-postes capturables, plusieurs routes par château.
+Déploiement sans recharge/plafond, énergie personnelle requise.
+Fluidité adaptative visant 60 FPS ; résultat dépendant du matériel.
+Invitations répétées corrigées : nouveaux salons, anciennes invitations nettoyées.
+
+DERNIERS AJOUTS
+• Coop adaptée à 1–4 joueurs, difficulté choisie conservée, ajustement annoncé au salon.
+• Recherche PvP par joueur/type : 3 améliorations pour la partie, troupes actuelles et futures.
+• Défenses améliorées individuellement : disparition du modèle corrigée, badges Niv. 1–3.
+• Onglets contrastés, transitions brèves, filtres tactiles et contrôle clavier.
+
+HUD MOBILE ET RENDU
+• Portrait/paysage : avatar et ressources sur une ligne, six cartes dans un petit bandeau.
+• Outils, en haut à droite : capacités, zoom, réglages et Territoires ; en PvP, Cible et Via.
+  Le volet reste non bloquant : la partie continue.
+• Minicarte masquée au départ : Outils → Carte pour l’afficher, Fermer la carte pour revenir.
+  Le radar est replié sur une ligne ; + affiche les fronts.
+• La fiche de pose montre le nom et le coût ; ⓘ développe les statistiques, × annule.
+• Profil graphique mobile automatique, sans flou de profondeur ni halo lumineux.
+  Résolution, ombres et effets s’adaptent à la charge ; 60 FPS ne sont pas garantis.
+
+CAMPAGNE ET DECKS
+• Combat → Campagne avec des amis : 2 à 4 joueurs, citadelle partagée et énergie personnelle.
+• Victoires et étoiles coop sauvegardées sur chaque compte ; même salon pour la mission suivante.
+• Arsenal → Mes decks : jusqu’à 12 decks nommés de 6 défenses + 6 unités, sauvegardés sur cet appareil.
+• Utiliser ce deck choisit les cartes de la prochaine partie, en PvE comme en PvP.
+• Changer de deck au salon puis se déclarer prêt actualise l’équipement personnel.
+• Projectiles animés entre les mises à jour réseau ; collisions des missiles rapides corrigées.
+• Après la mise à jour, tous les joueurs doivent recharger le jeu et créer un nouveau salon.

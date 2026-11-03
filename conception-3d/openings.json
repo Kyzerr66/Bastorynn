@@ -1,0 +1,28 @@
+{
+  "schema": "game-room.opening-schedule.v1",
+  "roomId": "owned-citadel-runtime",
+  "primaryArrival": {
+    "openingId": "generated-per-lane",
+    "exception": "Tactical miniature world: gate 1.34m fits 1.248m roads; no first-person player."
+  },
+  "openings": [
+    {
+      "type": "door",
+      "count": "55 across 16 maps",
+      "clearWidthMeters": 1.34,
+      "clearHeightMeters": 1.12,
+      "destination": "continuous paved courtyard",
+      "construction": "Separate posts and lintel, no wall behind aperture"
+    },
+    {
+      "id": "outpost-front-courtyard",
+      "type": "door",
+      "count": "3 or 5 per PvP map",
+      "clearWidthMeters": 0.9,
+      "depthMeters": 0.85,
+      "destination": "Visible field-fort courtyard",
+      "construction": "Real gap between independent low perimeter wall segments; no wall or decorative panel behind the entrance.",
+      "functionalException": "Miniature strategy prop, not a first-person interior; armies capture from the surrounding 3.5m zone rather than routing through this entrance."
+    }
+  ]
+}
