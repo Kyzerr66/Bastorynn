@@ -26,6 +26,11 @@ const server=http.createServer(async(req,res)=>{try{
  if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host)return json(res,403,{error:'Origine refusée'});
  if(req.headers['sec-fetch-site']==='cross-site'&&u.pathname.startsWith('/api/'))return json(res,403,{error:'Origine refusée'});
  if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,version:'frontieres-2',accounts:true,authority:'server'});
+ // Google Search Console requires the original verification file at the site root.
+ if(req.method==='GET'&&/^\/google[a-zA-Z0-9]+\.html$/.test(u.pathname)){
+  const file=path.join(__dirname,'dist',u.pathname.slice(1));
+  try{const body=fs.readFileSync(file);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'});return res.end(body);}catch{return json(res,404,{error:'Fichier de validation introuvable'});}
+ }
  if(req.method==='GET'&&await accounts.route(req,res,u,null))return;
  if(req.method==='GET'&&u.pathname==='/api/events'){
   const {r,p}=auth(req,{room:u.searchParams.get('room'),token:u.searchParams.get('token')});p.stream?.end();p.stream=res;res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache, no-transform','Connection':'keep-alive','X-Accel-Buffering':'no'});res.write(': connected\n\n');

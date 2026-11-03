@@ -97,3 +97,7 @@ CAMPAGNE ET DECKS
 • Changer de deck au salon puis se déclarer prêt actualise l’équipement personnel.
 • Projectiles animés entre les mises à jour réseau ; collisions des missiles rapides corrigées.
 • Après la mise à jour, tous les joueurs doivent recharger le jeu et créer un nouveau salon.
+
+GOOGLE SEARCH CONSOLE
+Le fichier dist/googlea6c20ef694929c4d.html doit rester dans le projet déployé.
+Après redéploiement, ouvre son URL sur le domaine Render avant de cliquer Valider.

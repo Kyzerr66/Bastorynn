@@ -170,3 +170,9 @@ Les cartes d’unités utilisent la même présentation que les défenses dans l
 Les obus de mortier et missiles s’animent entre les mises à jour de simulation et du réseau. Leur trajectoire visuelle est indépendante de la fréquence des messages ; les dégâts restent calculés par le serveur. Les missiles rapides détectent aussi une cible traversée entre deux positions, et les salves respectent leur décalage de départ. Une interruption réseau prolongée cesse l’extrapolation pour éviter des projectiles fantômes.
 
 Les niveaux des défenses utilisent les chiffres 1 à 3, sont centrés sous les tourelles et se mettent à jour après le déplacement de la caméra. Les badges qui se chevauchent sont masqués pour préserver la lisibilité.
+
+## Validation Google Search Console
+
+Pour la propriété **Préfixe de l’URL** `https://own-197c.onrender.com/`, le ZIP contient le fichier de validation Google d’origine. Après avoir remplacé **tout le projet** sur Render et attendu la fin du déploiement, ouvre `https://own-197c.onrender.com/googlea6c20ef694929c4d.html` : la page doit afficher `google-site-verification: googlea6c20ef694929c4d.html`. Reviens alors à Search Console et clique **Valider**. Conserve ce fichier dans `dist/` lors des prochaines mises à jour pour que la validation reste active.
+
+La validation prouve que tu contrôles le site ; elle ne garantit pas son apparition immédiate dans Google. Après validation, utilise **Inspection de l’URL** sur la page d’accueil et **Demander une indexation**. Ne publie pas seulement le fichier HTML du jeu : le serveur Node et le fichier Google placé dans `dist/` sont nécessaires.
