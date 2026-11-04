@@ -41,7 +41,7 @@ module.exports=function accounts({json,rooms,publicRoom}){
   if(req.method==='GET'&&p==='/api/account/me'){const account=cookie(req);json(res,200,account?view(account):{user:null});return true;}
   if(req.method==='GET'&&p==='/api/social/events'){
    const account=requireUser(req);res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache, no-transform','Connection':'keep-alive','X-Accel-Buffering':'no'});res.write(': social\n\n');if(!presence.has(account.id))presence.set(account.id,new Set());presence.get(account.id).add(res);onlineChanged(account);
-   const beat=setInterval(()=>{try{res.write(': heartbeat\n\n');}catch{}},15000);req.on('close',()=>{clearInterval(beat);presence.get(account.id)?.delete(res);onlineChanged(account);});return true;
+   const beat=setInterval(()=>{try{res.write(': heartbeat\n\n');}catch{}},15000);res.on('close',()=>{clearInterval(beat);presence.get(account.id)?.delete(res);onlineChanged(account);});return true;
   }
   if(req.method!=='POST'||!/^\/api\/(account|social)\//.test(p))return false;
   if(p==='/api/account/register'||p==='/api/account/login'){

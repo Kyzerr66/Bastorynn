@@ -1625,7 +1625,7 @@ const SiegePvP=(()=>{
  function defaultSpawn(s,player,type,route=0,target){
   const W=s?.world,from=W?.bases?.[player],stats=UNIT[type]&&TroopData.stats(type);if(!from||!stats)return null;
   const routePoints=W.routes[player]?.[route],to=routePoints?.[1]||W.bases[target]||W.hub,angle=Math.atan2(to.y-from.y,to.x-from.x);
-  for(const radius of [3.2,3.8,4.6,5.4])for(const offset of [0,.25,-.25,.5,-.5]){
+  for(const radius of [4,6,8,10,12,14,16])for(const offset of [0,.25,-.25,.5,-.5,1,-1]){
    const p={x:from.x+Math.cos(angle+offset)*radius,y:from.y+Math.sin(angle+offset)*radius};
    if(p.x<1||p.y<1||p.x>W.S-1||p.y>W.S-1||W.bases.some((b,i)=>i!==player&&distance(p,b)<4))continue;
    if(stats.mobility!=='air'&&(stats.mobility!=='amphibie'&&W.heightAt(p.x,p.y)<.035||W.outposts.some(o=>distance(o,p)<2)||W.blocks.some(b=>!b.park&&Math.abs(b.x-p.x)<b.w/2+.4&&Math.abs(b.y-p.y)<b.h/2+.4)||W.houses.some(h=>distance(h,p)<.8)))continue;
@@ -1642,7 +1642,7 @@ const SiegePvP=(()=>{
   else{
    spawn=d.p==null?defaultSpawn(s,player,type,route,d.target):d.p;
    if(!spawn||!Number.isFinite(spawn.x)||!Number.isFinite(spawn.y)||spawn.x<1||spawn.y<1||spawn.x>W.S-1||spawn.y>W.S-1)return 'Place le point de départ sur la carte.';
-   if(distance(spawn,from)>12||distance(spawn,from)<2.4)return 'Déploie entre 2,4 et 12 mètres de ton château.';
+   if(distance(spawn,from)>16||distance(spawn,from)<2.4)return 'Déploie entre 2,4 et 16 mètres de ton château.';
    if(stats.mobility!=='air'&&W.heightAt(spawn.x,spawn.y)<.035&&stats.mobility!=='amphibie')return 'Ce véhicule doit démarrer sur la terre ferme.';
    if(W.bases.some((p,i)=>i!==player&&distance(spawn,p)<4))return 'Départ trop proche d’un château adverse.';
    if(stats.mobility!=='air'&&W.outposts.some(o=>distance(o,spawn)<2))return 'Départ dans un avant-poste.';
