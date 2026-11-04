@@ -36,7 +36,7 @@ const FAM = {
   mlrs: { n: 'Lance-roquettes multiple', role: 'Barrage d\'artillerie', kind: 'shell', dt: 'phys', cost: 150, dmg: 22, rate: 4.2, range: 5.4, splash: 0.7, split: 5, pierce: 0.3, air: false, c: '#E07A4A', desc: 'Une salve de roquettes qui couvre toute une zone, de très loin. Rechargement lent.' },
   emp: { n: 'Canon IEM', role: 'Neutralisation', kind: 'pulse', dt: 'energy', cost: 120, dmg: 10, rate: 2.4, range: 1.9, shieldMul: 3, vehStun: { c: 0.55, d: 1.2 }, air: true, c: '#6FA8FF', desc: 'Impulsion électromagnétique : pulvérise les boucliers et paralyse véhicules et drones.' },
   gas: { n: 'Gaz incapacitant', role: 'Anti-infanterie', kind: 'puddle', dt: 'acid', cost: 90, dmg: 6, rate: 2.6, range: 2.8, splash: 1.0, dur: 3.6, infMul: 2.2, vehMul: 0.5, slow: { p: 0.35, d: 1 }, air: false, c: '#C8D86A', desc: 'Un nuage qui ralentit l\'infanterie et lui inflige le double de dégâts. Peu efficace contre les blindés.' },
-  orbital: { n: 'Satellite d\'attaque', role: 'Frappe globale', kind: 'orbital', dt: 'true', cost: 180, dmg: 150, rate: 6.5, range: 99, splash: 0.8, air: true, c: '#FFD8A0', desc: 'Frappe depuis l\'orbite l\'ennemi le plus dangereux, où qu\'il soit sur la carte.' },
+  orbital: { n: 'Satellite d\'attaque', role: 'Frappe lointaine', kind: 'orbital', dt: 'true', cost: 180, dmg: 150, rate: 6.5, range: 40, splash: 0.8, air: true, c: '#FFD8A0', desc: 'Frappe depuis l\'orbite l\'ennemi le plus dangereux, entre 10 et 40 mètres. Protège sa zone morte avec des défenses rapprochées.' },
   antitank: { n: 'Missile antichar', role: 'Tueur de blindés', kind: 'missile', dt: 'phys', cost: 130, dmg: 70, rate: 2.8, range: 3.7, salvo: 1, splash: 0.2, pierce: 0.6, vehMul: 2, infMul: 0.4, prefer: 'veh', air: false, c: '#B8C060', desc: 'Un missile filoguidé qui perce les blindages : double dégâts contre les véhicules.' },
   lourde: { n: 'Mitrailleuse lourde', role: 'Perce-blindage', kind: 'bullet', dt: 'phys', cost: 85, dmg: 13, rate: 0.48, range: 2.8, pierce: 0.35, air: true, c: '#E8C060', desc: 'Calibre .50 : des rafales qui traversent les blindages légers et touchent les volants.' },
   obusier: { n: 'Obusier lourd', role: 'Artillerie lointaine', kind: 'shell', dt: 'phys', cost: 170, dmg: 62, rate: 3.6, range: 6.2, splash: 0.9, air: false, c: '#C89060', desc: 'Des obus de 155 mm tirés de très loin. Lent, mais chaque impact dévaste une zone entière.' },
@@ -887,17 +887,20 @@ const Engine = (() => {
   const income = (B) => B.W.sectors.reduce((a, s, i) => a + (B.owned[i] ? s.income : 0), 0);
 
   // ---------------- tours ----------------
+  // Metres in world coordinates. Caps also apply after height, support and orders.
+  const firingLimits=Object.freeze({orbital:{min:10,max:40,damage:.85},mortar:{min:1.65,max:7,damage:.92},sniper:{min:1.95,max:8,damage:.92},rail:{min:1.9,max:9,damage:.92},mlrs:{min:2.5,max:10,damage:.9},obusier:{min:2.7,max:11,damage:.9},siege:{min:2.8,max:11,damage:.9},frostbattery:{min:1.75,max:7,damage:.95},skyguard:{min:1.6,max:7.5,damage:.95}});
   const pvpDeadZones=Object.freeze({canon:.8,mortar:1.65,sniper:1.95,rail:1.9,mlrs:2.5,obusier:2.7,siege:2.8,orbital:3.2,antitank:1.2,frostbattery:1.75,skyguard:1.6,flak:1.1,plasma:1.1,missile:.9});
   function cost(cardId,pvp=false) { const c = CARD[cardId]; return Math.round(FAM[c.fam].cost * (1 + 0.12 * RI(c.r))+(pvp&&c.fam==='orbital'?110:0)); }
   function upCost(tw) { return tw.lvl >= 3 ? 0 : Math.round(cost(tw.card,!!tw.pvp) * [0.75, 1.25][tw.lvl - 1]); }
   function stats(tw) {
     const c = CARD[tw.card], f = FAM[c.fam], tr = c.tr, ri = RI(c.r), L = tw.lvl - 1, cl = tw.pvp?1:(tw.clvl || 1), b = tw.buff || { rate: 0, dmg: 0, range: 0, crit: 0 };
+    const limits=firingLimits[c.fam];
     const rarityDamage=tw.pvp?1+.075*ri:RMUL.dmg[ri],rarityRate=tw.pvp?1+.035*ri:RMUL.rate[ri];
     let range = f.range * RMUL.rng[ri] * (tr.rangeMul || 1) * [1, 1.08, 1.16][L] * (1 + b.range);
     if (f.kind === 'radar' && (tr.rangeMul || 1) >= 9) range = 99;
     const bc = tr.crit || f.crit; const crit = bc ? { c: bc.c + b.crit, m: bc.m } : b.crit ? { c: b.crit, m: 2 } : null;
     const S = {
-      kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), minRange:tw.pvp?(pvpDeadZones[c.fam]||0):0, crit,
+      kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), minRange:limits?.min||(tw.pvp?(pvpDeadZones[c.fam]||0):0), maxRange:limits?.max||0, crit,
       dmg: f.dmg * rarityDamage * (tw.pvp?[1,1.22,1.5]:[1,1.55,2.3])[L] * (tw.pvp ? .44 : 1) * (1 + 0.08 * (cl - 1)) * (1 + b.dmg) * (tw.pvp?1:(tw.setb || 1)) * (tw.high ? 1.1 : 1),
       rate: f.rate ? f.rate / (rarityRate * (tr.rateMul || 1) * [1, 1.06, 1.14][L]) / (1 + b.rate) : 0,
       splash: f.splash ? f.splash + (tr.splash || 0) + L * 0.1 : tr.splash || 0,
@@ -928,14 +931,15 @@ const Engine = (() => {
       const critPower=c=>c?1+c.c*(c.m-1):1;
       const critical=critPower(S.crit)/critPower(f.crit);
       S.dmg/=Math.sqrt(Math.max(1,cluster)*salvo*Math.max(1,chain)*Math.max(1,ramp)*Math.max(1,critical));
-      if(S.kind==='orbital'){S.range=Math.min(7.5,S.range);S.rate=Math.max(15,S.rate);S.dmg=Math.min(45,S.dmg);S.splash=Math.min(.6,S.splash);S.multi=Math.min(2,S.multi);S.exec=0;}
+      if(S.kind==='orbital'){S.range=Math.min(40,S.range);S.rate=Math.max(15,S.rate);S.dmg=Math.min(45,S.dmg);S.splash=Math.min(.6,S.splash);S.multi=Math.min(2,S.multi);S.exec=0;}
       if(S.slow)S.slow={...S.slow,p:Math.min(.3,S.slow.p),d:Math.min(1.5,S.slow.d)};
       if(S.freeze)S.freeze={...S.freeze,d:Math.min(.65,S.freeze.d)};
       if(S.stun)S.stun={...S.stun,d:Math.min(.55,S.stun.d)};
       if(S.vehStun)S.vehStun={...S.vehStun,d:Math.min(.55,S.vehStun.d)};
       S.burn=Math.min(.35,S.burn);S.buffRate=Math.min(.35,S.buffRate);
     }
-    return Tactical.stats(S,tw);
+    if(limits)S.dmg*=limits.damage;
+    Tactical.stats(S,tw);if(S.maxRange)S.range=Math.min(S.range,S.maxRange);return S;
   }
   function refresh(B) {
     const relays = B.towers.filter((t) => FAM[CARD[t.card].fam].kind === 'aura' && !(t.jam > 0));
@@ -1092,6 +1096,8 @@ const Engine = (() => {
     if(t.jam>0||t.jamGuard>0)return false;
     t.jam=duration;return true;
   }
+  const hitSets=new WeakMap();
+  function hitSet(ids){let set=hitSets.get(ids);if(!set||set.size!==ids.length){set=new Set(ids);hitSets.set(ids,set);}return set;}
   function tick(B, dt) {
     Tactical.invalidate(B); B.t += dt; Tactical.tick(B,dt);
     for (const k in B.ab) B.ab[k].cd = Math.max(0, B.ab[k].cd - dt * (!B.pvp&&B.order?.id==='recovery'?1.25:1));
@@ -1159,24 +1165,27 @@ const Engine = (() => {
     }
     if(supportsDirty)refresh(B);
     Tactical.index(B);
-    for (const p of B.puddles) for (const m of (B.enemyPool||B.mobs)) if (B.t>=(p.born||0)&&!m.dead && !m.air && m.spawnT<=0 && Math.hypot(m.x - p.x, m.y - p.y) <= p.r) {
+    for (const p of B.puddles) {
+      if(p.t<=0||B.t<(p.born||0))continue;
+      for (const m of Tactical.areaCandidates(B,p,p.r)) if (!m.dead && !m.air && m.spawnT<=0 && (m.x-p.x)**2+(m.y-p.y)**2<=p.r*p.r) {
       hit(B, m, p.dps * dt, { dt: 'acid', tw: p.tw, ev: false, reaction:!p.reactionCloud, infMul: p.infMul, vehMul: p.vehMul });if(m.dead)continue;
       const oldMark=m.acidT>0?m.acidM:0;m.acidT=.6;m.acidM=Math.max(oldMark||0,p.mark||0);
       if (p.burn && !m.def.fireImm) { m.burn = Math.max(m.burnT > 0 ? m.burn : 0, p.pvp?Math.min(6,p.burn):p.burn); m.burnT = Math.max(m.burnT, p.pvp?1.4:1.6); }
       if (p.slow&&!m.def.noSlow) {const power=p.slow.p*(m.def.boss ? .5 : 1);m.slowP=Math.max(m.slowT>0?m.slowP:0,power);m.slowT=Math.max(m.slowT,.4);}
+      }
     }
     for (let i = B.mines.length - 1; i >= 0; i--) {
       const q = B.mines[i]; q.arm -= dt; if (q.arm > 0) continue;
       if (!B.towers.includes(q.tw)) { B.mines.splice(i, 1); continue; }
-      const trig = (B.enemyPool||B.mobs).find((m) => !m.dead && !m.air && m.spawnT <= 0 && !m.onWater && Math.hypot(m.x - q.x, m.y - q.y) <= 0.32 + m.def.r * 0.5);
+      const trig = Tactical.candidates(B,q,.32).find((m) => !m.dead && !m.air && m.spawnT <= 0 && !m.onWater && Math.hypot(m.x - q.x, m.y - q.y) <= 0.32 + m.def.r * 0.5);
       if (trig) { B.mines.splice(i, 1); aoe(B, q.x, q.y, q.S.splash, q.S.dmg, q.S, q.tw, false); B.ev.push({ k: 'boom', x: q.x, y: q.y, r: q.S.splash, c: '#FFB060', mine: true }); if (q.S.split) for (let k = 0; k < q.S.split; k++) { const a = (k / q.S.split) * Math.PI * 2 + B.rnd(), r = q.S.splash * (0.9 + B.rnd() * 0.6); B.shots.push({ pid: String(B.player??B.team??0)+":"+(B.nextShotId=(B.nextShotId||0)+1), kind: 'shell', sub: true, S: q.S, tw: q.tw, x0: q.x, y0: q.y, x: q.x, y: q.y, tx: q.x + Math.cos(a) * r, ty: q.y + Math.sin(a) * r, t: 0, T: 0.35, H: 0.5 }); } }
     }
-    const aimingTargets=new Map((B.enemyPool||B.mobs).filter(m=>!m.dead).map(m=>[m.id,m]));
+    // The spatial index also owns the tick's identity lookup.
     for (const tw of B.towers) {
       const S = tw.S; tw.fire = Math.max(0, tw.fire - dt);
       if (tw.jam > 0) { tw.beams = []; continue; }
       if (S.kind === 'aura' || S.kind === 'eco' || S.kind === 'radar') continue;
-      const tracked=aimingTargets.get(tw.aimId);
+      const tracked=Tactical.target(B,tw.aimId);
       if(tracked&&targetable(tracked,S)&&(!S.airOnly||tracked.air)&&inFiringBand(tw,tracked,S))aim(tw,tracked);
       else {tw.aimId=null;if(tw.cd>0&&S.kind!=='mine')pick(B,tw,1);}
       if (S.kind === 'beam') { beam(B, tw, dt); continue; }
@@ -1187,20 +1196,22 @@ const Engine = (() => {
       s.t += dt;
       if (s.t < 0) continue;
       if (s.kind === 'missile') {
-        const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead); if (tg) { s.tx = tg.x; s.ty = tg.y; }
+        const tg = Tactical.target(B,s.tg); if (tg) { s.tx = tg.x; s.ty = tg.y; }
         const a = Math.atan2(s.ty - s.y, s.tx - s.x); s.ang += clamp(((a - s.ang + Math.PI * 3) % (Math.PI * 2)) - Math.PI, -dt * 7, dt * 7);
         const px=s.x,py=s.y,v = 4 + s.t * 6; s.x += Math.cos(s.ang) * v * dt; s.y += Math.sin(s.ang) * v * dt;
         const dx=s.x-px,dy=s.y-py,l2=dx*dx+dy*dy,u=l2?clamp(((s.tx-px)*dx+(s.ty-py)*dy)/l2,0,1):0;
         if (Math.hypot(s.tx-px-u*dx,s.ty-py-u*dy) < 0.25 || s.t > 3) { s.done = true; boom(B, s); }
       } else if (s.kind === 'plasma') {
-        s.x += s.vx * dt; s.y += s.vy * dt;
-        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || m.air || m.spawnT > 0 || s.hitIds.includes(m.id)) continue; if (Math.hypot(m.x - s.x, m.y - s.y) <= s.S.width + m.def.r * 0.6) { s.hitIds.push(m.id); hit(B, m, s.S.dmg, { ...s.S, tw: s.tw }); applyFx(B, m, s.S); m.revT = Math.max(m.revT, 0.5); } }
+        s.x += s.vx * dt; s.y += s.vy * dt;const hits=hitSet(s.hitIds);
+        for (const m of Tactical.areaCandidates(B,s,s.S.width)) { if (m.dead || m.air || m.spawnT > 0 || hits.has(m.id)) continue; if (Math.hypot(m.x - s.x, m.y - s.y) <= s.S.width + m.def.r * 0.6) { s.hitIds.push(m.id);hits.add(m.id); hit(B, m, s.S.dmg, { ...s.S, tw: s.tw }); applyFx(B, m, s.S); m.revT = Math.max(m.revT, 0.5); } }
         if (s.t >= s.T) { s.done = true; B.ev.push({ k: 'boom', x: s.x, y: s.y, r: 0.5, c: '#5CF0FF', small: true, plasma: true }); if (s.S.split) aoe(B, s.x, s.y, 0.4 + s.S.split * 0.12, s.S.dmg * 0.5, s.S, s.tw, false); }
       } else if (s.kind === 'orbital') {
-        const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead); if (tg) { s.tx = tg.x; s.ty = tg.y; }
+        const tg = Tactical.target(B,s.tg);
+        if(tg&&!inFiringBand(s.tw,tg,s.S)){s.done=true;continue;}
+        if (tg) { s.tx = tg.x; s.ty = tg.y; }
         if (s.t >= s.T) { s.done = true; aoe(B, s.tx, s.ty, s.S.splash, s.S.dmg, s.S, s.tw, true,s.volleyHits||null); B.ev.push({ k: 'orbital', x: s.tx, y: s.ty, r: s.S.splash }); }
       } else if (s.kind === 'flak') {
-        const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead); if (tg) { s.tx = tg.x; s.ty = tg.y; }
+        const tg = Tactical.target(B,s.tg); if (tg) { s.tx = tg.x; s.ty = tg.y; }
         const k = Math.min(1, s.t / s.T); s.x = s.x0 + (s.tx - s.x0) * k; s.y = s.y0 + (s.ty - s.y0) * k;
         if (k >= 1) { s.done = true; for (const m of (B.enemyPool||B.mobs)) if (!m.dead && m.air && m.spawnT<=0 && Math.hypot(m.x - s.tx, m.y - s.ty) <= s.S.splash + m.def.r * 0.5) { hit(B, m, m.id === s.tg ? s.S.dmg : s.S.dmg * 0.6, { ...s.S, tw: s.tw }); applyFx(B, m, s.S); } B.ev.push({ k: 'flak', x: s.tx, y: s.ty, r: s.S.splash, type: tg ? tg.type : 'helico' }); }
       } else { const k = Math.min(1, s.t / s.T); s.x = s.x0 + (s.tx - s.x0) * k; s.y = s.y0 + (s.ty - s.y0) * k; s.h = Math.sin(k * Math.PI) * s.H; if (k >= 1) { s.done = true; boom(B, s); } }
@@ -1224,7 +1235,7 @@ const Engine = (() => {
       m.shield -= take; d = (sd - take) / f;
       if (m.shield <= 0) B.ev.push({ k: 'shieldbreak', x: m.x, y: m.y });
     }
-    let arm = m.arm * (1 - (o.pierce || 0)); if (o.dt === 'true' || o.dt === 'acid' || o.dt === 'fire') arm = 0;
+    let arm = m.arm * (m.acidT>0?(B.pvp?.92:.85):1) * (1 - (o.pierce || 0)); if (o.dt === 'true' || o.dt === 'acid' || o.dt === 'fire') arm = 0;
     d *= 1 - arm;
     if (d <= 0) { m.hitT = 0.08; return; }
     if(o.tw?.owner!=null)m.lastHitOwner=o.tw.owner; m.hp -= d; m.hitT = 0.12; B.stats.dmg += d; if (o.tw) o.tw.dmg += d;
@@ -1266,7 +1277,7 @@ const Engine = (() => {
   function nearestD(L, pt) { let best = 0, bd = 1e9; for (let d = 0; d <= L.len; d += 0.3) { const p = posAt(L, d), dd = Math.hypot(p.x - pt.x, p.y - pt.y); if (dd < bd) { bd = dd; best = d; } } return best; }
   function aim(tw,m){if(!m)return;tw.aimId=m.id;tw.aimX=m.x;tw.aimY=m.y;tw.ang=Math.atan2(m.y-tw.y,m.x-tw.x);}
   const targetable = (m, S) => !m.dead && m.spawnT <= 0 && (!m.air || S.air) && ((!m.def.stealth && m.hid <= 0 && !(m.def.sub && m.onWater)) || m.rev || m.revT > 0);
-  const inFiringBand=(tw,m,S=tw.S,outer=S.range)=>{const d=dist(tw,m);return d>=(S.minRange||0)&&d<=outer+(m.def?.r||0)*.6;};
+  const inFiringBand=(tw,m,S=tw.S,outer=S.range)=>{const d2=(tw.x-m.x)**2+(tw.y-m.y)**2,limit=Math.min(outer+(S.kind==='orbital'?0:(m.def?.r||0)*.6),S.maxRange||Infinity);return d2>=(S.minRange||0)**2&&d2<=limit*limit;};
   function pick(B, tw, n, rangeOverride) {
     const S = tw.S, rg = rangeOverride || S.range;
     let c = Tactical.candidates(B,tw,rg).filter((m) => targetable(m, S) && (!S.airOnly || m.air) && inFiringBand(tw,m,S,rg));
@@ -1279,16 +1290,17 @@ const Engine = (() => {
     aim(tw,c[0]);return c.slice(0, n);
   }
   function aoe(B, x, y, r, dmg, S, tw, air, volleyHits=null) {
-    for (const m of (B.enemyPool||B.mobs)) if (!m.dead && m.spawnT <= 0 && (air || !m.air) && (!volleyHits||!volleyHits.includes(m.id)) && Math.hypot(m.x - x, m.y - y) <= r + m.def.r * 0.6) {if(volleyHits)volleyHits.push(m.id);hit(B, m, dmg, { ...S, tw, ev: true }); applyFx(B, m, S); m.revT = Math.max(m.revT, 0.8); }
+    const hits=volleyHits?hitSet(volleyHits):null;
+    for (const m of Tactical.areaCandidates(B,{x,y},r)) if (!m.dead && m.spawnT <= 0 && (air || !m.air) && (S.kind!=='orbital'||inFiringBand(tw,m,S)) && (!hits||!hits.has(m.id)) && Math.hypot(m.x - x, m.y - y) <= r + m.def.r * 0.6) {if(hits){volleyHits.push(m.id);hits.add(m.id);}hit(B, m, dmg, { ...S, tw, ev: true }); applyFx(B, m, S); m.revT = Math.max(m.revT, 0.8); }
   }
 
   function boom(B, s) {
     const S = s.S;
     if(s.glob){B.ev.push({k:'boom',x:s.tx,y:s.ty,r:.3,c:FAM[S.fam].c,small:true});return;}
     if (s.kind === 'missile') {
-      const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead);
+      const tg = Tactical.target(B,s.tg);
       if (tg) { hit(B, tg, S.dmg, { ...S, tw: s.tw }); applyFx(B, tg, S); }
-      if (S.splash) for (const m of (B.enemyPool||B.mobs)) if (m !== tg && !m.dead && m.spawnT<=0 && (!m.air||S.air) && Math.hypot(m.x - s.x, m.y - s.y) <= S.splash) { hit(B, m, S.dmg * 0.5, { ...S, tw: s.tw }); applyFx(B, m, S); }
+      if (S.splash) for (const m of Tactical.areaCandidates(B,s,S.splash)) if (m !== tg && !m.dead && m.spawnT<=0 && (!m.air||S.air) && Math.hypot(m.x - s.x, m.y - s.y) <= S.splash) { hit(B, m, S.dmg * 0.5, { ...S, tw: s.tw }); applyFx(B, m, S); }
       B.ev.push({ k: 'boom', x: s.x, y: s.y, r: Math.max(0.35, S.splash), c: '#FF6B6B', small: true });
       return;
     }
@@ -1306,7 +1318,7 @@ const Engine = (() => {
         for (const m of T) {
           B.ev.push({ k: 'tracer', x: tw.x, y: tw.y, x2: m.x, y2: m.y, air: m.air, c: FAM[CARD[tw.card].fam].c, fam: CARD[tw.card].fam, tw: tw.id });
           hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S);
-          if (S.splash) { for (const o of (B.enemyPool||B.mobs)) if (o !== m && !o.dead && !o.air && Math.hypot(o.x - m.x, o.y - m.y) <= S.splash) hit(B, o, S.dmg * 0.5, { ...S, tw }); B.ev.push({ k: 'boom', x: m.x, y: m.y, r: S.splash, c: '#FF8A5B', small: true }); }
+          if (S.splash) { for (const o of Tactical.areaCandidates(B,m,S.splash)) if (o !== m && !o.dead && !o.air && Math.hypot(o.x - m.x, o.y - m.y) <= S.splash) hit(B, o, S.dmg * 0.5, { ...S, tw }); B.ev.push({ k: 'boom', x: m.x, y: m.y, r: S.splash, c: '#FF8A5B', small: true }); }
         }
         return true;
       }
@@ -1331,7 +1343,7 @@ const Engine = (() => {
         for (let i = 0,limit=Math.min(12,S.chains+(Tactical.wet(B,cur)?1:0)); i <= limit && cur; i++) {
           pts.push({ x: cur.x, y: cur.y }); done.add(cur.id); hit(B, cur, d, { ...S, tw }); applyFx(B, cur, S);
           if (!S.noDecay) d *= 0.8;
-          let nx = null, nd = 1.5; for (const o of (B.enemyPool||B.mobs)) if (!done.has(o.id) && targetable(o, S)) { const q = Math.hypot(o.x - cur.x, o.y - cur.y); if (q < nd) { nd = q; nx = o; } }
+          let nx = null, nd = 1.5; for (const o of Tactical.candidates(B,cur,1.5)) if (!done.has(o.id) && targetable(o, S)) { const q = Math.hypot(o.x - cur.x, o.y - cur.y); if (q < nd) { nd = q; nx = o; } }
           cur = nx;
         }
         B.ev.push({ k: 'chain', pts, tw: tw.id });
@@ -1354,8 +1366,8 @@ const Engine = (() => {
       case 'line': {
         const T = pick(B, tw, 1); if (!T.length) return false;
         const a = Math.atan2(T[0].y - tw.y, T[0].x - tw.x); tw.ang = a;
-        const L = S.range + 0.5, ex = tw.x + Math.cos(a) * L, ey = tw.y + Math.sin(a) * L;
-        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || !targetable(m, { air: true })) continue; const px = m.x - tw.x, py = m.y - tw.y, along = px * Math.cos(a) + py * Math.sin(a), perp = Math.abs(-px * Math.sin(a) + py * Math.cos(a)); if (along >= (S.minRange||0) && along < L && perp < 0.28 + m.def.r * 0.6) { hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S); } }
+        const L = S.maxRange?S.range:S.range+0.5, ex = tw.x + Math.cos(a) * L, ey = tw.y + Math.sin(a) * L;
+        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || !targetable(m, { air: true }) || !inFiringBand(tw,m,S)) continue; const px = m.x - tw.x, py = m.y - tw.y, along = px * Math.cos(a) + py * Math.sin(a), perp = Math.abs(-px * Math.sin(a) + py * Math.cos(a)); if (along >= (S.minRange||0) && along < L && perp < 0.28 + m.def.r * 0.6) { hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S); } }
         B.ev.push({ k: 'rail', x: tw.x, y: tw.y, x2: ex, y2: ey, c: FAM.rail.c, tw: tw.id });
         return true;
       }
@@ -1387,10 +1399,10 @@ const Engine = (() => {
         return true;
       }
       case 'orbital': {
-        const locked = new Set(B.shots.filter((s) => s.kind === 'orbital').map((s) => s.tg)); const T = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && !locked.has(m.id) && (!tw.pvp||inFiringBand(tw,m,S))).sort((a, b) => b.hp + b.shield - a.hp - a.shield).slice(0, S.multi);
+        const locked = new Set(B.shots.filter((s) => s.kind === 'orbital').map((s) => s.tg)); const T = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && !locked.has(m.id) && inFiringBand(tw,m,S)).sort((a, b) => b.hp + b.shield - a.hp - a.shield).slice(0, S.multi);
         if (!T.length) return false;
         aim(tw,T[0]);
-        const volleyHits=tw.pvp?[]:null;
+        const volleyHits=[];
         for (const m of T) { B.shots.push({ pid: String(B.player??B.team??0)+":"+(B.nextShotId=(B.nextShotId||0)+1), kind: 'orbital', S, tw, tg: m.id, x: m.x, y: m.y, tx: m.x, ty: m.y, t: 0, T: 0.8,volleyHits }); B.ev.push({ k: 'lock', x: m.x, y: m.y, id: m.id }); }
         return true;
       }
@@ -1415,7 +1427,7 @@ const Engine = (() => {
   function beam(B, tw, dt) {
     const S = tw.S;
     const old = tw.beams || [];
-    const pool=B.enemyPool||B.mobs,held=tw._beamMode===tw.mode?old.map(b=>pool.find(m=>m.id===b.id)).filter(m=>m&&targetable(m,S)&&(!S.airOnly||m.air)&&inFiringBand(tw,m,S)):[];
+    const pool=B.enemyPool||B.mobs,held=tw._beamMode===tw.mode?old.map(b=>Tactical.target(B,b.id)).filter(m=>m&&targetable(m,S)&&(!S.airOnly||m.air)&&inFiringBand(tw,m,S)):[];
     const T=[...held,...pick(B,tw,S.beams).filter(m=>!held.includes(m))].slice(0,S.beams);tw._beamMode=tw.mode;
     tw.beams = T.map((m) => { const o = old.find((b) => b.id === m.id); return { id: m.id, rt: o ? o.rt + dt : 0, x: m.x, y: m.y }; });
     if (T.length) aim(tw,T[0]);
@@ -1955,7 +1967,7 @@ function cstats(c, lvl = 1) {
   else if (S.kind === 'radar') out.push(['Marque', '+' + Math.round(S.mark * 100) + '%']);
   else out.push(['Dégâts', Math.round(S.kind === 'beam' ? S.dmg : S.dmg * (S.kind === 'missile' ? S.salvo : S.multi))]);
   if (S.rate) out.push(['Tirs/s', (1 / S.rate).toFixed(1)]);
-  out.push(['Portée', S.range > 50 ? '∞' : S.range.toFixed(1)]);
+  out.push(['Portée', S.range > 50 ? '∞' : (S.minRange?S.minRange.toFixed(1)+'–':'')+S.range.toFixed(1)]);
   return out;
 }
 function tcg(c, o = {}) {
@@ -1964,7 +1976,7 @@ function tcg(c, o = {}) {
     <div class="tcg-in"><div class="tcg-art" data-art="${c.id}"></div>
       <div class="tcg-hd"><span class="tcg-cost">${BOLT}${Engine.cost(c.id)}</span><span class="gems">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= R[c.r].gems ? 'on' : ''}"></i>`).join('')}</span></div>
       ${o.locked ? '<div class="lock">?</div>' : ''}
-      <div class="tcg-bd"><div class="tcg-rar">${R[c.r].label}</div><div class="tcg-n">${o.mystery ? 'Carte mystère' : c.n}</div><div class="tcg-f"><i></i>${f.n}</div>
+      <div class="tcg-bd"><div class="tcg-rar">${R[c.r].label}</div><div class="tcg-n">${o.mystery ? 'Carte mystère' : c.n}</div><div class="tcg-f"><i></i>${f.n}</div>${o.mystery?'':DefenseGuide.badges(c.id)}
       ${o.stats === false ? '' : `<div class="tcg-st">${cstats(c, lvl).map(([a, b]) => `<span><small>${a}</small>${b}</span>`).join('')}</div>`}</div>
       ${!o.mystery && lvl > 1 ? `<span class="tcg-lv">Niv ${lvl}</span>` : ''}${o.copies > 1 ? `<span class="tcg-cp">×${o.copies}</span>` : ''}
       <div class="tcg-holo"></div><div class="tcg-shine"></div></div></div>`;
@@ -2373,7 +2385,7 @@ let arsenalType='defenses', arsenalRarity='all', arsenalQuery='', arsenalLimit=2
 function arsenalEntries(){
  const defenses=CARDS.map(c=>({id:c.id,type:'defenses',r:c.r,name:c.n,fam:c.fam,has:!!owned(c.id)}));
  const troops=TroopData.all.map(id=>({id,type:'units',r:TroopData.rarity(id),name:UNIT[id].n,has:G.troops[id]>0}));
- return [...defenses,...troops].filter(c=>(arsenalType==='all'||c.type===arsenalType)&&(fView==='all'||c.has)&&(arsenalRarity==='all'||c.r===arsenalRarity)&&(arsenalType!=='defenses'||fFam==='all'||c.fam===fFam)&&c.name.toLocaleLowerCase('fr').includes(arsenalQuery.toLocaleLowerCase('fr'))).sort((a,b)=>RI(b.r)-RI(a.r)||a.name.localeCompare(b.name,'fr'));
+ return [...defenses,...troops].filter(c=>(arsenalType==='units'||DefenseGuide.matches(c.id))&&(arsenalType==='all'||c.type===arsenalType)&&(fView==='all'||c.has)&&(arsenalRarity==='all'||c.r===arsenalRarity)&&(arsenalType!=='defenses'||fFam==='all'||c.fam===fFam)&&c.name.toLocaleLowerCase('fr').includes(arsenalQuery.toLocaleLowerCase('fr'))).sort((a,b)=>RI(b.r)-RI(a.r)||a.name.localeCompare(b.name,'fr'));
 }
 function arsenalTroopSheet(id){
  if(!TroopData.all.includes(id))return;
@@ -2384,7 +2396,7 @@ function arsenalTroopSheet(id){
 function renderArsenal(){
  Troops.init();const host=$('t-arsenal');
  host.innerHTML=`<h2>Deck de défenses <span class="tag">${G.deck.length} / 6</span></h2><p class="sub">Touche une carte pour voir ses statistiques ou modifier ton équipement.</p><div class="deck8">${Array.from({length:6},(_,i)=>G.deck[i]?`<button class="catalogue-card" data-sheet="${G.deck[i]}" aria-label="${CARD[G.deck[i]].n}">${tcg(CARD[G.deck[i]],{stats:false})}</button>`:'<div class="slot">+</div>').join('')}</div><h2>Deck d’unités <span class="tag">${G.troopDeck.length} / 6</span></h2><div class="deck8">${Array.from({length:6},(_,i)=>G.troopDeck[i]?`<button class="catalogue-card" data-unit-sheet="${G.troopDeck[i]}" aria-label="${UNIT[G.troopDeck[i]].n}">${Troops.card(G.troopDeck[i],false)}</button>`:'<div class="slot">+</div>').join('')}</div><h2>Collection <span class="tag">${CARDS.filter(c=>owned(c.id)).length+TroopData.all.filter(id=>G.troops[id]>0).length} / ${CARDS.length+TroopData.all.length}</span></h2><div class="filters catalogue-types" aria-label="Type de carte">${[['all','Tout'],['defenses','Défenses'],['units','Unités']].map(([k,n])=>`<button data-type="${k}" class="${arsenalType===k?'on':''}" aria-pressed="${arsenalType===k}">${n} · ${k==='all'?CARDS.length+TroopData.all.length:k==='units'?TroopData.all.length:CARDS.length}</button>`).join('')}</div><div class="filters" aria-label="Cartes possédées"><button data-v="mine" class="${fView==='mine'?'on':''}">Mes cartes</button><button data-v="all" class="${fView==='all'?'on':''}">Catalogue complet</button></div><div class="filters catalogue-rarities" aria-label="Rareté">${['all',...RAR].map(r=>`<button data-rarity="${r}" class="${arsenalRarity===r?'on':''}" aria-pressed="${arsenalRarity===r}">${r==='all'?'Toutes les raretés':R[r].label}</button>`).join('')}</div><div class="catalogue-search"><input id="arsenalSearch" type="search" placeholder="Rechercher une carte…" aria-label="Rechercher dans le catalogue"><select id="arsenalFamily" aria-label="Famille de défense" ${arsenalType==='defenses'?'':'hidden'}><option value="all">Toutes les familles</option>${FAM_ORDER.map(f=>`<option value="${f}">${FAM[f].n}</option>`).join('')}</select></div><p class="sub">Défenses : une famille complète de 5 raretés donne +15 % de dégâts à ses tours. Unités : la rareté indique leur collection ; leur coût et leur rôle déterminent leur efficacité en PvP.</p><p id="catalogueCount" role="status"></p><div class="grid" id="catalogueGrid"></div><button class="btn glass full" id="catalogueMore">Afficher davantage</button>`;
- DeckPresets.mount(host);
+ DeckPresets.mount(host);DefenseGuide.mount(host,paint);
  host.querySelector('#arsenalSearch').value=arsenalQuery;host.querySelector('#arsenalFamily').value=fFam;
  function paint(){const list=arsenalEntries(),shown=list.slice(0,arsenalLimit);host.querySelector('#catalogueCount').textContent=`${list.length} carte${list.length>1?'s':''} · ${shown.length} affichée${shown.length>1?'s':''}`;host.querySelector('#catalogueGrid').innerHTML=shown.map(c=>c.type==='defenses'?`<button class="catalogue-card" data-sheet="${c.id}" aria-label="${c.name}, ${R[c.r].label}">${tcg(CARD[c.id],{locked:!c.has,copies:G.col[c.id]?.n,cls:G.deck.includes(c.id)?'indeck':''})}</button>`:`<button class="catalogue-card catalogue-unit ${c.has?'':'not-owned'}" data-unit-sheet="${c.id}" aria-label="${c.name}, ${R[c.r].label}">${Troops.card(c.id,true,{locked:!c.has,copies:G.troops[c.id],cls:G.troopDeck.includes(c.id)?'indeck':''})}</button>`).join('')||'<p class="sub">Aucune carte avec ces filtres. Essaie le catalogue complet ou une autre rareté.</p>';host.querySelector('#catalogueMore').hidden=shown.length>=list.length;Arts.fill(host);}
  host.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.sheet){cardSheet(b.dataset.sheet);return;}if(b.dataset.unitSheet){arsenalTroopSheet(b.dataset.unitSheet);return;}if(b.id==='catalogueMore'){arsenalLimit+=24;paint();return;}if(b.dataset.type)arsenalType=b.dataset.type;else if(b.dataset.v)fView=b.dataset.v;else if(b.dataset.rarity)arsenalRarity=b.dataset.rarity;else return;arsenalLimit=24;renderArsenal();};
@@ -2402,6 +2414,7 @@ function cardSheet(id, fromAuction) {
   scene(`<div class="srays r-${c.r}"></div><div class="kicker">${R[c.r].label} · ${f.n}</div>
     <div class="bigcard">${tcg(c, { cls: 'big', locked: !has && !fromAuction, copies: e?.n })}</div>
     <div class="stitle m">${c.n}</div><p class="sline"><i>${c.lore}</i><br>${f.desc}</p>
+    ${DefenseGuide.detail(id)}
     ${Frontier.statHTML(S,{card:id,lvl:1,clvl:e?.lvl||1})}
     <div class="traits">${traitList(c).map((t) => `<span>${t}</span>`).join('')}</div>
     ${owners.length ? `<p class="sline" style="margin-bottom:12px">Autres propriétaires : ${owners.map((o) => `<b>${o}</b><span class="ia">IA</span>`).join(', ')}</p>` : ''}
@@ -3320,7 +3333,7 @@ const SiegePvP=(()=>{
   m.owner=player;m.faction=b.team;m.targetPlayer=d.target;m.weapon=stats;m.upgradeLevel=TroopUpgrades.level(s,player,type);m.fireCd=.35;m.kills=0;m.dmg=0;m.off=0;m.routeKind=stats.mobility;m.spawnT=.2;m.shieldQuiet=0;
   const origin=MapGen.posAt(m.path,m.d);m.x=origin.x;m.y=origin.y;b.energy-=stats.cost;b.ev.push({k:'build',x:m.x,y:m.y,r:.5,c:'#e6b96b'});return true;
  }
- function spatialIndex(all){const buckets=new Map(),size=5;for(const m of all){const key=Math.floor(m.x/size)+':'+Math.floor(m.y/size);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(m);}return (p,r)=>{const out=[],x=Math.floor(p.x/size),y=Math.floor(p.y/size),n=Math.ceil(r/size);for(let dy=-n;dy<=n;dy++)for(let dx=-n;dx<=n;dx++){const list=buckets.get((x+dx)+':'+(y+dy));if(list)for(const m of list)if(!m.dead&&distance(m,p)<=r)out.push(m);}return out;};}
+ function spatialIndex(all){const buckets=new Map(),size=5;for(const m of all){const key=Math.floor(m.x/size)+':'+Math.floor(m.y/size);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(m);}return (p,r,team=null,enemies=false)=>{const out=[],x=Math.floor(p.x/size),y=Math.floor(p.y/size),n=Math.ceil(r/size);for(let dy=-n;dy<=n;dy++)for(let dx=-n;dx<=n;dx++){const list=buckets.get((x+dx)+':'+(y+dy));if(list)for(const m of list)if((team==null||(enemies?m.faction!==team:m.faction===team))&&!m.dead&&(m.x-p.x)**2+(m.y-p.y)**2<=r*r)out.push(m);}return out;};}
  function captureStep(s,dt,all=s.boards.flatMap(b=>b.mobs).filter(m=>!m.dead),nearby=spatialIndex(all)){
   for(const m of all)m.capturing=false;
   for(const state of s.outposts){const o=s.world.outposts[state.id],troops=nearby(o,o.r).filter(m=>!m.air&&m.spawnT<=0&&s.boards[m.owner]?.phase!=='lose'),teams=[...new Set(troops.map(m=>m.faction))];state.contested=teams.length>1;
@@ -3344,20 +3357,20 @@ const SiegePvP=(()=>{
    if(w.heal){
     // Medics keep pace with a nearby frontline unit instead of overtaking it
     // and arriving alone in enemy turret range. Combat slows still apply later.
-    const escorts=nearby(m,(w.healRadius||2.8)+.8).filter(o=>o!==m&&o.faction===m.faction&&!o.weapon?.heal&&o.spawnT<=0);
+    const escorts=nearby(m,(w.healRadius||2.8)+.8,m.faction).filter(o=>o!==m&&o.faction===m.faction&&!o.weapon?.heal&&o.spawnT<=0);
     if(escorts.length){const escort=escorts.sort((a,b)=>(b.maxHp+b.maxShield)-(a.maxHp+a.maxShield)||distance(a,m)-distance(b,m))[0],ahead=(m.x-escort.x)*Math.cos(m.ang)+(m.y-escort.y)*Math.sin(m.ang);if(ahead>.45)m.spd=Math.min(w.speed,escort.weapon?.speed||escort.spd);}
-    const allies=nearby(m,w.healRadius||2.8).filter(o=>o!==m&&o.faction===m.faction&&o.spawnT<=0&&o.hp<o.maxHp&&!o.weapon?.heal).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||a.id-b.id).slice(0,w.healTargets||3);
+    const allies=nearby(m,w.healRadius||2.8,m.faction).filter(o=>o!==m&&o.faction===m.faction&&o.spawnT<=0&&o.hp<o.maxHp&&!o.weapon?.heal).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||a.id-b.id).slice(0,w.healTargets||3);
     for(const o of allies)heals.set(o,(heals.get(o)||0)+w.heal*dt/allies.length);
    }
    let enemy=null,priority=-1,near=Infinity;
-   for(const o of nearby(m,w.range)){
+   for(const o of nearby(m,w.range,m.faction,true)){
     if(o.faction===m.faction||o.spawnT>0||o.air&&!w.air)continue;
-    const score=favored(w,o)?1:0,d=distance(o,m);
+    const score=favored(w,o)?1:0,d=Math.sqrt((o.x-m.x)**2+(o.y-m.y)**2);
     if(score>priority||score===priority&&(d<near-.0001||Math.abs(d-near)<.0001&&o.id<(enemy?.id??Infinity))){priority=score;near=d;enemy=o;}
    }
    if(enemy){
     m.engaged=true;m.aimAng=m.ang=Math.atan2(enemy.y-m.y,enemy.x-m.x);
-    if(m.fireCd<=0){m.fireCd=Math.max(0,m.fireCd)+w.rate;attacks.push({m,w,enemy,targets:w.splash?nearby(enemy,w.splash).filter(o=>o.faction!==m.faction&&o.spawnT<=0&&(!o.air||w.air)):[enemy]});}
+    if(m.fireCd<=0){m.fireCd=Math.max(0,m.fireCd)+w.rate;attacks.push({m,w,enemy,targets:w.splash?nearby(enemy,w.splash,m.faction,true).filter(o=>o.faction!==m.faction&&o.spawnT<=0&&(!o.air||w.air)):[enemy]});}
    }
   }
   // A target has one shared healing budget, regardless of healer count or order.
@@ -3590,14 +3603,14 @@ const RuntimePerformance=(()=>{
  ];
  const mobileScales=[1,1,1,.95,.9];
  function deviceProfile(width,height){const w=Number(width)||globalThis.innerWidth||1280,h=Number(height)||globalThis.innerHeight||800,coarse=!!globalThis.matchMedia?.('(pointer:coarse)').matches;return {mobile:coarse||Math.min(w,h)<=700,width:w,height:h,coarse};}
- function qualityAt(index,profile){index=Math.max(0,Math.min(tiers.length-1,Math.floor(Number(index)||0)));const q=tiers[index];if(!profile.mobile)return {...q,mobile:false,maxDpr:2,minDpr:.5,pixelBudget:2400000,resolutionScale:q.scale*(q.postFx?1:.7),depthOfField:q.postFx,unitAnimation:true,shadowSize:2048};
-  return {...q,name:['Mobile net','Mobile fluide','Mobile équilibré','Mobile léger','Mobile économie'][index],mobile:true,scale:mobileScales[index],resolutionScale:mobileScales[index],maxDpr:2,minDpr:1.25,pixelBudget:2200000,postFx:false,bloom:false,depthOfField:false,unitAnimation:true,shadows:index<2,shadowSize:512,weather:false,particles:Math.min(q.particles,[500,400,300,200,120][index]),emit:Math.min(q.emit,[40,32,24,16,10][index]),events:Math.min(q.events,[140,110,85,65,45][index]),meshes:Math.min(q.meshes,[52,44,36,26,16][index])};
+ function qualityAt(index,profile){index=Math.max(0,Math.min(tiers.length-1,Math.floor(Number(index)||0)));const q=tiers[index];if(!profile.mobile)return {...q,mobile:false,maxDpr:2,minDpr:.5,pixelBudget:2400000,resolutionScale:q.scale*(q.postFx?1:.7),depthOfField:q.postFx,unitAnimation:index<3,shadowSize:2048};
+  return {...q,name:['Mobile net','Mobile fluide','Mobile équilibré','Mobile léger','Mobile économie'][index],mobile:true,scale:mobileScales[index],resolutionScale:mobileScales[index],maxDpr:2,minDpr:1.25,pixelBudget:2200000,postFx:false,bloom:false,depthOfField:false,unitAnimation:index<3,shadows:index<2,shadowSize:512,weather:false,particles:Math.min(q.particles,[500,400,300,200,120][index]),emit:Math.min(q.emit,[40,32,24,16,10][index]),events:Math.min(q.events,[140,110,85,65,45][index]),meshes:Math.min(q.meshes,[52,44,36,26,16][index])};
  }
  let active=null;
  function attach(V,root){
   if(!V||V._performance)return V?._performance;
   let profile=deviceProfile(root?.clientWidth,root?.clientHeight),index=V.software?(profile.mobile?3:2):0,ema=1000/60,drawEma=0,last=0,lastChange=0,lastReport=0,slow=0,fast=0,frames=0,hidden=document.hidden,dead=false;
-  let currentQuality=qualityAt(index,profile);
+  let currentQuality=qualityAt(index,profile),loadFloor=0;
   const projectiles=typeof ProjectileMotion!=='undefined'?ProjectileMotion.create():null;
   const originals=[],abort=new AbortController(),draw=V.frame,dispose=V.dispose,counters=new Map();
   const state={fps:0,renderMs:0,tier:index,quality:currentQuality.name,scale:currentQuality.scale,software:!!V.software,targetFps:60,mobile:profile.mobile};
@@ -3612,9 +3625,9 @@ const RuntimePerformance=(()=>{
   function report(now){if(now-lastReport<1000)return;lastReport=now;state.fps=Math.round(1000/Math.max(1,ema));state.renderMs=Math.round(drawEma*10)/10;if(root){root.dataset.renderFps=state.fps;root.dataset.renderQuality=state.quality;root.dispatchEvent(new CustomEvent('renderperformance',{detail:{...state}}));}}
   function sample(now,cost,dt){if(hidden||dt===0){last=now;slow=fast=0;return;}const elapsed=last?now-last:1000/60;last=now;if(elapsed<2)return;frames++;ema+=.09*(Math.min(500,elapsed)-ema);drawEma+=.09*(Math.min(500,cost)-drawEma);if(frames<8){report(now);return;}const seconds=Math.min(.5,elapsed/1000);
    if(ema>19.5||drawEma>14){slow+=seconds;fast=0;}else if(ema<17.5&&drawEma<9){fast+=seconds;slow=Math.max(0,slow-seconds);}else{slow=Math.max(0,slow-seconds);fast=0;}
-   if(slow>=1.2&&index<tiers.length-1&&now-lastChange>1500){index++;lastChange=now;slow=fast=0;apply();}else if(fast>=8&&index>0&&now-lastChange>10000){index--;lastChange=now;slow=fast=0;apply();}report(now);
+   if(slow>=1.2&&index<tiers.length-1&&now-lastChange>1500){index++;lastChange=now;slow=fast=0;apply();}else if(fast>=8&&index>loadFloor&&now-lastChange>10000){index--;lastChange=now;slow=fast=0;apply();}report(now);
   }
-  V.frame=function(board,dt){if(dead)return;const start=performance.now();counters.clear();const events=board?.ev;try{return draw.call(V,board?{...board,ev:visualEvents(events),shots:projectiles?projectiles.frame(board.shots,dt,board.paused?0:(board.speed??(typeof Frontier!=='undefined'?Frontier.session?.speed:null)??1)):board.shots}:board,dt);}finally{if(events)events.length=0;sample(start,performance.now()-start,dt);}};
+  V.frame=function(board,dt){if(dead)return;const start=performance.now(),load=board?.mobs?.length||0;loadFloor=load>=(profile.mobile?240:400)?3:load>=(profile.mobile?120:200)?2:0;state.units=load;if(index<loadFloor){index=loadFloor;lastChange=start;apply();}counters.clear();const events=board?.ev;try{return draw.call(V,board?{...board,ev:visualEvents(events),shots:projectiles?projectiles.frame(board.shots,dt,board.paused?0:(board.speed??(typeof Frontier!=='undefined'?Frontier.session?.speed:null)??1)):board.shots}:board,dt);}finally{if(events)events.length=0;sample(start,performance.now()-start,dt);}};
   const onResize=()=>{const next=deviceProfile(root?.clientWidth,root?.clientHeight),changed=next.mobile!==profile.mobile;profile=next;if(changed){index=V.software?(profile.mobile?3:2):0;last=0;slow=fast=0;frames=0;}apply();};globalThis.addEventListener?.('resize',onResize,{signal:abort.signal});globalThis.addEventListener?.('orientationchange',onResize,{signal:abort.signal});let resizeObserver=null;if(typeof ResizeObserver!=='undefined'&&root){resizeObserver=new ResizeObserver(onResize);resizeObserver.observe(root);}
   const onVisibility=()=>{hidden=document.hidden;last=0;slow=fast=0;frames=0;ema=1000/60;drawEma=0;projectiles?.clear();};document.addEventListener('visibilitychange',onVisibility,{signal:abort.signal});
   const control={state,dispose(){if(dead)return;dead=true;projectiles?.clear();abort.abort();resizeObserver?.disconnect();for(const restore of originals)restore();V.frame=draw;V.dispose=dispose;delete V._performance;delete V.effectBudget;if(active===control)active=null;}};

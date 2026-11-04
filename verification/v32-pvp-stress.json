@@ -1,0 +1,40 @@
+{
+  "scope": "Local Node 2v2 combat, dense artificial frontline, 16 towers, 60 warmup + 180 measured ticks. CPU only; no production network or GPU.",
+  "runs": [
+    {
+      "units": 200,
+      "remaining": 200,
+      "towers": 16,
+      "meanMs": 6.146550555555555,
+      "p95Ms": 7.877899999999954,
+      "fingerprint": "27b4d976c4f9d6b7ffbe9eaef09959069a638c5a3e061d3ec70f752511aa9365"
+    },
+    {
+      "units": 600,
+      "remaining": 600,
+      "towers": 16,
+      "meanMs": 43.60274055555555,
+      "p95Ms": 53.023699999999735,
+      "fingerprint": "6e49e1c904597108d47c657837e395474bbc6976ef7ad0aae01fbae4babc2545"
+    }
+  ],
+  "before": [
+    {
+      "units": 200,
+      "remaining": 200,
+      "towers": 16,
+      "meanMs": 14.705989444444358,
+      "p95Ms": 17.442699999999604,
+      "fingerprint": "27b4d976c4f9d6b7ffbe9eaef09959069a638c5a3e061d3ec70f752511aa9365"
+    },
+    {
+      "units": 600,
+      "remaining": 600,
+      "towers": 16,
+      "meanMs": 114.16829944444429,
+      "p95Ms": 125.57250000000204,
+      "fingerprint": "6e49e1c904597108d47c657837e395474bbc6976ef7ad0aae01fbae4babc2545"
+    }
+  ],
+  "identicalCombatResults": true
+}

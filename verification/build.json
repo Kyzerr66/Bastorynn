@@ -1,8 +1,8 @@
 {
-  "version": "3.1.0",
-  "hash": "c04f2ffaea91",
+  "version": "3.2.0",
+  "hash": "d04b985c0cce",
   "fragments": 3,
-  "simulationBytes": 262566,
-  "clientBytes": 666916,
+  "simulationBytes": 274078,
+  "clientBytes": 678958,
   "source": "src/client.js + src/tactics.js"
 }

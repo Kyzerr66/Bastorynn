@@ -1,4 +1,8 @@
-# Bastorynn — version tactique 3.1
+# Bastorynn — version tactique 3.2
+
+La V3.2 rééquilibre les défenses lointaines et ajoute un guide de composition dans l’Arsenal : type de dégâts, effets, rôles manquants, filtres et schéma des cinq réactions, avec vues PvE et PvP. Le Courroux et les autres satellites tirent entre 10 et 40 m, infligent 15 % de dégâts en moins et ne cumulent plus plusieurs frappes d’une même salve sur une cible.
+
+Les grosses armées profitent de recherches de cibles partagées, de requêtes spatiales pour les zones et d’un rendu qui adapte les effets au nombre de troupes. Un défaut qui laissait se multiplier les nuages corrosifs est corrigé : six nuages de réaction actifs maximum par plateau. Les règles, mesures et limites sont détaillées dans `verification/V32_EQUILIBRAGE.txt`.
 
 La V3.1 intègre les corrections utiles de l'archive `Bastorynn-corrige.zip` dans la V3 tactique. Elle corrige les requêtes interrompues qui bloquaient les comptes, les départs pendant la préparation PvP, la reprise de campagne après départ de l'hôte et le nettoyage des salons. Elle ajoute aussi des protections HTTP et vérifie les decks par rapport à la sauvegarde en ligne. Le détail des adaptations et des validations figure dans `verification/V31_REVUE.txt`.
 
@@ -35,6 +39,7 @@ Le catalogue existant, les cartes, la campagne, les enchères et les formats mul
 
 - `src/client.js` : source principale du client et blocs de simulation partagés.
 - `src/tactics.js` : réactions, météo, spécialisations, ordres et index spatial.
+- `src/defense-guide.js` : profils de défense dérivés des statistiques, analyse du deck et schéma des réactions.
 - `src/tactical-config.json` : temporisations et plafonds des nouvelles règles.
 - `src/tactical-ui.js`, `src/tactical.css` : interface tactique et initiation.
 - `src/renderer.js` : moteur de rendu d’origine ; les modèles sont enrichis dans la couche procédurale de `src/client.js`.
@@ -47,6 +52,8 @@ npm test
 npm run audit:maps
 node scripts/training-check.cjs
 npm run benchmark
+node scripts/stress-simulation.cjs
+node scripts/stress-pvp.cjs
 ```
 
 Ne pas modifier les fichiers compilés à la main. Après un changement dans `src/`, reconstruire les deux clients et la simulation ensemble. Aucune dépendance supplémentaire n'est requise pour le build ou les tests du moteur. Les tests réseau démarrent un serveur local avec des comptes fictifs et un dossier temporaire, jamais avec la base configurée pour la production.
@@ -55,7 +62,7 @@ Le test facultatif `node scripts/browser-smoke.cjs` nécessite Playwright et Chr
 
 ## Validation et limites
 
-Les résultats propres à la V3.1 sont dans `verification/v31-*` et `verification/V31_REVUE.txt`. Les fichiers `v3-*` et `V3_BILAN.txt` décrivent la précédente livraison tactique ; les autres rapports proviennent de l'archive d'origine. Ils ne constituent pas une nouvelle validation de la V3.1.
+Les résultats propres à la V3.2 sont dans `verification/v32-*`, `verification/stress-browser-*.json` et `verification/V32_EQUILIBRAGE.txt`. Les rapports `v31-*`, `V31_REVUE.txt`, `v3-*` et `V3_BILAN.txt` décrivent les livraisons précédentes. Les scripts `check-deck-guide.cjs` et `stress-browser.cjs` utilisent le même Playwright/Chrome que le test navigateur principal.
 
 Les tests d’écran sont réalisés dans Chrome desktop avec des tailles de fenêtre et des entrées tactiles émulées. Ils ne prouvent pas les performances sur un téléphone physique. Les benchmarks mesurent le moteur Node.js, sans rendu 3D ni coût réseau. L’audit des cartes vérifie la continuité, les limites, les possibilités de pose initiale et les longueurs symétriques en PvP ; il ne prouve pas que chaque îlot est utile ni que tous les matchs sont équilibrés.
 

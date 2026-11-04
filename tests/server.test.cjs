@@ -8,7 +8,7 @@ test('HTTP guards, deck ownership, authoritative coop, duel departure and final 
  const streams=[],base='http://127.0.0.1:'+port;
  try{
   await new Promise((resolve,reject)=>{server.stdout.on('data',b=>{if(b.toString().includes('localhost:'+port))resolve();});server.on('exit',c=>reject(Error('Test server exit '+c)));server.on('error',reject);});
-  const health=await fetch(base+'/api/health');assert.equal((await health.json()).version,'bastorynn-3.1');
+  const health=await fetch(base+'/api/health');assert.equal((await health.json()).version,'bastorynn-3.2');
   assert.match(health.headers.get('content-security-policy'),/frame-ancestors 'none'/);
   // An unfinished upload must not enter the global account transaction queue.
   const slow=net.connect(port,'127.0.0.1');slow.on('error',()=>{});await new Promise(r=>slow.once('connect',r));

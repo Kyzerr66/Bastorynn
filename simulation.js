@@ -34,7 +34,7 @@ const FAM = {
   mlrs: { n: 'Lance-roquettes multiple', role: 'Barrage d\'artillerie', kind: 'shell', dt: 'phys', cost: 150, dmg: 22, rate: 4.2, range: 5.4, splash: 0.7, split: 5, pierce: 0.3, air: false, c: '#E07A4A', desc: 'Une salve de roquettes qui couvre toute une zone, de très loin. Rechargement lent.' },
   emp: { n: 'Canon IEM', role: 'Neutralisation', kind: 'pulse', dt: 'energy', cost: 120, dmg: 10, rate: 2.4, range: 1.9, shieldMul: 3, vehStun: { c: 0.55, d: 1.2 }, air: true, c: '#6FA8FF', desc: 'Impulsion électromagnétique : pulvérise les boucliers et paralyse véhicules et drones.' },
   gas: { n: 'Gaz incapacitant', role: 'Anti-infanterie', kind: 'puddle', dt: 'acid', cost: 90, dmg: 6, rate: 2.6, range: 2.8, splash: 1.0, dur: 3.6, infMul: 2.2, vehMul: 0.5, slow: { p: 0.35, d: 1 }, air: false, c: '#C8D86A', desc: 'Un nuage qui ralentit l\'infanterie et lui inflige le double de dégâts. Peu efficace contre les blindés.' },
-  orbital: { n: 'Satellite d\'attaque', role: 'Frappe globale', kind: 'orbital', dt: 'true', cost: 180, dmg: 150, rate: 6.5, range: 99, splash: 0.8, air: true, c: '#FFD8A0', desc: 'Frappe depuis l\'orbite l\'ennemi le plus dangereux, où qu\'il soit sur la carte.' },
+  orbital: { n: 'Satellite d\'attaque', role: 'Frappe lointaine', kind: 'orbital', dt: 'true', cost: 180, dmg: 150, rate: 6.5, range: 40, splash: 0.8, air: true, c: '#FFD8A0', desc: 'Frappe depuis l\'orbite l\'ennemi le plus dangereux, entre 10 et 40 mètres. Protège sa zone morte avec des défenses rapprochées.' },
   antitank: { n: 'Missile antichar', role: 'Tueur de blindés', kind: 'missile', dt: 'phys', cost: 130, dmg: 70, rate: 2.8, range: 3.7, salvo: 1, splash: 0.2, pierce: 0.6, vehMul: 2, infMul: 0.4, prefer: 'veh', air: false, c: '#B8C060', desc: 'Un missile filoguidé qui perce les blindages : double dégâts contre les véhicules.' },
   lourde: { n: 'Mitrailleuse lourde', role: 'Perce-blindage', kind: 'bullet', dt: 'phys', cost: 85, dmg: 13, rate: 0.48, range: 2.8, pierce: 0.35, air: true, c: '#E8C060', desc: 'Calibre .50 : des rafales qui traversent les blindages légers et touchent les volants.' },
   obusier: { n: 'Obusier lourd', role: 'Artillerie lointaine', kind: 'shell', dt: 'phys', cost: 170, dmg: 62, rate: 3.6, range: 6.2, splash: 0.9, air: false, c: '#C89060', desc: 'Des obus de 155 mm tirés de très loin. Lent, mais chaque impact dévaste une zone entière.' },
@@ -724,6 +724,7 @@ const Tactical = (() => {
   const weatherNames = {clear:'Temps clair',rain:'Pluie',fog:'Brouillard',storm:'Orage',snow:'Neige',wind:'Vent fort'};
   const weatherHelp = {clear:'Aucun modificateur.',rain:'Brûlures plus courtes ; électricité renforcée.',fog:'Portée de tir −12 %. Un radar proche compense.',storm:'Conductivité renforcée. Cercles de foudre annoncés 3 s avant impact.',snow:'Mobilité terrestre −8 % ; givre prolongé.',wind:'Les fumées se dissipent deux fois plus vite.'};
   const reactions = {fracture:['Fracture','#a9e8ff'],thermal:['Choc thermique','#ffb18d'],conductive:['Conductivité','#b4adff'],corrosive:['Vapeur corrosive','#b7e584'],rupture:['Protection rompue','#80bfff']};
+  const cloudQueues=new WeakMap();
   const branches = {
     precision:{name:'Perforation',desc:'Dégâts +25 %, pénétration +15 points ; délai entre tirs +10 %.',dmg:1.25,rate:1.1,pierce:.15},
     barrage:{name:'Barrage',desc:'Cadence +25 %, zone +15 % ; dégâts par tir −15 %.',dmg:.85,rate:.8,splash:1.15},
@@ -784,8 +785,12 @@ const Tactical = (() => {
     }else if((fire&&m.acidT>0)||(S.dt==='acid'&&m.burnT>0)){
       key='corrosive';
       // Bounded independent cloud. It cannot trigger reactions of its own.
-      B.puddles.push({x:m.x,y:m.y,r:.75,t:1.4,T:1.4,dps:B.pvp?2:5,born:B.t,tw:S.tw,mark:0,reactionCloud:true});
-      const clouds=B.puddles.filter(p=>p.reactionCloud);if(clouds.length>cfg.reactions.maxClouds)clouds[0].t=0;
+      const cloud={x:m.x,y:m.y,r:.75,t:1.4,T:1.4,dps:B.pvp?2:5,born:B.t,tw:S.tw,mark:0,reactionCloud:true};
+      B.puddles.push(cloud);
+      // A bounded queue avoids scanning an ever-growing array during mass reactions.
+      const clouds=(cloudQueues.get(B)||[]).filter(p=>p.t>0);clouds.push(cloud);
+      while(clouds.length>cfg.reactions.maxClouds)clouds.shift().t=0;
+      cloudQueues.set(B,clouds);
     }else if(S.kind==='chain'&&wet(B,m)){
       key='conductive';extra=dmg*.12;
     }else if(m.shield>0&&['pulse','emp','sonic'].includes(S.fam)){
@@ -826,6 +831,7 @@ const Tactical = (() => {
       if(!covered)S.range*=cfg.weather.fogRange;
     }
     if(B.order&&!B.pvp){const o=orders[B.order.id];if(o?.rate)S.rate*=o.rate;if(o?.range)S.range*=o.range;}
+    if(S.maxRange)S.range=Math.min(S.range,S.maxRange);
   }
   function onStart(B){if(B.order&&B.wave>B.order.untilWave){B.order=null;Engine.refresh(B);}B.orderOffer=null;}
   function onClear(B){if(!B.pvp&&B.wave>0&&B.wave%3===0&&(B.endless||B.wave<B.maxWave))B.orderOffer={wave:B.wave,options:Object.keys(orders)};}
@@ -844,8 +850,9 @@ const Tactical = (() => {
     if(swarm||!lines.length)lines.push({key:'swarm',n:swarm,label:'Infanterie',tip:'Mitrailleuse et mortier couvrent les groupes ; le cryo les retient.'});
     return lines;
   }
-  const grids=new WeakMap();
-  function index(B){const pool=B.enemyPool||B.mobs;if(pool.length<32){grids.delete(B);return;}const cells=new Map(),order=new Map();let radius=0;
+  const grids=new WeakMap(),identities=new WeakMap();
+  function target(B,id){const pool=B.enemyPool||B.mobs,g=identities.get(B),m=g?.pool===pool?g.byId.get(id):pool.find(m=>m.id===id);return m&&!m.dead?m:undefined;}
+  function index(B){const pool=B.enemyPool||B.mobs,byId=new Map();for(const m of pool)if(!m.dead)byId.set(m.id,m);identities.set(B,{pool,byId});if(pool.length<32){grids.delete(B);return;}const cells=new Map(),order=new Map();let radius=0;
     pool.forEach((m,i)=>{if(m.dead)return;order.set(m,i);radius=Math.max(radius,m.def.r||0);const k=Math.floor(m.x/4)+':'+Math.floor(m.y/4);if(!cells.has(k))cells.set(k,[]);cells.get(k).push(m);});grids.set(B,{pool,cells,order,radius});
   }
   function candidates(B,p,r){const pool=B.enemyPool||B.mobs,g=grids.get(B);if(!g||g.pool!==pool||r>24)return pool;
@@ -853,8 +860,73 @@ const Tactical = (() => {
     // Preserve original target tie-breaking, including taunt priority.
     return out.sort((a,b)=>g.order.get(a)-g.order.get(b));
   }
-  function invalidate(B){grids.delete(B);}
-  return {cfg,init,tick,weatherAt,weatherNames,weatherHelp,reactions,wet,impact,effect,branches,branchOptions,specialize,stats,boardStats,orders,onStart,onClear,chooseOrder,leaked,advice,index,candidates,invalidate};
+  function invalidate(B){grids.delete(B);identities.delete(B);}
+  function* areaCandidates(B,p,r){
+    const pool=B.enemyPool||B.mobs,initial=pool.length,near=candidates(B,p,r);
+    // Array iterators include children spawned by a kill during the same blast.
+    // Preserve that behavior even when the spatial query returns a separate list.
+    yield* near;
+    if(near!==pool)for(let i=initial;i<pool.length;i++)yield pool[i];
+  }
+  return {cfg,init,tick,weatherAt,weatherNames,weatherHelp,reactions,wet,impact,effect,branches,branchOptions,specialize,stats,boardStats,orders,onStart,onClear,chooseOrder,leaked,advice,index,candidates,areaCandidates,target,invalidate};
+})();
+
+// Profiles come from combat stats, including rarity traits and PvP normalization.
+const DefenseGuide=(()=>{
+  let mode='pve',filter='all';
+  const labels={instant:'Impact immédiat',dot:'Dégâts dans la durée',slow:'Ralentissement',armor:'Anti-armure',shield:'Anti-bouclier',air:'Anti-aérien',area:'Zone / groupes',support:'Soutien',close:'Défense rapprochée'};
+  function profile(id,pvp=false){
+    const c=CARD[id],f=FAM[c.fam],S=Engine.stats({card:id,lvl:1,clvl:1,pvp}),roles=[];
+    const cold=['cryo','frostbattery'].includes(c.fam)||!!S.freeze,fire=S.dt==='fire'||S.burn>0,acid=S.dt==='acid';
+    const element=cold?'❄ Givre':S.dt==='fire'?'♨ Feu':acid?'◈ Acide':S.kind==='chain'?'ϟ Électricité':S.dt==='energy'?'✦ Énergie':S.dt==='true'?'◎ Dégâts purs':S.dt==='none'?'◇ Soutien':'◆ Physique';
+    if(S.dmg&&S.kind!=='puddle'&&S.kind!=='beam')roles.push('instant');
+    if(S.kind==='puddle'||S.kind==='beam'||S.burn)roles.push('dot');
+    if(S.slow||S.freeze||S.stun||S.vehStun||S.pull)roles.push('slow');
+    if(S.pierce||S.melt||acid||S.dt==='fire'||S.dt==='true')roles.push('armor');
+    if(S.dt==='energy'||S.shieldMul>1)roles.push('shield');
+    if(S.air)roles.push('air');
+    if(S.splash||['pulse','cone','gravity','chain','puddle'].includes(S.kind)||S.multi>1)roles.push('area');
+    if(['eco','radar','aura'].includes(S.kind))roles.push('support');
+    if(S.dmg&&!S.minRange&&!S.airOnly&&S.range<=3.5)roles.push('close');
+    return {id,f,S,roles,element,cold,fire,acid,impact:['shell','missile','mine'].includes(S.kind)||c.fam==='canon',electric:S.kind==='chain',rupture:['pulse','emp','sonic'].includes(c.fam)};
+  }
+  const reactions=[
+    {key:'fracture',left:'Givre',right:'Obus / missile / mine / canon',name:'Fracture',effect:'Impact renforcé (+15 %, ou +30 % contre une armure >10 %). Consomme le givre.',a:p=>p.cold,b:p=>p.impact},
+    {key:'thermal',left:'Givre',right:'Feu / brûlure',name:'Choc thermique',effect:'Explosion de dégâts (+30 % de l’impact). Consomme le givre et la brûlure.',a:p=>p.cold,b:p=>p.fire},
+    {key:'corrosive',left:'Acide',right:'Feu / brûlure',name:'Vapeur corrosive',effect:'Petit nuage acide de 1,4 s : 5 dégâts/s en PvE, 2 en PvP.',a:p=>p.acid,b:p=>p.fire},
+    {key:'conductive',left:'Eau / pluie / orage',right:'Tesla',name:'Conductivité',effect:'Impact électrique renforcé de 12 %. Dépend du terrain ou de la météo.',environment:true,b:p=>p.electric},
+    {key:'rupture',left:'Bouclier ennemi',right:'Onde / IEM / sonique',name:'Protection rompue',effect:'Retire 20 % du bouclier maximal, jusqu’à 45 points en PvE ou 18 en PvP.',environment:true,b:p=>p.rupture}
+  ];
+  function comboState(ids,pvp=false){const list=ids.filter(id=>CARD[id]).map(id=>profile(id,pvp));return reactions.map(r=>({...r,ready:(r.environment||list.some(r.a))&&list.some(r.b)}));}
+  const num=n=>Number(n.toFixed(2));
+  function badges(id){const p=profile(id);return '<div class="defense-badges"><span>'+p.element+'</span><span>'+labels[['slow','dot','shield','armor','instant','support'].find(r=>p.roles.includes(r))||'support']+'</span></div>';}
+  function detail(id,pvp=false){const p=profile(id,pvp),s=p.S,lines=[];
+    if(s.slow)lines.push('Ralentit de '+Math.round(s.slow.p*100)+' % pendant '+num(s.slow.d)+' s. Les résistances ennemies s’appliquent.');
+    if(s.freeze)lines.push('Gel : '+Math.round(s.freeze.c*100)+' % de chance, jusqu’à '+num(Math.min(1.8,s.freeze.d))+' s ; les boss résistent.');
+    if(p.acid)lines.push('Ignore l’armure. Le contact réduit aussi l’armure restante de '+(pvp?'8':'15')+' % pendant 0,6 s, renouvelé dans le nuage.');
+    if(s.pierce)lines.push('Ignore '+Math.round(s.pierce*100)+' % de l’armure sur ce tir ; ne réduit pas l’armure pour les autres tours.');
+    if(s.melt)lines.push('Érode définitivement '+num(s.melt*5)+' points de pourcentage d’armure par impact.');
+    if(s.burn)lines.push('Brûle pendant '+(pvp?'1,4':'2,5')+' s (durée réduite sous la pluie). Les brûlures ne s’additionnent pas : la plus forte est conservée.');
+    if(s.kind==='puddle')lines.push('Nuage : dégâts continus aux ennemis au sol qui restent dans sa zone.');
+    if(s.kind==='beam')lines.push('Faisceau continu : dégâts progressifs tant que la cible reste à portée.');
+    if(s.dt==='energy')lines.push('Énergie : efficacité doublée sur les boucliers avant les bonus propres à la carte. L’armure reste active.');
+    if(s.dt==='fire'||s.dt==='true')lines.push(s.dt==='fire'?'Le feu ignore l’armure et traverse les boucliers.':'Les dégâts purs ignorent l’armure, mais les boucliers les absorbent.');
+    if(s.minRange)lines.push('Tir entre '+num(s.minRange)+' et '+num(s.range)+' m : prévois une tour rapprochée dans la zone morte.');
+    if(!lines.length)lines.push(p.f.desc);
+    return '<section class="defense-detail"><b>'+(pvp?'PvP':'PvE')+' · '+p.element+' · '+p.f.role+'</b><div class="defense-tags">'+p.roles.map(r=>'<span>'+labels[r]+'</span>').join('')+'</div><ul>'+lines.map(t=>'<li>'+t+'</li>').join('')+'</ul></section>';
+  }
+  function diagram(ids,pvp=false){return '<div class="reaction-map">'+comboState(ids,pvp).map(r=>'<article class="reaction-row '+(r.ready?'ready':'')+'"><div class="reaction-formula"><span>'+r.left+'</span><i>+</i><span>'+r.right+'</span><i>→</i><strong>'+r.name+'</strong></div><p>'+r.effect+'</p><small>'+(r.ready?(r.environment?'✓ Prêt si la condition est présente':'✓ Combinaison dans ton deck'):'À compléter dans ton deck')+'</small></article>').join('')+'</div><p class="reaction-note">Une seule réaction par ennemi toutes les '+Tactical.cfg.reactions.cooldown+' s. Les bonus de dégâts sont plafonnés à '+(pvp?Tactical.cfg.reactions.pvpBonusCap:Tactical.cfg.reactions.bonusCap)+' ; Fracture et Choc thermique sont aussi limités à 5 % des PV max. Les nuages ne déclenchent pas de réaction en chaîne.</p>';}
+  function analysis(ids,pvp=false){const ps=ids.filter(id=>CARD[id]).map(id=>profile(id,pvp)),needs=['close','air','slow','armor','area'],missing=needs.filter(r=>!ps.some(p=>p.roles.includes(r)));return {ps,missing};}
+  function mount(host,refreshCollection){
+    const panel=document.createElement('section');panel.className='deck-lab';panel.setAttribute('aria-label','Analyse du deck et réactions');host.querySelector('.deck8').after(panel);
+    function paint(){const pvp=mode==='pvp',{ps,missing}=analysis(G.deck,pvp),cost=ps.reduce((n,p)=>n+Engine.cost(p.id,pvp),0),suggest=CARDS.filter(c=>owned(c.id)&&!G.deck.includes(c.id)).filter(c=>profile(c.id,pvp).roles.some(r=>missing.includes(r))).sort((a,b)=>Engine.cost(a.id,pvp)-Engine.cost(b.id,pvp)).slice(0,3);
+      panel.innerHTML='<header><div><small>COMPOSE TA DÉFENSE</small><h3>Rôles & réactions</h3></div><div class="deck-mode" role="group" aria-label="Mode d’analyse"><button data-guide-mode="pve" aria-pressed="'+!pvp+'">PvE</button><button data-guide-mode="pvp" aria-pressed="'+pvp+'">PvP</button></div></header><p>'+ps.length+' / 6 défenses · coût moyen '+(ps.length?Math.round(cost/ps.length):0)+' ⚡ · '+(pvp?'Statistiques normalisées, niveaux de collection ignorés.':'Profil de base des cartes ; les améliorations en partie renforcent leurs effets.')+'</p><div class="deck-coverage">'+['close','air','slow','armor','area'].map(r=>'<span class="'+(missing.includes(r)?'missing':'covered')+'">'+(missing.includes(r)?'○ ':'✓ ')+labels[r]+'</span>').join('')+'</div><p role="status">'+(missing.length?'À prévoir : '+missing.map(r=>labels[r].toLowerCase()).join(', ')+'.':'Les cinq rôles principaux sont couverts. Adapte le placement et les cartes à la vague.')+'</p>'+(ps.some(p=>p.S.minRange)?'<p>◎ Protège les zones mortes de tes artilleries avec une défense rapprochée.</p>':'')+(suggest.length?'<div class="deck-suggestions">Cartes possédées à examiner : '+suggest.map(c=>'<button data-guide-card="'+c.id+'">'+c.n+'</button>').join('')+'</div>':'')+'<details class="deck-reactions"><summary>Schéma des réactions élémentaires</summary>'+diagram(G.deck,pvp)+'</details><details><summary>Effets des cartes de ce deck</summary>'+ps.map(p=>'<h4>'+CARD[p.id].n+'</h4>'+detail(p.id,pvp)).join('')+'</details>';
+    }
+    panel.onclick=e=>{const b=e.target.closest('button');if(!b)return;e.stopPropagation();if(b.dataset.guideMode){mode=b.dataset.guideMode;paint();refreshCollection?.();panel.querySelector('[data-guide-mode="'+mode+'"]').focus();}if(b.dataset.guideCard)cardSheet(b.dataset.guideCard);};paint();
+    const wrap=document.createElement('label');wrap.className='defense-role-filter';wrap.innerHTML='Filtrer par effet <select aria-label="Rôle de défense"><option value="all">Tous les effets</option>'+Object.entries(labels).map(([id,n])=>'<option value="'+id+'">'+n+'</option>').join('')+'</select>';host.querySelector('#catalogueCount').before(wrap);const select=wrap.querySelector('select');select.value=filter;select.disabled=arsenalType==='units';select.onchange=()=>{filter=select.value;renderArsenal();};
+  }
+  function matches(id){return filter==='all'||!!CARD[id]&&profile(id,mode==='pvp').roles.includes(filter);}
+  return {profile,badges,detail,diagram,analysis,comboState,mount,matches,reactions};
 })();
 
 
@@ -893,17 +965,20 @@ const Engine = (() => {
   const income = (B) => B.W.sectors.reduce((a, s, i) => a + (B.owned[i] ? s.income : 0), 0);
 
   // ---------------- tours ----------------
+  // Metres in world coordinates. Caps also apply after height, support and orders.
+  const firingLimits=Object.freeze({orbital:{min:10,max:40,damage:.85},mortar:{min:1.65,max:7,damage:.92},sniper:{min:1.95,max:8,damage:.92},rail:{min:1.9,max:9,damage:.92},mlrs:{min:2.5,max:10,damage:.9},obusier:{min:2.7,max:11,damage:.9},siege:{min:2.8,max:11,damage:.9},frostbattery:{min:1.75,max:7,damage:.95},skyguard:{min:1.6,max:7.5,damage:.95}});
   const pvpDeadZones=Object.freeze({canon:.8,mortar:1.65,sniper:1.95,rail:1.9,mlrs:2.5,obusier:2.7,siege:2.8,orbital:3.2,antitank:1.2,frostbattery:1.75,skyguard:1.6,flak:1.1,plasma:1.1,missile:.9});
   function cost(cardId,pvp=false) { const c = CARD[cardId]; return Math.round(FAM[c.fam].cost * (1 + 0.12 * RI(c.r))+(pvp&&c.fam==='orbital'?110:0)); }
   function upCost(tw) { return tw.lvl >= 3 ? 0 : Math.round(cost(tw.card,!!tw.pvp) * [0.75, 1.25][tw.lvl - 1]); }
   function stats(tw) {
     const c = CARD[tw.card], f = FAM[c.fam], tr = c.tr, ri = RI(c.r), L = tw.lvl - 1, cl = tw.pvp?1:(tw.clvl || 1), b = tw.buff || { rate: 0, dmg: 0, range: 0, crit: 0 };
+    const limits=firingLimits[c.fam];
     const rarityDamage=tw.pvp?1+.075*ri:RMUL.dmg[ri],rarityRate=tw.pvp?1+.035*ri:RMUL.rate[ri];
     let range = f.range * RMUL.rng[ri] * (tr.rangeMul || 1) * [1, 1.08, 1.16][L] * (1 + b.range);
     if (f.kind === 'radar' && (tr.rangeMul || 1) >= 9) range = 99;
     const bc = tr.crit || f.crit; const crit = bc ? { c: bc.c + b.crit, m: bc.m } : b.crit ? { c: b.crit, m: 2 } : null;
     const S = {
-      kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), minRange:tw.pvp?(pvpDeadZones[c.fam]||0):0, crit,
+      kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), minRange:limits?.min||(tw.pvp?(pvpDeadZones[c.fam]||0):0), maxRange:limits?.max||0, crit,
       dmg: f.dmg * rarityDamage * (tw.pvp?[1,1.22,1.5]:[1,1.55,2.3])[L] * (tw.pvp ? .44 : 1) * (1 + 0.08 * (cl - 1)) * (1 + b.dmg) * (tw.pvp?1:(tw.setb || 1)) * (tw.high ? 1.1 : 1),
       rate: f.rate ? f.rate / (rarityRate * (tr.rateMul || 1) * [1, 1.06, 1.14][L]) / (1 + b.rate) : 0,
       splash: f.splash ? f.splash + (tr.splash || 0) + L * 0.1 : tr.splash || 0,
@@ -934,14 +1009,15 @@ const Engine = (() => {
       const critPower=c=>c?1+c.c*(c.m-1):1;
       const critical=critPower(S.crit)/critPower(f.crit);
       S.dmg/=Math.sqrt(Math.max(1,cluster)*salvo*Math.max(1,chain)*Math.max(1,ramp)*Math.max(1,critical));
-      if(S.kind==='orbital'){S.range=Math.min(7.5,S.range);S.rate=Math.max(15,S.rate);S.dmg=Math.min(45,S.dmg);S.splash=Math.min(.6,S.splash);S.multi=Math.min(2,S.multi);S.exec=0;}
+      if(S.kind==='orbital'){S.range=Math.min(40,S.range);S.rate=Math.max(15,S.rate);S.dmg=Math.min(45,S.dmg);S.splash=Math.min(.6,S.splash);S.multi=Math.min(2,S.multi);S.exec=0;}
       if(S.slow)S.slow={...S.slow,p:Math.min(.3,S.slow.p),d:Math.min(1.5,S.slow.d)};
       if(S.freeze)S.freeze={...S.freeze,d:Math.min(.65,S.freeze.d)};
       if(S.stun)S.stun={...S.stun,d:Math.min(.55,S.stun.d)};
       if(S.vehStun)S.vehStun={...S.vehStun,d:Math.min(.55,S.vehStun.d)};
       S.burn=Math.min(.35,S.burn);S.buffRate=Math.min(.35,S.buffRate);
     }
-    return Tactical.stats(S,tw);
+    if(limits)S.dmg*=limits.damage;
+    Tactical.stats(S,tw);if(S.maxRange)S.range=Math.min(S.range,S.maxRange);return S;
   }
   function refresh(B) {
     const relays = B.towers.filter((t) => FAM[CARD[t.card].fam].kind === 'aura' && !(t.jam > 0));
@@ -1098,6 +1174,8 @@ const Engine = (() => {
     if(t.jam>0||t.jamGuard>0)return false;
     t.jam=duration;return true;
   }
+  const hitSets=new WeakMap();
+  function hitSet(ids){let set=hitSets.get(ids);if(!set||set.size!==ids.length){set=new Set(ids);hitSets.set(ids,set);}return set;}
   function tick(B, dt) {
     Tactical.invalidate(B); B.t += dt; Tactical.tick(B,dt);
     for (const k in B.ab) B.ab[k].cd = Math.max(0, B.ab[k].cd - dt * (!B.pvp&&B.order?.id==='recovery'?1.25:1));
@@ -1165,24 +1243,27 @@ const Engine = (() => {
     }
     if(supportsDirty)refresh(B);
     Tactical.index(B);
-    for (const p of B.puddles) for (const m of (B.enemyPool||B.mobs)) if (B.t>=(p.born||0)&&!m.dead && !m.air && m.spawnT<=0 && Math.hypot(m.x - p.x, m.y - p.y) <= p.r) {
+    for (const p of B.puddles) {
+      if(p.t<=0||B.t<(p.born||0))continue;
+      for (const m of Tactical.areaCandidates(B,p,p.r)) if (!m.dead && !m.air && m.spawnT<=0 && (m.x-p.x)**2+(m.y-p.y)**2<=p.r*p.r) {
       hit(B, m, p.dps * dt, { dt: 'acid', tw: p.tw, ev: false, reaction:!p.reactionCloud, infMul: p.infMul, vehMul: p.vehMul });if(m.dead)continue;
       const oldMark=m.acidT>0?m.acidM:0;m.acidT=.6;m.acidM=Math.max(oldMark||0,p.mark||0);
       if (p.burn && !m.def.fireImm) { m.burn = Math.max(m.burnT > 0 ? m.burn : 0, p.pvp?Math.min(6,p.burn):p.burn); m.burnT = Math.max(m.burnT, p.pvp?1.4:1.6); }
       if (p.slow&&!m.def.noSlow) {const power=p.slow.p*(m.def.boss ? .5 : 1);m.slowP=Math.max(m.slowT>0?m.slowP:0,power);m.slowT=Math.max(m.slowT,.4);}
+      }
     }
     for (let i = B.mines.length - 1; i >= 0; i--) {
       const q = B.mines[i]; q.arm -= dt; if (q.arm > 0) continue;
       if (!B.towers.includes(q.tw)) { B.mines.splice(i, 1); continue; }
-      const trig = (B.enemyPool||B.mobs).find((m) => !m.dead && !m.air && m.spawnT <= 0 && !m.onWater && Math.hypot(m.x - q.x, m.y - q.y) <= 0.32 + m.def.r * 0.5);
+      const trig = Tactical.candidates(B,q,.32).find((m) => !m.dead && !m.air && m.spawnT <= 0 && !m.onWater && Math.hypot(m.x - q.x, m.y - q.y) <= 0.32 + m.def.r * 0.5);
       if (trig) { B.mines.splice(i, 1); aoe(B, q.x, q.y, q.S.splash, q.S.dmg, q.S, q.tw, false); B.ev.push({ k: 'boom', x: q.x, y: q.y, r: q.S.splash, c: '#FFB060', mine: true }); if (q.S.split) for (let k = 0; k < q.S.split; k++) { const a = (k / q.S.split) * Math.PI * 2 + B.rnd(), r = q.S.splash * (0.9 + B.rnd() * 0.6); B.shots.push({ pid: String(B.player??B.team??0)+":"+(B.nextShotId=(B.nextShotId||0)+1), kind: 'shell', sub: true, S: q.S, tw: q.tw, x0: q.x, y0: q.y, x: q.x, y: q.y, tx: q.x + Math.cos(a) * r, ty: q.y + Math.sin(a) * r, t: 0, T: 0.35, H: 0.5 }); } }
     }
-    const aimingTargets=new Map((B.enemyPool||B.mobs).filter(m=>!m.dead).map(m=>[m.id,m]));
+    // The spatial index also owns the tick's identity lookup.
     for (const tw of B.towers) {
       const S = tw.S; tw.fire = Math.max(0, tw.fire - dt);
       if (tw.jam > 0) { tw.beams = []; continue; }
       if (S.kind === 'aura' || S.kind === 'eco' || S.kind === 'radar') continue;
-      const tracked=aimingTargets.get(tw.aimId);
+      const tracked=Tactical.target(B,tw.aimId);
       if(tracked&&targetable(tracked,S)&&(!S.airOnly||tracked.air)&&inFiringBand(tw,tracked,S))aim(tw,tracked);
       else {tw.aimId=null;if(tw.cd>0&&S.kind!=='mine')pick(B,tw,1);}
       if (S.kind === 'beam') { beam(B, tw, dt); continue; }
@@ -1193,20 +1274,22 @@ const Engine = (() => {
       s.t += dt;
       if (s.t < 0) continue;
       if (s.kind === 'missile') {
-        const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead); if (tg) { s.tx = tg.x; s.ty = tg.y; }
+        const tg = Tactical.target(B,s.tg); if (tg) { s.tx = tg.x; s.ty = tg.y; }
         const a = Math.atan2(s.ty - s.y, s.tx - s.x); s.ang += clamp(((a - s.ang + Math.PI * 3) % (Math.PI * 2)) - Math.PI, -dt * 7, dt * 7);
         const px=s.x,py=s.y,v = 4 + s.t * 6; s.x += Math.cos(s.ang) * v * dt; s.y += Math.sin(s.ang) * v * dt;
         const dx=s.x-px,dy=s.y-py,l2=dx*dx+dy*dy,u=l2?clamp(((s.tx-px)*dx+(s.ty-py)*dy)/l2,0,1):0;
         if (Math.hypot(s.tx-px-u*dx,s.ty-py-u*dy) < 0.25 || s.t > 3) { s.done = true; boom(B, s); }
       } else if (s.kind === 'plasma') {
-        s.x += s.vx * dt; s.y += s.vy * dt;
-        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || m.air || m.spawnT > 0 || s.hitIds.includes(m.id)) continue; if (Math.hypot(m.x - s.x, m.y - s.y) <= s.S.width + m.def.r * 0.6) { s.hitIds.push(m.id); hit(B, m, s.S.dmg, { ...s.S, tw: s.tw }); applyFx(B, m, s.S); m.revT = Math.max(m.revT, 0.5); } }
+        s.x += s.vx * dt; s.y += s.vy * dt;const hits=hitSet(s.hitIds);
+        for (const m of Tactical.areaCandidates(B,s,s.S.width)) { if (m.dead || m.air || m.spawnT > 0 || hits.has(m.id)) continue; if (Math.hypot(m.x - s.x, m.y - s.y) <= s.S.width + m.def.r * 0.6) { s.hitIds.push(m.id);hits.add(m.id); hit(B, m, s.S.dmg, { ...s.S, tw: s.tw }); applyFx(B, m, s.S); m.revT = Math.max(m.revT, 0.5); } }
         if (s.t >= s.T) { s.done = true; B.ev.push({ k: 'boom', x: s.x, y: s.y, r: 0.5, c: '#5CF0FF', small: true, plasma: true }); if (s.S.split) aoe(B, s.x, s.y, 0.4 + s.S.split * 0.12, s.S.dmg * 0.5, s.S, s.tw, false); }
       } else if (s.kind === 'orbital') {
-        const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead); if (tg) { s.tx = tg.x; s.ty = tg.y; }
+        const tg = Tactical.target(B,s.tg);
+        if(tg&&!inFiringBand(s.tw,tg,s.S)){s.done=true;continue;}
+        if (tg) { s.tx = tg.x; s.ty = tg.y; }
         if (s.t >= s.T) { s.done = true; aoe(B, s.tx, s.ty, s.S.splash, s.S.dmg, s.S, s.tw, true,s.volleyHits||null); B.ev.push({ k: 'orbital', x: s.tx, y: s.ty, r: s.S.splash }); }
       } else if (s.kind === 'flak') {
-        const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead); if (tg) { s.tx = tg.x; s.ty = tg.y; }
+        const tg = Tactical.target(B,s.tg); if (tg) { s.tx = tg.x; s.ty = tg.y; }
         const k = Math.min(1, s.t / s.T); s.x = s.x0 + (s.tx - s.x0) * k; s.y = s.y0 + (s.ty - s.y0) * k;
         if (k >= 1) { s.done = true; for (const m of (B.enemyPool||B.mobs)) if (!m.dead && m.air && m.spawnT<=0 && Math.hypot(m.x - s.tx, m.y - s.ty) <= s.S.splash + m.def.r * 0.5) { hit(B, m, m.id === s.tg ? s.S.dmg : s.S.dmg * 0.6, { ...s.S, tw: s.tw }); applyFx(B, m, s.S); } B.ev.push({ k: 'flak', x: s.tx, y: s.ty, r: s.S.splash, type: tg ? tg.type : 'helico' }); }
       } else { const k = Math.min(1, s.t / s.T); s.x = s.x0 + (s.tx - s.x0) * k; s.y = s.y0 + (s.ty - s.y0) * k; s.h = Math.sin(k * Math.PI) * s.H; if (k >= 1) { s.done = true; boom(B, s); } }
@@ -1230,7 +1313,7 @@ const Engine = (() => {
       m.shield -= take; d = (sd - take) / f;
       if (m.shield <= 0) B.ev.push({ k: 'shieldbreak', x: m.x, y: m.y });
     }
-    let arm = m.arm * (1 - (o.pierce || 0)); if (o.dt === 'true' || o.dt === 'acid' || o.dt === 'fire') arm = 0;
+    let arm = m.arm * (m.acidT>0?(B.pvp?.92:.85):1) * (1 - (o.pierce || 0)); if (o.dt === 'true' || o.dt === 'acid' || o.dt === 'fire') arm = 0;
     d *= 1 - arm;
     if (d <= 0) { m.hitT = 0.08; return; }
     if(o.tw?.owner!=null)m.lastHitOwner=o.tw.owner; m.hp -= d; m.hitT = 0.12; B.stats.dmg += d; if (o.tw) o.tw.dmg += d;
@@ -1272,7 +1355,7 @@ const Engine = (() => {
   function nearestD(L, pt) { let best = 0, bd = 1e9; for (let d = 0; d <= L.len; d += 0.3) { const p = posAt(L, d), dd = Math.hypot(p.x - pt.x, p.y - pt.y); if (dd < bd) { bd = dd; best = d; } } return best; }
   function aim(tw,m){if(!m)return;tw.aimId=m.id;tw.aimX=m.x;tw.aimY=m.y;tw.ang=Math.atan2(m.y-tw.y,m.x-tw.x);}
   const targetable = (m, S) => !m.dead && m.spawnT <= 0 && (!m.air || S.air) && ((!m.def.stealth && m.hid <= 0 && !(m.def.sub && m.onWater)) || m.rev || m.revT > 0);
-  const inFiringBand=(tw,m,S=tw.S,outer=S.range)=>{const d=dist(tw,m);return d>=(S.minRange||0)&&d<=outer+(m.def?.r||0)*.6;};
+  const inFiringBand=(tw,m,S=tw.S,outer=S.range)=>{const d2=(tw.x-m.x)**2+(tw.y-m.y)**2,limit=Math.min(outer+(S.kind==='orbital'?0:(m.def?.r||0)*.6),S.maxRange||Infinity);return d2>=(S.minRange||0)**2&&d2<=limit*limit;};
   function pick(B, tw, n, rangeOverride) {
     const S = tw.S, rg = rangeOverride || S.range;
     let c = Tactical.candidates(B,tw,rg).filter((m) => targetable(m, S) && (!S.airOnly || m.air) && inFiringBand(tw,m,S,rg));
@@ -1285,16 +1368,17 @@ const Engine = (() => {
     aim(tw,c[0]);return c.slice(0, n);
   }
   function aoe(B, x, y, r, dmg, S, tw, air, volleyHits=null) {
-    for (const m of (B.enemyPool||B.mobs)) if (!m.dead && m.spawnT <= 0 && (air || !m.air) && (!volleyHits||!volleyHits.includes(m.id)) && Math.hypot(m.x - x, m.y - y) <= r + m.def.r * 0.6) {if(volleyHits)volleyHits.push(m.id);hit(B, m, dmg, { ...S, tw, ev: true }); applyFx(B, m, S); m.revT = Math.max(m.revT, 0.8); }
+    const hits=volleyHits?hitSet(volleyHits):null;
+    for (const m of Tactical.areaCandidates(B,{x,y},r)) if (!m.dead && m.spawnT <= 0 && (air || !m.air) && (S.kind!=='orbital'||inFiringBand(tw,m,S)) && (!hits||!hits.has(m.id)) && Math.hypot(m.x - x, m.y - y) <= r + m.def.r * 0.6) {if(hits){volleyHits.push(m.id);hits.add(m.id);}hit(B, m, dmg, { ...S, tw, ev: true }); applyFx(B, m, S); m.revT = Math.max(m.revT, 0.8); }
   }
 
   function boom(B, s) {
     const S = s.S;
     if(s.glob){B.ev.push({k:'boom',x:s.tx,y:s.ty,r:.3,c:FAM[S.fam].c,small:true});return;}
     if (s.kind === 'missile') {
-      const tg = (B.enemyPool||B.mobs).find((m) => m.id === s.tg && !m.dead);
+      const tg = Tactical.target(B,s.tg);
       if (tg) { hit(B, tg, S.dmg, { ...S, tw: s.tw }); applyFx(B, tg, S); }
-      if (S.splash) for (const m of (B.enemyPool||B.mobs)) if (m !== tg && !m.dead && m.spawnT<=0 && (!m.air||S.air) && Math.hypot(m.x - s.x, m.y - s.y) <= S.splash) { hit(B, m, S.dmg * 0.5, { ...S, tw: s.tw }); applyFx(B, m, S); }
+      if (S.splash) for (const m of Tactical.areaCandidates(B,s,S.splash)) if (m !== tg && !m.dead && m.spawnT<=0 && (!m.air||S.air) && Math.hypot(m.x - s.x, m.y - s.y) <= S.splash) { hit(B, m, S.dmg * 0.5, { ...S, tw: s.tw }); applyFx(B, m, S); }
       B.ev.push({ k: 'boom', x: s.x, y: s.y, r: Math.max(0.35, S.splash), c: '#FF6B6B', small: true });
       return;
     }
@@ -1312,7 +1396,7 @@ const Engine = (() => {
         for (const m of T) {
           B.ev.push({ k: 'tracer', x: tw.x, y: tw.y, x2: m.x, y2: m.y, air: m.air, c: FAM[CARD[tw.card].fam].c, fam: CARD[tw.card].fam, tw: tw.id });
           hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S);
-          if (S.splash) { for (const o of (B.enemyPool||B.mobs)) if (o !== m && !o.dead && !o.air && Math.hypot(o.x - m.x, o.y - m.y) <= S.splash) hit(B, o, S.dmg * 0.5, { ...S, tw }); B.ev.push({ k: 'boom', x: m.x, y: m.y, r: S.splash, c: '#FF8A5B', small: true }); }
+          if (S.splash) { for (const o of Tactical.areaCandidates(B,m,S.splash)) if (o !== m && !o.dead && !o.air && Math.hypot(o.x - m.x, o.y - m.y) <= S.splash) hit(B, o, S.dmg * 0.5, { ...S, tw }); B.ev.push({ k: 'boom', x: m.x, y: m.y, r: S.splash, c: '#FF8A5B', small: true }); }
         }
         return true;
       }
@@ -1337,7 +1421,7 @@ const Engine = (() => {
         for (let i = 0,limit=Math.min(12,S.chains+(Tactical.wet(B,cur)?1:0)); i <= limit && cur; i++) {
           pts.push({ x: cur.x, y: cur.y }); done.add(cur.id); hit(B, cur, d, { ...S, tw }); applyFx(B, cur, S);
           if (!S.noDecay) d *= 0.8;
-          let nx = null, nd = 1.5; for (const o of (B.enemyPool||B.mobs)) if (!done.has(o.id) && targetable(o, S)) { const q = Math.hypot(o.x - cur.x, o.y - cur.y); if (q < nd) { nd = q; nx = o; } }
+          let nx = null, nd = 1.5; for (const o of Tactical.candidates(B,cur,1.5)) if (!done.has(o.id) && targetable(o, S)) { const q = Math.hypot(o.x - cur.x, o.y - cur.y); if (q < nd) { nd = q; nx = o; } }
           cur = nx;
         }
         B.ev.push({ k: 'chain', pts, tw: tw.id });
@@ -1360,8 +1444,8 @@ const Engine = (() => {
       case 'line': {
         const T = pick(B, tw, 1); if (!T.length) return false;
         const a = Math.atan2(T[0].y - tw.y, T[0].x - tw.x); tw.ang = a;
-        const L = S.range + 0.5, ex = tw.x + Math.cos(a) * L, ey = tw.y + Math.sin(a) * L;
-        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || !targetable(m, { air: true })) continue; const px = m.x - tw.x, py = m.y - tw.y, along = px * Math.cos(a) + py * Math.sin(a), perp = Math.abs(-px * Math.sin(a) + py * Math.cos(a)); if (along >= (S.minRange||0) && along < L && perp < 0.28 + m.def.r * 0.6) { hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S); } }
+        const L = S.maxRange?S.range:S.range+0.5, ex = tw.x + Math.cos(a) * L, ey = tw.y + Math.sin(a) * L;
+        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || !targetable(m, { air: true }) || !inFiringBand(tw,m,S)) continue; const px = m.x - tw.x, py = m.y - tw.y, along = px * Math.cos(a) + py * Math.sin(a), perp = Math.abs(-px * Math.sin(a) + py * Math.cos(a)); if (along >= (S.minRange||0) && along < L && perp < 0.28 + m.def.r * 0.6) { hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S); } }
         B.ev.push({ k: 'rail', x: tw.x, y: tw.y, x2: ex, y2: ey, c: FAM.rail.c, tw: tw.id });
         return true;
       }
@@ -1393,10 +1477,10 @@ const Engine = (() => {
         return true;
       }
       case 'orbital': {
-        const locked = new Set(B.shots.filter((s) => s.kind === 'orbital').map((s) => s.tg)); const T = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && !locked.has(m.id) && (!tw.pvp||inFiringBand(tw,m,S))).sort((a, b) => b.hp + b.shield - a.hp - a.shield).slice(0, S.multi);
+        const locked = new Set(B.shots.filter((s) => s.kind === 'orbital').map((s) => s.tg)); const T = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && !locked.has(m.id) && inFiringBand(tw,m,S)).sort((a, b) => b.hp + b.shield - a.hp - a.shield).slice(0, S.multi);
         if (!T.length) return false;
         aim(tw,T[0]);
-        const volleyHits=tw.pvp?[]:null;
+        const volleyHits=[];
         for (const m of T) { B.shots.push({ pid: String(B.player??B.team??0)+":"+(B.nextShotId=(B.nextShotId||0)+1), kind: 'orbital', S, tw, tg: m.id, x: m.x, y: m.y, tx: m.x, ty: m.y, t: 0, T: 0.8,volleyHits }); B.ev.push({ k: 'lock', x: m.x, y: m.y, id: m.id }); }
         return true;
       }
@@ -1421,7 +1505,7 @@ const Engine = (() => {
   function beam(B, tw, dt) {
     const S = tw.S;
     const old = tw.beams || [];
-    const pool=B.enemyPool||B.mobs,held=tw._beamMode===tw.mode?old.map(b=>pool.find(m=>m.id===b.id)).filter(m=>m&&targetable(m,S)&&(!S.airOnly||m.air)&&inFiringBand(tw,m,S)):[];
+    const pool=B.enemyPool||B.mobs,held=tw._beamMode===tw.mode?old.map(b=>Tactical.target(B,b.id)).filter(m=>m&&targetable(m,S)&&(!S.airOnly||m.air)&&inFiringBand(tw,m,S)):[];
     const T=[...held,...pick(B,tw,S.beams).filter(m=>!held.includes(m))].slice(0,S.beams);tw._beamMode=tw.mode;
     tw.beams = T.map((m) => { const o = old.find((b) => b.id === m.id); return { id: m.id, rt: o ? o.rt + dt : 0, x: m.x, y: m.y }; });
     if (T.length) aim(tw,T[0]);
@@ -1811,7 +1895,7 @@ const SiegePvP=(()=>{
   m.owner=player;m.faction=b.team;m.targetPlayer=d.target;m.weapon=stats;m.upgradeLevel=TroopUpgrades.level(s,player,type);m.fireCd=.35;m.kills=0;m.dmg=0;m.off=0;m.routeKind=stats.mobility;m.spawnT=.2;m.shieldQuiet=0;
   const origin=MapGen.posAt(m.path,m.d);m.x=origin.x;m.y=origin.y;b.energy-=stats.cost;b.ev.push({k:'build',x:m.x,y:m.y,r:.5,c:'#e6b96b'});return true;
  }
- function spatialIndex(all){const buckets=new Map(),size=5;for(const m of all){const key=Math.floor(m.x/size)+':'+Math.floor(m.y/size);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(m);}return (p,r)=>{const out=[],x=Math.floor(p.x/size),y=Math.floor(p.y/size),n=Math.ceil(r/size);for(let dy=-n;dy<=n;dy++)for(let dx=-n;dx<=n;dx++){const list=buckets.get((x+dx)+':'+(y+dy));if(list)for(const m of list)if(!m.dead&&distance(m,p)<=r)out.push(m);}return out;};}
+ function spatialIndex(all){const buckets=new Map(),size=5;for(const m of all){const key=Math.floor(m.x/size)+':'+Math.floor(m.y/size);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(m);}return (p,r,team=null,enemies=false)=>{const out=[],x=Math.floor(p.x/size),y=Math.floor(p.y/size),n=Math.ceil(r/size);for(let dy=-n;dy<=n;dy++)for(let dx=-n;dx<=n;dx++){const list=buckets.get((x+dx)+':'+(y+dy));if(list)for(const m of list)if((team==null||(enemies?m.faction!==team:m.faction===team))&&!m.dead&&(m.x-p.x)**2+(m.y-p.y)**2<=r*r)out.push(m);}return out;};}
  function captureStep(s,dt,all=s.boards.flatMap(b=>b.mobs).filter(m=>!m.dead),nearby=spatialIndex(all)){
   for(const m of all)m.capturing=false;
   for(const state of s.outposts){const o=s.world.outposts[state.id],troops=nearby(o,o.r).filter(m=>!m.air&&m.spawnT<=0&&s.boards[m.owner]?.phase!=='lose'),teams=[...new Set(troops.map(m=>m.faction))];state.contested=teams.length>1;
@@ -1835,20 +1919,20 @@ const SiegePvP=(()=>{
    if(w.heal){
     // Medics keep pace with a nearby frontline unit instead of overtaking it
     // and arriving alone in enemy turret range. Combat slows still apply later.
-    const escorts=nearby(m,(w.healRadius||2.8)+.8).filter(o=>o!==m&&o.faction===m.faction&&!o.weapon?.heal&&o.spawnT<=0);
+    const escorts=nearby(m,(w.healRadius||2.8)+.8,m.faction).filter(o=>o!==m&&o.faction===m.faction&&!o.weapon?.heal&&o.spawnT<=0);
     if(escorts.length){const escort=escorts.sort((a,b)=>(b.maxHp+b.maxShield)-(a.maxHp+a.maxShield)||distance(a,m)-distance(b,m))[0],ahead=(m.x-escort.x)*Math.cos(m.ang)+(m.y-escort.y)*Math.sin(m.ang);if(ahead>.45)m.spd=Math.min(w.speed,escort.weapon?.speed||escort.spd);}
-    const allies=nearby(m,w.healRadius||2.8).filter(o=>o!==m&&o.faction===m.faction&&o.spawnT<=0&&o.hp<o.maxHp&&!o.weapon?.heal).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||a.id-b.id).slice(0,w.healTargets||3);
+    const allies=nearby(m,w.healRadius||2.8,m.faction).filter(o=>o!==m&&o.faction===m.faction&&o.spawnT<=0&&o.hp<o.maxHp&&!o.weapon?.heal).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||a.id-b.id).slice(0,w.healTargets||3);
     for(const o of allies)heals.set(o,(heals.get(o)||0)+w.heal*dt/allies.length);
    }
    let enemy=null,priority=-1,near=Infinity;
-   for(const o of nearby(m,w.range)){
+   for(const o of nearby(m,w.range,m.faction,true)){
     if(o.faction===m.faction||o.spawnT>0||o.air&&!w.air)continue;
-    const score=favored(w,o)?1:0,d=distance(o,m);
+    const score=favored(w,o)?1:0,d=Math.sqrt((o.x-m.x)**2+(o.y-m.y)**2);
     if(score>priority||score===priority&&(d<near-.0001||Math.abs(d-near)<.0001&&o.id<(enemy?.id??Infinity))){priority=score;near=d;enemy=o;}
    }
    if(enemy){
     m.engaged=true;m.aimAng=m.ang=Math.atan2(enemy.y-m.y,enemy.x-m.x);
-    if(m.fireCd<=0){m.fireCd=Math.max(0,m.fireCd)+w.rate;attacks.push({m,w,enemy,targets:w.splash?nearby(enemy,w.splash).filter(o=>o.faction!==m.faction&&o.spawnT<=0&&(!o.air||w.air)):[enemy]});}
+    if(m.fireCd<=0){m.fireCd=Math.max(0,m.fireCd)+w.rate;attacks.push({m,w,enemy,targets:w.splash?nearby(enemy,w.splash,m.faction,true).filter(o=>o.faction!==m.faction&&o.spawnT<=0&&(!o.air||w.air)):[enemy]});}
    }
   }
   // A target has one shared healing budget, regardless of healer count or order.
@@ -2105,4 +2189,4 @@ const Frontier = (()=>{
 
 
 
-globalThis.OwnedGame={Engine,MapGen,MAPS,Frontier,WaveRadar,CARD,UNIT,FAM,TroopData,TroopUpgrades,CoopBalance,SiegePvP,MatchSpeed,Tactical};
+globalThis.OwnedGame={Engine,MapGen,MAPS,Frontier,WaveRadar,CARD,UNIT,FAM,TroopData,TroopUpgrades,CoopBalance,SiegePvP,MatchSpeed,Tactical,DefenseGuide};

@@ -1,0 +1,128 @@
+BASTORYNN 3.2 — ÉQUILIBRAGE, ARMÉES ET COMPOSITION DES DECKS
+4 novembre 2026
+
+Ce qui change dans le jeu
+
+Courroux divin et famille Satellite : portée de tir de 10 à 40 mètres,
+dans tous les modes. Le ciblage PvE contournait auparavant la portée.
+Les bonus de hauteur, relais, niveau et ordre ne dépassent plus 40 m.
+Une cible qui entre dans la zone morte avant la frappe annule son verrouillage.
+Une salve ne touche chaque ennemi qu'une fois, même si ses zones se recouvrent.
+Les dégâts par impact diminuent de 15 %. Trois cibles en PvE, deux en PvP ;
+les plafonds de dégâts, le délai minimum de 15 s, l'absence d'exécution
+et le surcoût PvP existants sont conservés.
+
+Autres défenses lointaines : les zones mortes s'appliquent désormais aussi
+en PvE. Les chiffres ci-dessous sont des limites maximales après bonus,
+pas des portées offertes à chaque version commune.
+
+Famille                 Minimum    Plafond    Dégâts
+Mortier                  1,65 m       7 m       -8 %
+Tireur d'élite            1,95 m       8 m       -8 %
+Railgun                  1,90 m       9 m       -8 %
+Lance-roquettes          2,50 m      10 m      -10 %
+Obusier                  2,70 m      11 m      -10 %
+Briseur de siège         2,80 m      11 m      -10 %
+Batterie boréale         1,75 m       7 m       -5 %
+Garde-ciel               1,60 m     7,5 m       -5 %
+Satellite               10,00 m      40 m      -15 %
+
+Les artilleries doivent être protégées à courte distance. Les tirs déjà
+lancés peuvent causer des dégâts de zone dans une zone morte, sauf pour
+les frappes orbitales dont toute la zone est filtrée par la bande 10–40 m.
+Le Railgun respecte aussi sa portée maximale pour les cibles traversées.
+
+L'acide ignore déjà l'armure. Il réduit maintenant aussi l'armure restante
+de 15 % en PvE et de 8 % en PvP pendant 0,6 s après contact, renouvelable
+dans le nuage. Une armure de 50 % devient donc 42,5 % ou 46 %, puis reprend
+sa valeur habituelle. Plusieurs nuages ne multiplient pas cette réduction.
+La pénétration d'un tir et l'érosion permanente des cartes dotées de cet
+effet restent distinctes et sont décrites séparément dans les fiches.
+
+Arsenal et guide de deck
+
+- Type visible sur les cartes : physique, givre, feu, acide, électricité,
+  énergie, dégâts purs ou soutien ; effet principal affiché à côté.
+- Fiche détaillée : immédiat / continu, ralentissement, gel, brûlure,
+  pénétration, érosion, corrosion, boucliers et contraintes de portée.
+- Filtre par effet, sans masquer les unités lorsque l'onglet Unités est choisi.
+- Analyse des six défenses : courte portée, anti-air, contrôle, anti-armure
+  et dégâts de groupe ; suggestions parmi les cartes possédées.
+- Vues PvE et PvP calculées à partir des statistiques réelles du moteur.
+- Schéma lisible de Fracture, Choc thermique, Vapeur corrosive,
+  Conductivité et Protection rompue ; combinaisons disponibles dans le deck,
+  conditions environnementales et limites de réaction indiquées.
+
+Le guide propose une couverture de rôles, pas une garantie de victoire ni
+un deck universel. Le placement, les adversaires et le coût restent décisifs.
+
+Optimisations et correction des saccades
+
+- Une table d'identifiants par tick remplace les recherches répétées dans
+  toute l'armée pour les missiles, verrous et faisceaux.
+- Les explosions, mines, flaques et projectiles traversants interrogent
+  les cases voisines ; l'ordre des cibles et les enfants libérés à la mort
+  d'un transport sont préservés.
+- Les impacts déjà appliqués utilisent un ensemble pour éviter les
+  recherches linéaires répétées, tout en gardant le format réseau existant.
+- PvP : filtrage de faction avant les distances ; distances quadratiques
+  pour les voisins, racine simple pour comparer les cibles proches.
+- Vapeur corrosive : la limite de six nuages était défectueuse ; le code
+  désactivait toujours le premier nuage, laissant les suivants s'accumuler.
+  Une file bornée garantit six nuages actifs et les nuages expirés ne sont
+  plus parcourus pour appliquer leurs dégâts. Aucun ennemi n'est supprimé.
+- Rendu : les unités hors caméra ne recalculent pas toutes leurs poses.
+  Les recherches de cibles visuelles sont partagées par image.
+  L'augmentation des armées réduit plus tôt ombres, post-traitements,
+  animations secondaires et tirs purement décoratifs. Les unités visibles,
+  leurs déplacements et le combat restent présents.
+
+Mesures locales reproductibles
+
+Simulation PvE, 36 tours, jusqu'à 168 projectiles simultanés, 30 ticks/s,
+120 ticks de chauffe et 480 mesurés, ennemis résistants pour maintenir
+la charge. Moyenne par tick :
+                         V3.1           V3.2
+200 troupes              3,91 ms        1,33 ms
+600 troupes             33,48 ms        3,68 ms
+1 200 troupes          120,69 ms        7,50 ms
+
+La réduction inclut la correction des nuages surnuméraires ; ces mesures
+ne prétendent pas conserver les dégâts erronés de la V3.1. Une comparaison
+avec les mêmes règles et des recherches complètes figure aussi dans le JSON.
+
+PvP 2v2, front artificiellement dense, 16 tours :
+200 troupes : 14,71 -> 6,15 ms/tick ; 600 : 114,17 -> 43,60 ms/tick.
+Les empreintes des résultats de combat avant/après sont identiques dans
+ce scénario. Le cas extrême 600 troupes au même front reste au-dessus
+du budget de 33,3 ms : il ne garantit pas 30 ticks/s sur tout matériel.
+
+Rendu Chrome 1280 x 800, simulation en pause, armée cadrée : à 600 troupes,
+le coût CPU de la fonction de rendu passe d'environ 1,98 à 1,40 ms/image.
+La qualité adaptative diminue les effets sous charge. Ce test ne mesure
+pas la latence GPU complète ni les performances d'un téléphone physique.
+
+Validation
+
+54 tests automatiques : portées exactes, zones mortes, bonus et plafonds,
+frappes orbitales, corrosion, nuages bornés, profils des 160 cartes,
+équivalence entre ciblage spatial et recherche exhaustive, réactions,
+coopération, duel, 2v2, reprise de campagne et contrôles HTTP.
+Chrome : bureau 1440x900, mobile 390x844, paysage 844x390, ouverture locale,
+audio différé, absence d'erreurs JavaScript/CSP et de débordement horizontal.
+Guide : filtre, changement PvE/PvP, cinq réactions et fiche Courroux vérifiés
+sur bureau et mobile ; captures dans verification/screenshots/v32-*.
+Initiation : six vagues gagnées, 20 PV, 137 éliminations, 46 réactions,
+avec budget normal, sans achats ni pouvoirs.
+
+Les résultats sont locaux. Aucun test de charge sur Render, réseau mobile
+réel ou PostgreSQL de production n'a été effectué. L'équilibre compétitif
+à long terme nécessite des parties humaines et leurs statistiques.
+
+Reproduction : npm run build ; npm test ; node scripts/stress-simulation.cjs ;
+node scripts/stress-pvp.cjs ; node scripts/training-check.cjs.
+Avec Playwright/Chrome : node scripts/browser-smoke.cjs ;
+node scripts/check-deck-guide.cjs ; node scripts/stress-browser.cjs.
+Un dossier de V3.1 peut être donné aux scripts de simulation/PvP pour
+reproduire les comparaisons. --refresh réutilise la référence enregistrée
+du benchmark PvE et remesure les règles courantes.

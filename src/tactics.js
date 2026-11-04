@@ -11,6 +11,7 @@ const Tactical = (() => {
   const weatherNames = {clear:'Temps clair',rain:'Pluie',fog:'Brouillard',storm:'Orage',snow:'Neige',wind:'Vent fort'};
   const weatherHelp = {clear:'Aucun modificateur.',rain:'Brûlures plus courtes ; électricité renforcée.',fog:'Portée de tir −12 %. Un radar proche compense.',storm:'Conductivité renforcée. Cercles de foudre annoncés 3 s avant impact.',snow:'Mobilité terrestre −8 % ; givre prolongé.',wind:'Les fumées se dissipent deux fois plus vite.'};
   const reactions = {fracture:['Fracture','#a9e8ff'],thermal:['Choc thermique','#ffb18d'],conductive:['Conductivité','#b4adff'],corrosive:['Vapeur corrosive','#b7e584'],rupture:['Protection rompue','#80bfff']};
+  const cloudQueues=new WeakMap();
   const branches = {
     precision:{name:'Perforation',desc:'Dégâts +25 %, pénétration +15 points ; délai entre tirs +10 %.',dmg:1.25,rate:1.1,pierce:.15},
     barrage:{name:'Barrage',desc:'Cadence +25 %, zone +15 % ; dégâts par tir −15 %.',dmg:.85,rate:.8,splash:1.15},
@@ -71,8 +72,12 @@ const Tactical = (() => {
     }else if((fire&&m.acidT>0)||(S.dt==='acid'&&m.burnT>0)){
       key='corrosive';
       // Bounded independent cloud. It cannot trigger reactions of its own.
-      B.puddles.push({x:m.x,y:m.y,r:.75,t:1.4,T:1.4,dps:B.pvp?2:5,born:B.t,tw:S.tw,mark:0,reactionCloud:true});
-      const clouds=B.puddles.filter(p=>p.reactionCloud);if(clouds.length>cfg.reactions.maxClouds)clouds[0].t=0;
+      const cloud={x:m.x,y:m.y,r:.75,t:1.4,T:1.4,dps:B.pvp?2:5,born:B.t,tw:S.tw,mark:0,reactionCloud:true};
+      B.puddles.push(cloud);
+      // A bounded queue avoids scanning an ever-growing array during mass reactions.
+      const clouds=(cloudQueues.get(B)||[]).filter(p=>p.t>0);clouds.push(cloud);
+      while(clouds.length>cfg.reactions.maxClouds)clouds.shift().t=0;
+      cloudQueues.set(B,clouds);
     }else if(S.kind==='chain'&&wet(B,m)){
       key='conductive';extra=dmg*.12;
     }else if(m.shield>0&&['pulse','emp','sonic'].includes(S.fam)){
@@ -113,6 +118,7 @@ const Tactical = (() => {
       if(!covered)S.range*=cfg.weather.fogRange;
     }
     if(B.order&&!B.pvp){const o=orders[B.order.id];if(o?.rate)S.rate*=o.rate;if(o?.range)S.range*=o.range;}
+    if(S.maxRange)S.range=Math.min(S.range,S.maxRange);
   }
   function onStart(B){if(B.order&&B.wave>B.order.untilWave){B.order=null;Engine.refresh(B);}B.orderOffer=null;}
   function onClear(B){if(!B.pvp&&B.wave>0&&B.wave%3===0&&(B.endless||B.wave<B.maxWave))B.orderOffer={wave:B.wave,options:Object.keys(orders)};}
@@ -131,8 +137,9 @@ const Tactical = (() => {
     if(swarm||!lines.length)lines.push({key:'swarm',n:swarm,label:'Infanterie',tip:'Mitrailleuse et mortier couvrent les groupes ; le cryo les retient.'});
     return lines;
   }
-  const grids=new WeakMap();
-  function index(B){const pool=B.enemyPool||B.mobs;if(pool.length<32){grids.delete(B);return;}const cells=new Map(),order=new Map();let radius=0;
+  const grids=new WeakMap(),identities=new WeakMap();
+  function target(B,id){const pool=B.enemyPool||B.mobs,g=identities.get(B),m=g?.pool===pool?g.byId.get(id):pool.find(m=>m.id===id);return m&&!m.dead?m:undefined;}
+  function index(B){const pool=B.enemyPool||B.mobs,byId=new Map();for(const m of pool)if(!m.dead)byId.set(m.id,m);identities.set(B,{pool,byId});if(pool.length<32){grids.delete(B);return;}const cells=new Map(),order=new Map();let radius=0;
     pool.forEach((m,i)=>{if(m.dead)return;order.set(m,i);radius=Math.max(radius,m.def.r||0);const k=Math.floor(m.x/4)+':'+Math.floor(m.y/4);if(!cells.has(k))cells.set(k,[]);cells.get(k).push(m);});grids.set(B,{pool,cells,order,radius});
   }
   function candidates(B,p,r){const pool=B.enemyPool||B.mobs,g=grids.get(B);if(!g||g.pool!==pool||r>24)return pool;
@@ -140,6 +147,13 @@ const Tactical = (() => {
     // Preserve original target tie-breaking, including taunt priority.
     return out.sort((a,b)=>g.order.get(a)-g.order.get(b));
   }
-  function invalidate(B){grids.delete(B);}
-  return {cfg,init,tick,weatherAt,weatherNames,weatherHelp,reactions,wet,impact,effect,branches,branchOptions,specialize,stats,boardStats,orders,onStart,onClear,chooseOrder,leaked,advice,index,candidates,invalidate};
+  function invalidate(B){grids.delete(B);identities.delete(B);}
+  function* areaCandidates(B,p,r){
+    const pool=B.enemyPool||B.mobs,initial=pool.length,near=candidates(B,p,r);
+    // Array iterators include children spawned by a kill during the same blast.
+    // Preserve that behavior even when the spatial query returns a separate list.
+    yield* near;
+    if(near!==pool)for(let i=initial;i<pool.length;i++)yield pool[i];
+  }
+  return {cfg,init,tick,weatherAt,weatherNames,weatherHelp,reactions,wet,impact,effect,branches,branchOptions,specialize,stats,boardStats,orders,onStart,onClear,chooseOrder,leaked,advice,index,candidates,areaCandidates,target,invalidate};
 })();

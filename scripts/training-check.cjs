@@ -22,5 +22,5 @@ function prepare(){
 }
 let ticks=0;while(!['win','lose'].includes(b.phase)&&ticks++<36000){if(b.phase==='build')prepare();g.Engine.step(b,1/30);b.ev.length=0;}
 const report={scope:'Headless initiation with a fixed placement policy, normal budget, no purchases or abilities. Winnability check, not a human usability test.',result:b.phase,hp:b.hp,wave:b.wave,simulatedSeconds:b.t,kills:b.kills,reactions:b.tactical.reactions,history};
-fs.writeFileSync(path.join(__dirname,'../verification/v3-training.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));assert.equal(b.phase,'win');
+fs.writeFileSync(path.join(__dirname,'../verification/v32-training.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));assert.equal(b.phase,'win');
 

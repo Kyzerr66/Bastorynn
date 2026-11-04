@@ -1,0 +1,207 @@
+{
+  "label": "after",
+  "scope": "Headless Chrome, 1280x800, software GPU environment, paused simulation with 200/600 visible units. Measures rendering and UI; not player hardware FPS.",
+  "runs": [
+    {
+      "count": 200,
+      "frames": 682,
+      "draws": 682,
+      "renderMeanMs": 1.1700879766488355,
+      "renderP95Ms": 1.5999999977648258,
+      "frameMeanMs": 5.872727272728365,
+      "frameP95Ms": 6,
+      "quality": {
+        "fps": 17,
+        "renderMs": 1.3,
+        "tier": 2,
+        "quality": "Équilibrée",
+        "scale": 0.76,
+        "software": false,
+        "targetFps": 60,
+        "mobile": false,
+        "maxDpr": 2,
+        "postFx": true,
+        "depthOfField": true,
+        "shadows": false,
+        "units": 200
+      },
+      "units": 200,
+      "software": false,
+      "hotspots": [
+        [
+          "(idle)",
+          1335
+        ],
+        [
+          "(program)",
+          371
+        ],
+        [
+          "frame",
+          312
+        ],
+        [
+          "ne",
+          65
+        ],
+        [
+          "update",
+          31
+        ],
+        [
+          "oh",
+          29
+        ],
+        [
+          "bufferSubData",
+          29
+        ],
+        [
+          "Pi",
+          26
+        ],
+        [
+          "g",
+          23
+        ],
+        [
+          "Kt",
+          18
+        ],
+        [
+          "setFromEuler",
+          18
+        ],
+        [
+          "updateMatrixWorld",
+          14
+        ],
+        [
+          "ea",
+          13
+        ],
+        [
+          "setValue",
+          13
+        ],
+        [
+          "Vn",
+          13
+        ],
+        [
+          "s",
+          13
+        ],
+        [
+          "o",
+          11
+        ],
+        [
+          "p",
+          10
+        ]
+      ]
+    },
+    {
+      "count": 600,
+      "frames": 681,
+      "draws": 681,
+      "renderMeanMs": 1.3985315711783155,
+      "renderP95Ms": 1.9000000022351742,
+      "frameMeanMs": 5.881497797356827,
+      "frameP95Ms": 6,
+      "quality": {
+        "fps": 17,
+        "renderMs": 1.3,
+        "tier": 3,
+        "quality": "Performance",
+        "scale": 0.62,
+        "software": false,
+        "targetFps": 60,
+        "mobile": false,
+        "maxDpr": 2,
+        "postFx": false,
+        "depthOfField": false,
+        "shadows": false,
+        "units": 600
+      },
+      "units": 600,
+      "software": false,
+      "hotspots": [
+        [
+          "(idle)",
+          1183
+        ],
+        [
+          "(program)",
+          384
+        ],
+        [
+          "frame",
+          338
+        ],
+        [
+          "ne",
+          161
+        ],
+        [
+          "update",
+          42
+        ],
+        [
+          "setFromEuler",
+          27
+        ],
+        [
+          "p",
+          26
+        ],
+        [
+          "g",
+          24
+        ],
+        [
+          "bufferSubData",
+          24
+        ],
+        [
+          "(anonymous)",
+          20
+        ],
+        [
+          "Kt",
+          17
+        ],
+        [
+          "ea",
+          17
+        ],
+        [
+          "multiplyMatrices",
+          16
+        ],
+        [
+          "oh",
+          16
+        ],
+        [
+          "Pi",
+          16
+        ],
+        [
+          "toArray",
+          15
+        ],
+        [
+          "renderBufferDirect",
+          11
+        ],
+        [
+          "s",
+          10
+        ]
+      ]
+    }
+  ],
+  "errors": []
+}

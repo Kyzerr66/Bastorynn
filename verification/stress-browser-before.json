@@ -1,0 +1,205 @@
+{
+  "label": "before",
+  "scope": "Headless Chrome, 1280x800, software GPU environment, paused simulation with 200/600 visible units. Measures rendering and UI; not player hardware FPS.",
+  "runs": [
+    {
+      "count": 200,
+      "frames": 682,
+      "draws": 682,
+      "renderMeanMs": 1.5788856304286163,
+      "renderP95Ms": 2.199999999254942,
+      "frameMeanMs": 5.871554252196135,
+      "frameP95Ms": 6,
+      "quality": {
+        "fps": 17,
+        "renderMs": 1.1,
+        "tier": 0,
+        "quality": "Haute",
+        "scale": 1,
+        "software": false,
+        "targetFps": 60,
+        "mobile": false,
+        "maxDpr": 2,
+        "postFx": true,
+        "depthOfField": true,
+        "shadows": true
+      },
+      "units": 200,
+      "software": false,
+      "hotspots": [
+        [
+          "(idle)",
+          1047
+        ],
+        [
+          "(program)",
+          429
+        ],
+        [
+          "frame",
+          345
+        ],
+        [
+          "ne",
+          74
+        ],
+        [
+          "g",
+          52
+        ],
+        [
+          "oh",
+          47
+        ],
+        [
+          "update",
+          34
+        ],
+        [
+          "Pi",
+          24
+        ],
+        [
+          "bufferSubData",
+          24
+        ],
+        [
+          "setFromEuler",
+          22
+        ],
+        [
+          "renderBufferDirect",
+          19
+        ],
+        [
+          "Vn",
+          19
+        ],
+        [
+          "(anonymous)",
+          18
+        ],
+        [
+          "_",
+          18
+        ],
+        [
+          "bindVertexArray",
+          18
+        ],
+        [
+          "p",
+          17
+        ],
+        [
+          "setValue",
+          17
+        ],
+        [
+          "updateMatrixWorld",
+          16
+        ]
+      ]
+    },
+    {
+      "count": 600,
+      "frames": 680,
+      "draws": 680,
+      "renderMeanMs": 1.9761764706112444,
+      "renderP95Ms": 2.600000001490116,
+      "frameMeanMs": 5.8866176470577285,
+      "frameP95Ms": 6,
+      "quality": {
+        "fps": 17,
+        "renderMs": 1.1,
+        "tier": 0,
+        "quality": "Haute",
+        "scale": 1,
+        "software": false,
+        "targetFps": 60,
+        "mobile": false,
+        "maxDpr": 2,
+        "postFx": true,
+        "depthOfField": true,
+        "shadows": true
+      },
+      "units": 600,
+      "software": false,
+      "hotspots": [
+        [
+          "(idle)",
+          894
+        ],
+        [
+          "(program)",
+          419
+        ],
+        [
+          "frame",
+          352
+        ],
+        [
+          "ne",
+          185
+        ],
+        [
+          "setFromEuler",
+          47
+        ],
+        [
+          "g",
+          39
+        ],
+        [
+          "update",
+          39
+        ],
+        [
+          "bufferSubData",
+          33
+        ],
+        [
+          "p",
+          32
+        ],
+        [
+          "oh",
+          31
+        ],
+        [
+          "_",
+          23
+        ],
+        [
+          "Kt",
+          22
+        ],
+        [
+          "H",
+          18
+        ],
+        [
+          "renderBufferDirect",
+          17
+        ],
+        [
+          "Vn",
+          17
+        ],
+        [
+          "multiplyMatrices",
+          16
+        ],
+        [
+          "updateMatrixWorld",
+          14
+        ],
+        [
+          "intersectsObject",
+          13
+        ]
+      ]
+    }
+  ],
+  "errors": []
+}

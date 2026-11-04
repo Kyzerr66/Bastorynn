@@ -1,0 +1,81 @@
+{
+  "scope": "Node CPU simulation only, 36 defenses, 200/600/1200 long-lived units, 30 ticks/s, 120 warmup + 480 measured ticks. Not player FPS.",
+  "current": [
+    {
+      "units": 200,
+      "remaining": 200,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 1.3324247916666623,
+      "p95Ms": 2.060100000000034
+    },
+    {
+      "units": 600,
+      "remaining": 600,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 3.675107500000006,
+      "p95Ms": 5.435699999999997
+    },
+    {
+      "units": 1200,
+      "remaining": 1200,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 7.499034791666628,
+      "p95Ms": 10.101999999999862
+    }
+  ],
+  "fullScan": [
+    {
+      "units": 200,
+      "remaining": 200,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 1.831039166666642,
+      "p95Ms": 2.742899999999281
+    },
+    {
+      "units": 600,
+      "remaining": 600,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 5.605194166666641,
+      "p95Ms": 10.76549999999952
+    },
+    {
+      "units": 1200,
+      "remaining": 1200,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 9.930221041666739,
+      "p95Ms": 13.462899999998626
+    }
+  ],
+  "before": [
+    {
+      "units": 200,
+      "remaining": 200,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 3.907461666666647,
+      "p95Ms": 5.515900000013062
+    },
+    {
+      "units": 600,
+      "remaining": 600,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 33.47639166666689,
+      "p95Ms": 44.43549999999232
+    },
+    {
+      "units": 1200,
+      "remaining": 1200,
+      "towers": 36,
+      "maxShots": 168,
+      "meanMs": 120.69309854166659,
+      "p95Ms": 152.04810000001453
+    }
+  ]
+}
