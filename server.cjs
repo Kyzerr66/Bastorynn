@@ -28,6 +28,15 @@ const server=http.createServer(async(req,res)=>{try{await ((req.url.startsWith('
  if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host)return json(res,403,{error:'Origine refusée'});
  if(req.headers['sec-fetch-site']==='cross-site'&&u.pathname.startsWith('/api/'))return json(res,403,{error:'Origine refusée'});
  if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,version:'frontieres-2.2',accounts:true,authority:'server',storage:accounts.status()});
+ // Serve the split browser engine from dist: without this, every /assets/ request is 404.
+ if(req.method==='GET'&&/^\/assets\/engine-part-(?:0[1-9]|1[0-4])\.js$/.test(u.pathname)){
+  const file=path.join(__dirname,'dist',u.pathname.slice(1));
+  let body;
+  try{body=fs.readFileSync(file);}catch{return json(res,404,{error:'Ressource du jeu introuvable'});}
+  res.writeHead(200,{'Content-Type':'application/javascript; charset=utf-8','Cache-Control':'public, max-age=300','X-Content-Type-Options':'nosniff'});
+  return res.end(body);
+ }
+
  if(req.method==='GET'&&(u.pathname==='/sitemap.xml'||u.pathname==='/robots.txt')){
   const file=path.join(__dirname,'dist',u.pathname.slice(1));
   const body=fs.readFileSync(file);
