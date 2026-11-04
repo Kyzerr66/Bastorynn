@@ -1,0 +1,421 @@
+{
+  "scope": "Geometry continuity, bounds (1.25 m spawn margin), symmetric PvP route lengths and initial placement availability. Not a visual terrain audit or balance proof.",
+  "maps": [
+    {
+      "map": "aube",
+      "pveLanes": 3,
+      "pveSamples": 279,
+      "validInitialMitrailleusePositions": 783,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 884,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4176,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 9608,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "delta",
+      "pveLanes": 4,
+      "pveSamples": 384,
+      "validInitialMitrailleusePositions": 1087,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 960,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4560,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 9608,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "fjord",
+      "pveLanes": 4,
+      "pveSamples": 439,
+      "validInitialMitrailleusePositions": 1271,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 984,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4638,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 9608,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "dunes",
+      "pveLanes": 4,
+      "pveSamples": 404,
+      "validInitialMitrailleusePositions": 1224,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1016,
+          "maxRouteSymmetryError": 3.552713678800501e-15
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4800,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10060,
+          "maxRouteSymmetryError": 2.1316282072803006e-14
+        }
+      ]
+    },
+    {
+      "map": "caldeira",
+      "pveLanes": 4,
+      "pveSamples": 418,
+      "validInitialMitrailleusePositions": 567,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 940,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4332,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 9608,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "cite",
+      "pveLanes": 5,
+      "pveSamples": 416,
+      "validInitialMitrailleusePositions": 592,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 960,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4596,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 9656,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        }
+      ]
+    },
+    {
+      "map": "emeraude",
+      "pveLanes": 5,
+      "pveSamples": 445,
+      "validInitialMitrailleusePositions": 543,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1016,
+          "maxRouteSymmetryError": 3.552713678800501e-15
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4596,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10060,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        }
+      ]
+    },
+    {
+      "map": "atoll",
+      "pveLanes": 6,
+      "pveSamples": 575,
+      "validInitialMitrailleusePositions": 449,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1016,
+          "maxRouteSymmetryError": 3.552713678800501e-15
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 4704,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10092,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        }
+      ]
+    },
+    {
+      "map": "cimes",
+      "pveLanes": 5,
+      "pveSamples": 753,
+      "validInitialMitrailleusePositions": 981,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1052,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5094,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10840,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        }
+      ]
+    },
+    {
+      "map": "toundra",
+      "pveLanes": 6,
+      "pveSamples": 488,
+      "validInitialMitrailleusePositions": 636,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1018,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5202,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 11208,
+          "maxRouteSymmetryError": 1.0658141036401503e-14
+        }
+      ]
+    },
+    {
+      "map": "automne",
+      "pveLanes": 5,
+      "pveSamples": 475,
+      "validInitialMitrailleusePositions": 1348,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1072,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5082,
+          "maxRouteSymmetryError": 2.1316282072803006e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10632,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "canyon",
+      "pveLanes": 5,
+      "pveSamples": 694,
+      "validInitialMitrailleusePositions": 1071,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1120,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5040,
+          "maxRouteSymmetryError": 1.4210854715202004e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10632,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "baie",
+      "pveLanes": 5,
+      "pveSamples": 637,
+      "validInitialMitrailleusePositions": 758,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1072,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5100,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10632,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "peninsule",
+      "pveLanes": 5,
+      "pveSamples": 436,
+      "validInitialMitrailleusePositions": 473,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 976,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5094,
+          "maxRouteSymmetryError": 2.842170943040401e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 10632,
+          "maxRouteSymmetryError": 7.105427357601002e-15
+        }
+      ]
+    },
+    {
+      "map": "glacier",
+      "pveLanes": 6,
+      "pveSamples": 582,
+      "validInitialMitrailleusePositions": 1173,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1130,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5370,
+          "maxRouteSymmetryError": 5.684341886080802e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 11208,
+          "maxRouteSymmetryError": 1.0658141036401503e-14
+        }
+      ]
+    },
+    {
+      "map": "rempart",
+      "pveLanes": 6,
+      "pveSamples": 597,
+      "validInitialMitrailleusePositions": 410,
+      "pvp": [
+        {
+          "players": 2,
+          "paths": 6,
+          "samples": 1130,
+          "maxRouteSymmetryError": 0
+        },
+        {
+          "players": 3,
+          "paths": 24,
+          "samples": 5370,
+          "maxRouteSymmetryError": 5.684341886080802e-14
+        },
+        {
+          "players": 4,
+          "paths": 60,
+          "samples": 11208,
+          "maxRouteSymmetryError": 1.0658141036401503e-14
+        }
+      ]
+    }
+  ]
+}

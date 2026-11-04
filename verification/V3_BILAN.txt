@@ -1,0 +1,84 @@
+BASTORYNN — BILAN DE LA VERSION TACTIQUE 3.0
+4 novembre 2026
+
+Livraison locale construite à partir de Bastorynn-main.zip. Les documents V3 ont servi de référence ; ce bilan décrit uniquement le travail réellement livré. Aucune publication GitHub/Render, aucun accès aux comptes de production.
+
+CE QUI CHANGE POUR LE JOUEUR
+• Une initiation de 6 vagues, avec deck fourni, indications contextuelles et résultat de partie.
+• Cinq réactions élémentaires réelles et la dispersion des fumées par le vent.
+• Météo déterministe : phases de 120 s, préavis de 12 s, foudre annoncée 3 s avant impact. Les règles affectent les portées, brûlures, mouvements, fumées et réactions selon les conditions.
+• Deux spécialisations proposées par famille à partir du niveau 2 : choix unique, avantages et contreparties, effets réduits en PvP.
+• Trois ordres au choix après chaque troisième vague PvE/coop, valables deux vagues, sans bloquer la partie.
+• Météo, renseignements, conseils de contre-stratégie, journal court et conseil de défaite dans l’interface.
+• Accueil modernisé ; panneaux adaptés aux formats ordinateur, téléphone portrait et paysage.
+• Canon avec blindages et frein de bouche ; Cryo avec réservoirs ; Tesla avec conducteurs. Garde d’élite bleu/or avec fanion ; Béhémoth à blindage étagé et cheminées ; Char de rupture à bélier frontal.
+
+OPTIMISATIONS MESURÉES
+• HTML + fragments initiaux : 5,377,295 → 1,946,105 octets bruts, soit 63.8 % de moins.
+• À compression gzip comparable : 3,239,453 → 714,874 octets, soit 77.9 % de moins.
+• Les sons ne sont pas supprimés : leur banque est téléchargée après la première interaction. Les ressources externes éventuelles et la banque sonore différée ne sont pas incluses dans la mesure initiale.
+• Le serveur sert désormais les ressources compressées, conserve leur cache en mémoire et répond aux ETag. Les états SSE restent séparés.
+• Ciblage spatial avec ordre des cibles conservé ; conseils mis en cache et comptage des menaces en une passe.
+
+MICROBENCHMARK LOCAL — moteur Node, 30 tours, sans rendu 3D ni réseau
+50 unités au départ : moyenne 0.298 → 0.215 ms/tick ; p95 0.489 → 0.349 ms/tick ; 43 unités restantes à la fin.
+100 unités au départ : moyenne 0.560 → 0.272 ms/tick ; p95 0.914 → 0.446 ms/tick ; 79 unités restantes à la fin.
+200 unités au départ : moyenne 1.099 → 0.444 ms/tick ; p95 1.764 → 0.604 ms/tick ; 158 unités restantes à la fin.
+120 ticks de chauffe, puis 600 ticks mesurés. Résultat indicatif d’une exécution locale, sensible à la machine et à sa charge. Ce ne sont pas des FPS et ce test ne prédit pas la capacité de Render.
+
+GÉOMÉTRIE — ajouts ciblés, pas une refonte du catalogue entier
+canon_0 : 12624 → 12960 sommets (+2.66 %).
+cryo_0 : 11688 → 12168 sommets (+4.11 %).
+tesla_0 : 18276 → 18564 sommets (+1.58 %).
+b_garde : 27552 → 27828 sommets (+1.0 %).
+b_behemoth : 32712 → 33288 sommets (+1.76 %).
+rupture : 29772 → 29988 sommets (+0.73 %).
+Comptage des géométries procédurales, tour niveau 2 pour les défenses. Les pièces sont fusionnées et mises en cache ; aucun nouveau matériau ou mesh indépendant par détail. Les animations existantes de tourelle et recul sont conservées. Captures de modèles à cadrage identique dans verification/screenshots/.
+
+VALIDATIONS EXÉCUTÉES
+• 18 tests moteur/serveur passent : réactions, limites, spécialisations, ordres, météo, radar, ciblage, déterminisme et droits des joueurs.
+• Test réseau réel sur localhost : deux comptes fictifs, salon coop, flux SSE, construction, amélioration, refus d’une spécialisation non autorisée, synchronisation et reconnexion.
+• Les formats coop, duel, duo et chacun pour soi à 3/4 joueurs sont aussi exercés en simulation. Ce n’est pas un test réseau complet de chaque format.
+• Chrome : 1440×900, 390×844 et 844×390 ; initiation, panneau tactique, construction, amélioration, spécialisation, lancement de vague et retour accueil. Aucune erreur JavaScript détectée ni débordement horizontal dans ce parcours.
+• Ouverture directe du HTML sans serveur : initiation et banque sonore fonctionnelles.
+• Initiation complète en simulation avec politique de placement fixe, budget normal, sans achat ni pouvoir : victoire vague 6, 20 PV, 137 éliminations, 45 réactions, environ 520 s simulées. Ce test démontre la faisabilité, pas la facilité pour un débutant.
+• Les captures et JSON de cette livraison portent le préfixe v3 ou sont référencés ici. Les anciens rapports de l’archive restent des documents historiques.
+
+AUDIT CARTE PAR CARTE — périmètre automatique
+Contrôles : continuité par échantillons espacés de 0,5 m, coordonnées finies, limites de terrain avec marge de départ hors champ de 1,25 m, arrivée PvE près de la citadelle, poses initiales possibles, longueurs symétriques des branches PvP et continuité des liaisons entre adversaires.
+Le nombre de poses désigne des points de grille valides, pas autant de tours constructibles simultanément. La marge hors champ est une entrée d’ennemis existante, pas une téléportation ajoutée.
+Carte | voies PvE | points de pose initiaux | liaisons PvP vérifiées (2/3/4 joueurs)
+aube | 3 | 783 | 6/24/60
+delta | 4 | 1087 | 6/24/60
+fjord | 4 | 1271 | 6/24/60
+dunes | 4 | 1224 | 6/24/60
+caldeira | 4 | 567 | 6/24/60
+cite | 5 | 592 | 6/24/60
+emeraude | 5 | 543 | 6/24/60
+atoll | 6 | 449 | 6/24/60
+cimes | 5 | 981 | 6/24/60
+toundra | 6 | 636 | 6/24/60
+automne | 5 | 1348 | 6/24/60
+canyon | 5 | 1071 | 6/24/60
+baie | 5 | 758 | 6/24/60
+peninsule | 5 | 473 | 6/24/60
+glacier | 6 | 1173 | 6/24/60
+rempart | 6 | 410 | 6/24/60
+Résultat : ces contrôles passent sur les 16 cartes. Aucune route n’a été modifiée arbitrairement pour cette livraison. Pour chaque carte, restent à examiner visuellement l’utilité de chaque îlot, les angles de tir, les collisions selon toutes les mobilités et les avantages de terrain en partie réelle. Le test de symétrie des distances ne prouve pas à lui seul l’équilibre.
+
+CE QUI RESTE À FAIRE
+• Refonte des autres modèles et de tous les écrans : collection, enchères, boutique, progression et lobbies conservent largement leur présentation existante.
+• Vrais objectifs secondaires (convoi, ravitaillement), décors météo animés et variations de composition liées à la météo. Les choix temporaires sont livrés ; ces événements ne le sont pas.
+• Profils GPU/LOD approfondis, mémoire et FPS sur PC modeste et téléphones physiques, réseau lent, sessions longues et plusieurs salons sur l’hébergement réel.
+• Équilibrage par sessions humaines : nouvelles réactions, contrôle de foule, météo PvP, économie et progression existantes. Les plafonds réduisent les risques mais ne remplacent pas ces essais.
+• Le mode animations réduites concerne principalement la nouvelle interface et ses effets. Une réduction globale des effets du moteur 3D mérite encore une passe dédiée.
+• Migration vérifiée sur une copie de base persistante avant toute mise à jour publique ; les modules comptes/stockage/progression n’ont pas été modifiés.
+
+POUR CONSTRUIRE UNE AUDIENCE
+La notoriété ne peut pas être garantie par une amélioration de code. Étape suivante proposée : bêta avec 10–20 volontaires, observation des premières minutes, suivi de l’abandon avant la première vague et de l’envie de rejouer. Ce sont des objectifs de test proposés, aucune télémétrie n’a été ajoutée.
+Après correction des difficultés observées : courte vidéo montrant une combinaison réussie, parties coop sur rendez-vous, journal public des améliorations et retours communautaires. Prioriser stabilité et plaisir de rejouer avant classement, saisons ou acquisition payante.
+
+ESSAYER ET MODIFIER
+Extraire le ZIP complet ; ouvrir index.html ; choisir Jouer l’initiation.
+Pour le réseau : Node.js 20+, npm install, npm start. README.md contient les instructions de mise à jour.
+Sources dans src/. Reconstruction : npm run build. Tests : npm test ; npm run audit:maps ; node scripts/training-check.cjs.

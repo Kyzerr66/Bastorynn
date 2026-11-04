@@ -1,0 +1,72 @@
+BASTORYNN — REVUE DE L’ARCHIVE FOURNIE ET FUSION V3.1
+4 novembre 2026
+
+CONCLUSION
+L’archive fournie contient des corrections serveur utiles, complémentaires au gameplay V3. Ses apports intéressants ont été intégrés dans une copie séparée, avec adaptations et tests supplémentaires. La V3 précédente et le ZIP reçu sont conservés. Rien n’a été publié sur GitHub ou Render.
+
+PROVENANCE ET MÉTHODE
+Archive : Bastorynn-corrige.zip, présentée par l’utilisateur comme le travail de Claude.
+SHA256 : fbc43dc08a9ac62d556153cc1deb107ce5f6dfe1e0708ce4c72d477fe0040ec4
+Comparaison à trois versions : archive initiale Bastorynn-main, notre V3 tactique, archive corrigée reçue. Les notes CORRECTIONS.md ont été vérifiées dans le code ; leurs affirmations de tests n’ont pas été reprises comme preuves sans contrôle.
+
+L’archive corrigée repart de la base d’origine : elle conserve 14 fragments JavaScript et ne contient pas les nouveautés tactiques V3. La remplacer intégralement aurait perdu l’initiation, les réactions, la météo, les spécialisations, les modèles retravaillés et le chargement sonore différé. La fusion porte donc sur les changements utiles, dans les sources canoniques, puis reconstruit le client et la simulation.
+
+APPORTS RETENUS
+1. PRIORITÉ FORTE — Requêtes interrompues et comptes bloqués.
+   Ancien problème : le serveur entrait dans la transaction des comptes avant d’avoir reçu le corps HTTP. Un envoi incomplet occupait la file ; une fermeture sans événement end laissait la promesse sans réponse.
+   Apport retenu : lecture avant transaction, taille limitée à 512 000 octets, délai de 30 secondes, traitement de l’erreur et de la fermeture.
+   Reproduction locale sur notre V3 : /api/health dépasse le délai d’essai de 1 seconde pendant l’envoi, puis après son interruption. V3.1 : réponse 200 en 11 ms pendant l’envoi et 2 ms après interruption, dans cette exécution locale. Ces temps ne sont pas des garanties de performance en production.
+
+2. PRIORITÉ FORTE — Joueur parti avant le début du siège.
+   Le démarrage remettait toutes les bases en phase wave, y compris celle du joueur ayant quitté. Le correctif préserve la phase lose. Intégré à src/client.js, puis compilé aussi dans simulation.js.
+   Vérifié dans un duel réseau local : départ pendant les 20 secondes de préparation, victoire de l’adversaire à leur terme, état final conservé pour reconnexion.
+
+3. STABILITÉ ET CHARGE — Fin de partie et salons inutilisés.
+   Les parties terminées ne sont plus simulées ni diffusées en boucle. Le dernier état reste disponible à la reconnexion. Les battements de connexion ne prolongent plus indéfiniment un salon inactif. Nettoyage prévu à 30 minutes pour l’attente et 10 minutes après une fin de partie sans action.
+   Arrêt des diffusions et reconnexion vérifiés en réseau local ; durées de nettoyage vérifiées par tests avec horloge contrôlée, sans attendre réellement 30 minutes.
+
+4. CAMPAGNE — Relais de l’hôte.
+   Les places sont conservées pendant la mission, puis un joueur restant peut devenir hôte après sa fin. Le changement intervient après l’envoi de l’état final.
+   Vérifié avec le vrai code de gestion serveur dans un test contrôlé : départ de l’hôte, fin de mission, promotion, demande campaignNext et passage de aube à delta. Le stockage et le transport sont simulés dans ce test ; ce n’est pas une campagne humaine complète sur un serveur public.
+
+5. PROTECTIONS HTTP ET LIMITES.
+   En-têtes CSP, interdiction d’intégration en iframe, nosniff, politique de référent et HSTS en HTTPS. Table de limitation bornée et nettoyage des invitations temporaires. Identifiant validé avant construction de la clé de limitation.
+   Les protections sont compatibles avec le rendu, les workers, les images intégrées et l’audio différé dans le parcours Chrome testé. La CSP conserve unsafe-inline, nécessaire à l’architecture actuelle : elle ne rend pas le jeu invulnérable aux injections.
+
+6. PvP — Budget privé.
+   Les instantanés envoyés à un adversaire omettent energy et wallets. Le budget des alliés reste visible. Aucun changement au calcul de l’énergie.
+   Vérifié sur de vrais flux SSE locaux en duel et en 2 contre 2 à quatre comptes. La reconnexion du duel conserve le filtrage. Cela masque ces champs exacts ; l’observation des achats et revenus publics peut toujours fournir des indices.
+
+7. DECKS ET FORMULAIRE.
+   Contrôle des cartes par rapport aux cartes de départ et à la collection enregistrée. Correction du motif HTML du champ identifiant, rejeté auparavant par les navigateurs récents. Vérifié dans Chrome avec un identifiant valide comportant tiret/souligné et un identifiant invalide.
+
+ADAPTATIONS APPORTÉES À LA FUSION
+• Cartes de départ : ajout de Radar et Tesla aux cartes toujours acceptées, car elles appartiennent au deck initial solo. Le deck multijoueur par défaut, qui contient Missiles et Forge, reste également accepté. Le correctif reçu n’accordait pas cette exception au deck initial solo sans sauvegarde.
+• Synchronisation : attendre l’envoi de la progression avant création/rejoignement d’un salon et avant soumission du deck. Un gain récent a ainsi une chance d’être validé immédiatement, sans attendre la sauvegarde périodique.
+• Adresse IP : pas de confiance automatique dans CF-Connecting-IP sur la seule présence de RENDER. TRUSTED_IP_HEADER doit désigner explicitement un en-tête que le proxy remplace. Sans proxy déclaré, les en-têtes IP fournis par le client sont ignorés.
+• Limiteur : sa purge périodique conserve maintenant les entrées actives lorsque la table atteint exactement sa capacité ; l’éviction n’intervient que lorsqu’une nouvelle entrée nécessite de la place. Test de régression ajouté.
+• La suppression de maximum-scale=1 était déjà présente dans notre V3 : aucun changement supplémentaire nécessaire.
+• Les nouvelles commandes specialize/order, le build commun, la compression et le chargement différé V3 sont conservés.
+• Version du paquet, santé du serveur et métadonnées du build mises à jour en 3.1.0. Commande de test rendue portable : node --test.
+
+VÉRIFICATIONS EXÉCUTÉES
+• Les 25 tests fournis dans l’archive reçue passent, avant adaptation.
+• La suite fusionnée compte 45 tests réussis : les tests V3, les protections adaptées, le cycle de campagne et les parcours réseau supplémentaires.
+• Serveur local et stockage temporaire uniquement : comptes fictifs, sauvegardes réelles non touchées.
+• Requête partielle pendant laquelle les autres requêtes restent disponibles ; interruption ; refus d’un deck non possédé ; acceptation du deck de départ complet ; construction et spécialisation coop ; refus d’une action d’un autre propriétaire.
+• Duel : départ pendant la préparation, fin de partie, arrêt des instantanés et reconnexion sur l’état final.
+• 2 contre 2 à quatre connexions : budget allié présent, budget adverse absent.
+• Chrome en 1440×900, 390×844 et 844×390 : accueil, initiation, construction, spécialisation, combat, retour, formulaire d’identifiant. Pas d’erreur JavaScript ni de violation CSP dans ce parcours. Ouverture directe du HTML également vérifiée.
+• Les tests cartographiques et benchmarks V3 existants sont conservés comme historiques : ils n’ont pas été présentés comme nouvellement exécutés pour cette fusion, qui ne change pas la géométrie des cartes.
+
+LIMITES À CONNAÎTRE
+Le contrôle des decks n’est pas un anti-triche complet. Le serveur accepte encore une progression déclarée par le client ; modifier cette progression peut contourner le contrôle de possession. Résoudre cela exige de transférer l’attribution des cartes et récompenses vers une logique serveur, en prévoyant la migration des sauvegardes existantes.
+
+PostgreSQL, l’hébergement Render, une charge publique importante et les téléphones physiques n’ont pas été testés. Le calcul scrypt reste dans la transaction de compte et les comptes restent regroupés dans le format de stockage existant. Le schéma de sauvegarde, account-store.cjs et progress.cjs sont inchangés ; accounts.cjs a été modifié pour ses protections de requêtes, sans accès à une base réelle.
+
+Pour un hébergement derrière un proxy, vérifier sa configuration avant de définir TRUSTED_IP_HEADER. Sans réglage adapté, plusieurs joueurs derrière le même proxy peuvent partager une limite de tentatives. La version locale n’a pas besoin de ce réglage.
+
+LIVRAISON
+Bastorynn_V3_1_Fusion.zip contient le jeu V3 enrichi des corrections retenues, les sources, les tests et les rapports. Extraire tout le ZIP puis ouvrir index.html pour le solo. Pour les salons réseau : Node.js 20+, npm install, npm start. README.md décrit la configuration et la mise à jour.
+
+Pièces de contrôle : verification/v31-tests.txt, v31-browser.json, v31-body-lock.json et captures v31-*.

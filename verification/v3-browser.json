@@ -1,0 +1,86 @@
+[
+  {
+    "name": "desktop",
+    "state": {
+      "phase": "build",
+      "weather": {
+        "kind": "clear",
+        "next": "wind",
+        "phase": 0,
+        "endsAt": 120,
+        "warnings": [],
+        "strikeCycle": -1
+      },
+      "towers": 0,
+      "canvas": true,
+      "software": false,
+      "bodyWidth": 1440,
+      "width": 1440
+    },
+    "combat": {
+      "mobs": 1,
+      "phase": "wave",
+      "branch": "precision"
+    },
+    "audioDeferred": true,
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "state": {
+      "phase": "build",
+      "weather": {
+        "kind": "clear",
+        "next": "wind",
+        "phase": 0,
+        "endsAt": 120,
+        "warnings": [],
+        "strikeCycle": -1
+      },
+      "towers": 0,
+      "canvas": true,
+      "software": false,
+      "bodyWidth": 390,
+      "width": 390
+    },
+    "combat": {
+      "mobs": 1,
+      "phase": "wave",
+      "branch": "precision"
+    },
+    "audioDeferred": true,
+    "errors": []
+  },
+  {
+    "name": "landscape",
+    "state": {
+      "phase": "build",
+      "weather": {
+        "kind": "clear",
+        "next": "wind",
+        "phase": 0,
+        "endsAt": 120,
+        "warnings": [],
+        "strikeCycle": -1
+      },
+      "towers": 0,
+      "canvas": true,
+      "software": false,
+      "bodyWidth": 844,
+      "width": 844
+    },
+    "combat": {
+      "mobs": 1,
+      "phase": "wave",
+      "branch": "precision"
+    },
+    "audioDeferred": true,
+    "errors": []
+  },
+  {
+    "name": "file-offline",
+    "phase": "build",
+    "hasAudio": true,
+    "errors": []
+  }
+]

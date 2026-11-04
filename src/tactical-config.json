@@ -1,0 +1,4 @@
+{
+  "weather": {"phaseSeconds": 120, "noticeSeconds": 12, "fogRange": 0.88, "rainBurn": 0.65, "snowSpeed": 0.92, "strikeEvery": 18, "strikeRadius": 1.8, "strikeNotice": 3},
+  "reactions": {"cooldown": 1.5, "bonusCap": 40, "pvpBonusCap": 8, "maxClouds": 6}
+}

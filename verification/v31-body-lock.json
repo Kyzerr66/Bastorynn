@@ -1,0 +1,24 @@
+[
+  {
+    "version": "V3",
+    "during": {
+      "status": "TimeoutError",
+      "elapsedMs": 1010
+    },
+    "afterAbort": {
+      "status": "TimeoutError",
+      "elapsedMs": 1000
+    }
+  },
+  {
+    "version": "V3.1",
+    "during": {
+      "status": 200,
+      "elapsedMs": 11
+    },
+    "afterAbort": {
+      "status": 200,
+      "elapsedMs": 2
+    }
+  }
+]

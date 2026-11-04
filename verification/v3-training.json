@@ -1,0 +1,47 @@
+{
+  "scope": "Headless initiation with a fixed placement policy, normal budget, no purchases or abilities. Winnability check, not a human usability test.",
+  "result": "win",
+  "hp": 20,
+  "wave": 6,
+  "simulatedSeconds": 520.4666666668506,
+  "kills": 137,
+  "reactions": 45,
+  "history": [
+    {
+      "wave": 1,
+      "hp": 20,
+      "energy": 30,
+      "towers": 4
+    },
+    {
+      "wave": 2,
+      "hp": 20,
+      "energy": 3,
+      "towers": 6
+    },
+    {
+      "wave": 3,
+      "hp": 20,
+      "energy": 17,
+      "towers": 8
+    },
+    {
+      "wave": 4,
+      "hp": 20,
+      "energy": 32,
+      "towers": 11
+    },
+    {
+      "wave": 5,
+      "hp": 20,
+      "energy": 33,
+      "towers": 15
+    },
+    {
+      "wave": 6,
+      "hp": 20,
+      "energy": 17,
+      "towers": 19
+    }
+  ]
+}

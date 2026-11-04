@@ -1,0 +1,38 @@
+[
+  {
+    "id": "canon_0",
+    "verticesBefore": 12624,
+    "verticesAfter": 12960,
+    "increasePercent": 2.66
+  },
+  {
+    "id": "cryo_0",
+    "verticesBefore": 11688,
+    "verticesAfter": 12168,
+    "increasePercent": 4.11
+  },
+  {
+    "id": "tesla_0",
+    "verticesBefore": 18276,
+    "verticesAfter": 18564,
+    "increasePercent": 1.58
+  },
+  {
+    "id": "b_garde",
+    "verticesBefore": 27552,
+    "verticesAfter": 27828,
+    "increasePercent": 1.0
+  },
+  {
+    "id": "b_behemoth",
+    "verticesBefore": 32712,
+    "verticesAfter": 33288,
+    "increasePercent": 1.76
+  },
+  {
+    "id": "rupture",
+    "verticesBefore": 29772,
+    "verticesAfter": 29988,
+    "increasePercent": 0.73
+  }
+]

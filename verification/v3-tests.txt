@@ -1,0 +1,26 @@
+✔ HTTP compression, isolated accounts, authoritative coop and reconnect snapshots (1666.6869ms)
+✔ all 16 maps and original catalogs remain available (1.0383ms)
+✔ fracture consumes cold, adds bounded damage and cannot retrigger immediately (397.0951ms)
+✔ thermal shock clears both statuses in both application orders (0.3098ms)
+✔ conductivity is bounded and respects internal cooldown (0.2381ms)
+✔ corrosive clouds do not recursively create more reactions (0.3059ms)
+✔ EMP rupture removes a bounded part of shields (0.1796ms)
+✔ specialization is validated once and does not mutate family statistics (1.2531ms)
+✔ temporary orders expire and cannot be chosen twice or in PvP (0.6216ms)
+✔ weather schedule is repeatable and contains a 120 second clear opening (1.7127ms)
+✔ fog modifies actual tower range and a newly placed radar immediately compensates (0.4136ms)
+✔ radar coverage with an active range order is independent of tower order (0.3016ms)
+✔ weather warning is emitted once, twelve seconds before transition (0.2518ms)
+✔ announced lightning has bounded damage and does not strike twice (0.3207ms)
+✔ spatial candidates preserve all valid targets and original order (1.5551ms)
+✔ invalid placement and repair never spend energy (0.3159ms)
+✔ same seeded game gives the same result through multiple waves (205.8023ms)
+✔ all multiplayer formats accept authorized new commands and serialize new state (2782.223ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3535.8133

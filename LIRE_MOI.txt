@@ -1,98 +1,13 @@
-BASTORYNN — OWNED FRONTIÈRES 3D
-Version 2.2.0 · Mise à jour tactique · 4 novembre 2026
+BASTORYNN — VERSION TACTIQUE 3.1
 
-DÉMARRAGE
-• Solo / IA : ouvre index.html dans ton navigateur.
-• Entre appareils : extrais tout le ZIP et utilise Node.js 20 ou plus récent.
-  Windows : OUVRIR_MULTIJOUER.bat. macOS/Linux : ouvrir-multijoueur.sh.
-  En ligne de commande : npm install, puis npm start.
-• Garde le serveur ouvert. Tous les joueurs utilisent son adresse réseau affichée.
-  Une adresse localhost désigne uniquement l’appareil qui l’ouvre.
-• TUTO_MULTIJOUEUR.md décrit les comptes, les salons, les decks et les commandes.
+1. Extrais tout le ZIP.
+2. Ouvre index.html dans Chrome ou Edge.
+3. Clique sur Jouer l’initiation : 6 vagues, deck fourni, sans compte.
 
-INSTALLER LA MISE À JOUR SUR TON PROJET EXISTANT
-1. Remplace les fichiers de code du projet par ceux de ce ZIP, à leurs emplacements.
-   Les changements concernent le client ET le serveur : ne remplace pas uniquement
-   index.html. dist/index.html et simulation.js font partie de la mise à jour.
-2. Conserve ta configuration d’hébergement et les variables DATABASE_URL,
-   DATA_DIR et PORT déjà utilisées. Ne mets aucun secret dans le HTML ou le dépôt.
-   Si tu utilises le stockage local du serveur, conserve ton dossier data existant.
-3. Relance / redéploie le service Node.js avec npm start.
-4. Recharge le jeu sur les appareils et crée un nouveau salon.
-   Une partie en cours n’est pas reprise après redémarrage du serveur.
+Garde le dossier assets à côté du HTML.
+Pour le multijoueur réseau : Node.js 20+, npm install puis npm start.
+Le fichier OUVRIR_MULTIJOUER.bat démarre aussi le serveur local sur Windows.
 
-CARTES ET DÉPLACEMENTS
-• Les voies de flanc du PvP passent par les grandes îles latérales et leurs ponts.
-  La voie centrale reste plus directe. Les départs conservent des accès équitables.
-• Chacun pour soi disponible à 3 ou 4 joueurs sur les 16 cartes.
-• En PvE, l’île nord-est de l’Atoll reçoit un front naval à partir de la vague 12,
-  avec une répartition du budget d’ennemis existant.
-• Le choix de la cible et des voies reste directement accessible sur téléphone.
-• Déploiement automatique en un toucher pour toutes les mobilités ; Départ précis
-  permet de choisir le point de départ des unités hors-piste, aériennes et amphibies.
-
-COMBAT ET ÉCONOMIE
-• Réparation de la citadelle uniquement entre les vagues. Le serveur refuse
-  toute réparation en pleine manche, sans prélever d’énergie.
-• En coopération, chaque élimination rapporte de l’énergie à tous les joueurs.
-  La prime ordinaire tient compte des effectifs supplémentaires ; les dépenses
-  restent personnelles. Les primes de boss restent entières pour chacun.
-• Améliorer la tourelle d’un allié utilise ton énergie, sans changer son propriétaire.
-  Seul le propriétaire peut la vendre ou changer son ciblage. Aucun upgrade ennemi.
-• Réglages PvP distincts pour rendre les attaques plus efficaces face aux défenses.
-  Les gains de puissance des améliorations de tours et les primes défensives ont
-  été réduits. Le PvE conserve ses réglages propres.
-• Les troupes combattent les troupes adverses et attaquent les châteaux en arrivant.
-  Elles ne détruisent pas les tourelles. Il n’y a ni recharge ni plafond de déploiement :
-  l’énergie personnelle limite les envois.
-• Soins, stase, boucliers, mines, flaques et ciblage laser corrigés.
-• Écart de dégâts entre raretés légèrement réduit.
-
-COLLECTION ET DECKS
-• 160 défenses et 185 troupes : 25 troupes ajoutées, cinq par rareté.
-• Jusqu’à six défenses et six troupes équipées, avec decks nommés enregistrables.
-• Si un deck est plein, sélectionne exactement la carte à remplacer, puis confirme.
-  Annuler conserve le deck. La carte retirée reste dans la collection.
-• Mythiques un peu plus difficiles à obtenir. La boutique affiche les probabilités
-  calculées à partir des mêmes poids que le tirage, avec les garanties des boosters.
-• Identifiants existants conservés et format de progression inchangé.
-
-CONFORT, VITESSE ET RENDU
-• Solo : x1, x2, x3 ou x4. Coopération : vote unanime des joueurs humains ;
-  les IA acceptent. Un refus ou l’expiration du vote conserve la vitesse actuelle.
-  Le PvP reste à x1.
-• L’hôte peut changer la carte avant le lancement du salon. Les états Prêt sont
-  réinitialisés pour que chacun voie la nouvelle configuration.
-• Mes tourelles : repérage visuel des défenses personnelles, liste et recentrage.
-• Pose assistée à courte distance : respecte l’eau, les routes, les territoires,
-  les bâtiments, les pentes fortes et l’espacement entre socles.
-• HUD plus lisible, coins moins arrondis, voies visibles et boutons séparés.
-• Secousses fortement réduites et plafonnées ; visée des tourelles interpolée.
-• Reprise du rendu après changement d’onglet / fenêtre et redimensionnement corrigée.
-• Profil mobile sans flou de profondeur ; adaptation des effets pour conserver
-  une image nette. La fluidité dépend de l’appareil et de la taille des combats.
-
-SAUVEGARDES
-Avec DATABASE_URL, comptes, sessions, amis, campagne, collection, niveau, XP,
-crédits et decks sont enregistrés dans PostgreSQL / Supabase.
-Sans DATABASE_URL, le serveur utilise data/accounts.json (ou DATA_DIR).
-Le HTML ouvert seul reste local. Les réglages graphiques/audio restent propres
-à l’appareil. INSTALLER_SUPABASE.md contient la procédure de configuration.
-
-FICHIERS PRINCIPAUX
-index.html et dist/index.html : même jeu, autonome / servi par le serveur.
-server.cjs : salons, réseau et commandes de partie.
-simulation.js : moteur partagé de combat et de cartes.
-accounts.cjs, account-store.cjs, progress.cjs : comptes et sauvegardes.
-package.json et package-lock.json : dépendances et commande npm start.
-OUVRIR_MULTIJOUER.bat / ouvrir-multijoueur.sh : lanceurs locaux.
-TUTO_MULTIJOUEUR.md : règles et prise en main.
-MISE_A_JOUR.txt : détail des changements et vérifications de cette livraison.
-conception-3d/ : documents de conception d’origine conservés.
-
-HÉBERGEMENT ET FICHIERS CONSERVÉS
-Le multijoueur nécessite le projet complet exécuté par un service Node.js.
-Un dépôt du seul HTML sur un hébergement statique ne lance pas ce serveur.
-Les fichiers robots.txt, sitemap.xml et googlea6c20ef694929c4d.html dans dist/
-sont conservés pour le déploiement existant. Cette livraison ne déploie pas le jeu
-sur ton hébergement : elle fournit les fichiers prêts à remplacer.
+README.md explique les nouveautés, les tests et l’installation sur un serveur.
+verification/V31_REVUE.txt distingue ce qui est livré des travaux restants.
+Cette archive n’a pas été mise en ligne automatiquement.

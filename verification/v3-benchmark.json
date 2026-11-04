@@ -1,0 +1,69 @@
+{
+  "scope": "Local Node simulation, 30 towers, 50/100/200 long-lived units, 120 warmup + 600 measured ticks. No rendering/network cost; not mobile FPS.",
+  "current": {
+    "payload": {
+      "rawInitialBytes": 1946105,
+      "gzipInitialBytes": 714874,
+      "fragments": 3
+    },
+    "runs": [
+      {
+        "units": 50,
+        "towers": 30,
+        "ticks": 600,
+        "meanMs": 0.21538466666666417,
+        "p95Ms": 0.3485000000000582,
+        "remainingMobs": 43
+      },
+      {
+        "units": 100,
+        "towers": 30,
+        "ticks": 600,
+        "meanMs": 0.2719901666666639,
+        "p95Ms": 0.4455000000000382,
+        "remainingMobs": 79
+      },
+      {
+        "units": 200,
+        "towers": 30,
+        "ticks": 600,
+        "meanMs": 0.4435781666666674,
+        "p95Ms": 0.6037999999998647,
+        "remainingMobs": 158
+      }
+    ]
+  },
+  "baseline": {
+    "payload": {
+      "rawInitialBytes": 5377295,
+      "gzipInitialBytes": 3239453,
+      "fragments": 14
+    },
+    "runs": [
+      {
+        "units": 50,
+        "towers": 30,
+        "ticks": 600,
+        "meanMs": 0.29825616666668564,
+        "p95Ms": 0.4887000000003354,
+        "remainingMobs": 43
+      },
+      {
+        "units": 100,
+        "towers": 30,
+        "ticks": 600,
+        "meanMs": 0.5595853333333412,
+        "p95Ms": 0.914299999999912,
+        "remainingMobs": 79
+      },
+      {
+        "units": 200,
+        "towers": 30,
+        "ticks": 600,
+        "meanMs": 1.098831500000008,
+        "p95Ms": 1.7635000000000218,
+        "remainingMobs": 158
+      }
+    ]
+  }
+}
