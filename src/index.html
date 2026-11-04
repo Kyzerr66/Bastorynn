@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#05060B">
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101c23">
 <title>Bastorynn — jeu de stratégie 3D, défense de château et PvP</title>
 <meta name="description" content="Joue à Bastorynn, un jeu de stratégie 3D gratuit dans ton navigateur. Défends ton château, collectionne des tourelles et des troupes, conquiers des bases et affronte tes amis en PvP ou en campagne coopérative.">
 <link rel="canonical" href="https://bastorynn.onrender.com/">
@@ -1151,7 +1151,7 @@ button,input,select{font:inherit}button:focus-visible,select:focus-visible{outli
 <div id="sky"></div>
 <div class="app">
   <header class="top">
-    <div class="logo"><div class="logo-m"><svg viewBox="0 0 24 24" fill="none" stroke="#F2C35A" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><b>basto<i>rynn</i></b><small>Front tactique</small></div></div>
+    <div class="logo"><div class="logo-m"><svg viewBox="0 0 24 24" fill="none" stroke="#F2C35A" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><b>basto<i>rynn</i></b><small>Citadelles / Saison 01</small></div></div>
     <button class="hlvl" id="lvlring" aria-label="Niveau"><b id="lvl">1</b></button>
     <div class="pill" id="pt"><img id="tkImg" alt=""><span id="tk">0</span></div>
     <div class="pill" id="pc"><img id="crImg" alt=""><span id="cr">0</span></div>
@@ -1173,14 +1173,21 @@ button,input,select{font:inherit}button:focus-visible,select:focus-visible{outli
 <div class="toasts" id="toasts"></div>
 <canvas id="fx"></canvas>
 <script>/* RENDERER_MODULE */</script>
+<script src="assets/citadelles-pack.js"></script>
+<script src="assets/blender-models.js"></script>
+<div id="v4-loading" role="status" style="position:fixed;inset:0;z-index:300;display:grid;place-content:center;background:#101c23;color:#f4eedc;text-align:center;font-family:system-ui"><b style="letter-spacing:.12em;font-size:28px">BASTORYNN</b><p>Préparation de la citadelle…</p></div>
 <script>window.__bastorynnScriptParts=[];</script>
 <!-- ENGINE_SCRIPTS -->
 <script>
-(function () {
+(async function () {
+ try {
+  await CitadellesModels.init();
   const script = document.createElement('script');
   script.textContent = window.__bastorynnScriptParts.join('');
   document.body.appendChild(script);
   delete window.__bastorynnScriptParts;
+  document.getElementById("v4-loading").remove();
+ } catch(error) { document.getElementById("v4-loading").lastElementChild.textContent="Chargement impossible : "+error.message; console.error(error); }
 })();
 </script>
 </body></html>

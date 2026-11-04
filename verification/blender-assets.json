@@ -1,0 +1,14 @@
+{
+  "beforeTriangles": 717872,
+  "afterTriangles": 411828,
+  "objects": 491,
+  "families": 36,
+  "baseUnits": 87,
+  "trees": 10,
+  "compressedBytes": 2567908,
+  "rawBytes": 8856617,
+  "blender": "5.2.2 LTS",
+  "beforeTrianglesIncludingFoundations": 1002392,
+  "triangleReductionPercent": 58.9,
+  "note": "Full library comparison, including new foundations and props; not an FPS measurement."
+}

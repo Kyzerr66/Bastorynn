@@ -1,13 +1,7 @@
-BASTORYNN — MISE À JOUR V3.1
+BASTORYNN CITADELLES V4
 
-Lire README.md avant une mise à jour de l’hébergement.
-Déployer ensemble le serveur, simulation.js, index.html, dist/ et assets/.
-Conserver les sauvegardes et variables d’environnement existantes.
-Recréer les salons après un redémarrage du serveur.
+Interface refondue, 36 familles de defenses et 87 modeles de base d’unites retravailles dans Blender. Decors, donjon, vegetation et apercus de cartes integres.
 
-Sources : src/. Reconstruction : npm run build.
-Tests : npm test, npm run audit:maps, node scripts/training-check.cjs.
-Résultats et limites : verification/V31_REVUE.txt.
-Les rapports anciens de l’archive d’origine n’ont pas été présentés comme de nouveaux tests.
-
-Derrière un proxy : lire la section TRUSTED_IP_HEADER du README.
+Ouvrir index.html pour le solo, ou lancer npm start pour le serveur.
+Le fichier Blender editable se trouve dans conception-3d/Bastorynn-Citadelles.blend.
+Voir REFONTE_V4.md pour les changements, les validations et les limites.

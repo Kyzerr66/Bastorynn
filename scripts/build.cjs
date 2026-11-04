@@ -19,9 +19,11 @@ const exported='Engine,MapGen,MAPS,Frontier,WaveRadar,CARD,UNIT,FAM,TroopData,Tr
 const simulation=pieces.join('\n')+'\nglobalThis.OwnedGame={'+exported+'};\n';
 new vm.Script(simulation,{filename:'simulation.js'});
 const assetNames=[];for(let at=0,i=1;at<client.length;at+=300000,i++)assetNames.push(['engine-part-'+String(i).padStart(2,'0')+'.js','window.__bastorynnScriptParts.push('+JSON.stringify(client.slice(at,at+300000))+');\n']);
+const modelHash=crypto.createHash('sha256').update(read('src/models/citadelles-pack.js')).update(read('src/blender-models.js')).digest('hex').slice(0,12);
 const sha=crypto.createHash('sha256').update(client).digest('hex').slice(0,12);
-let html=read('src/index.html').replace('/* RENDERER_MODULE */',()=>read('src/renderer.js')).replace('/* TACTICAL_STYLE */',()=>read('src/tactical.css'));
+let html=read('src/index.html').replace('/* RENDERER_MODULE */',()=>read('src/renderer.js')).replace('/* TACTICAL_STYLE */',()=>read('src/tactical.css')+'\n'+read('src/citadelles.css'));
 html=html.replace('<!-- ENGINE_SCRIPTS -->',assetNames.map(([name])=>'<script src="assets/'+name+'?v='+sha+'"></script>').join('\n'));
+html=html.replace('src="assets/citadelles-pack.js"','src="assets/citadelles-pack.js?v='+modelHash+'"').replace('src="assets/blender-models.js"','src="assets/blender-models.js?v='+modelHash+'"');
 html=html.trimEnd()+'\n';
 client='';
 for(const dir of ['assets','dist/assets']){
@@ -30,9 +32,11 @@ for(const dir of ['assets','dist/assets']){
  for(const f of fs.readdirSync(dest))if(/^engine-part-\d{2}\.js$/.test(f))fs.unlinkSync(path.join(dest,f));
  for(const [name,body]of assetNames)fs.writeFileSync(path.join(dest,name),body);
  fs.writeFileSync(path.join(dest,'audio-bank.js'),read('src/audio-bank.js'));
+ fs.writeFileSync(path.join(dest,'citadelles-pack.js'),read('src/models/citadelles-pack.js'));
+ fs.writeFileSync(path.join(dest,'blender-models.js'),read('src/blender-models.js'));
 }
 fs.writeFileSync(path.join(root,'simulation.js'),simulation);
 for(const f of ['index.html','dist/index.html'])fs.writeFileSync(path.join(root,f),html);
-fs.writeFileSync(path.join(root,'verification/build.json'),JSON.stringify({version:JSON.parse(read('package.json')).version,hash:sha,fragments:assetNames.length,simulationBytes:Buffer.byteLength(simulation),clientBytes:assetNames.reduce((n,a)=>n+Buffer.byteLength(a[1]),0),source:'src/client.js + src/tactics.js'},null,2)+'\n');
-console.log('Build V3:',assetNames.length,'fragments; shared rules',sha);
+fs.writeFileSync(path.join(root,'verification/build.json'),JSON.stringify({version:JSON.parse(read('package.json')).version,hash:sha,modelHash,fragments:assetNames.length,simulationBytes:Buffer.byteLength(simulation),clientBytes:assetNames.reduce((n,a)=>n+Buffer.byteLength(a[1]),0),source:'src/client.js + src/tactics.js'},null,2)+'\n');
+console.log('Build Citadelles V4:',assetNames.length,'fragments; shared rules',sha);
 

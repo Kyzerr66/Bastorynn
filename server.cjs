@@ -48,7 +48,7 @@ const server=http.createServer(async(req,res)=>{try{guards.applySecurityHeaders(
  if(req.headers['sec-fetch-site']==='cross-site'&&u.pathname.startsWith('/api/'))return json(res,403,{error:'Origine refusée'});
  if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,version:'bastorynn-3.2',accounts:true,authority:'server',storage:accounts.status()});
  // Serve the split browser engine from dist: without this, every /assets/ request is 404.
- if(req.method==='GET'&&/^\/assets\/(?:engine-part-\d{2}|audio-bank)\.js$/.test(u.pathname)){
+ if(req.method==='GET'&&/^\/assets\/(?:engine-part-\d{2}|audio-bank|citadelles-pack|blender-models)\.js$/.test(u.pathname)){
   const file=path.join(__dirname,'dist',u.pathname.slice(1));
   let body;
   try{body=staticCache.get(u.pathname)?.raw||fs.readFileSync(file);}catch{return json(res,404,{error:'Ressource du jeu introuvable'});}

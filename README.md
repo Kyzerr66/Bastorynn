@@ -1,3 +1,9 @@
+# Bastorynn — Citadelles V4
+
+Refonte de l’interface et de la bibliothèque 3D, avec assets Blender intégrés et règles V3.2 conservées. [Détails et validation](REFONTE_V4.md) · [Maquettes Figma](https://www.figma.com/design/sOMbAInE8ss4scp8J74sgQ).
+
+![Citadelles, rendu Blender](verification/screenshots/v4-blender-studio.png)
+
 # Bastorynn — version tactique 3.2
 
 La V3.2 rééquilibre les défenses lointaines et ajoute un guide de composition dans l’Arsenal : type de dégâts, effets, rôles manquants, filtres et schéma des cinq réactions, avec vues PvE et PvP. Le Courroux et les autres satellites tirent entre 10 et 40 m, infligent 15 % de dégâts en moins et ne cumulent plus plusieurs frappes d’une même salve sur une cible.
