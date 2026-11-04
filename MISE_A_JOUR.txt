@@ -1,0 +1,134 @@
+BASTORYNN — MISE À JOUR 2.2.0
+4 novembre 2026
+
+1. CHEMINS ET UTILITÉ DES ÎLES
+Les voies latérales du PvP passent par les grandes îles extérieures avant de
+rejoindre les objectifs et le château ennemi. L’axe central conserve un trajet
+plus direct. Les sections maritimes sont reliées par les ponts du jeu.
+Sur l’Atoll en duel, les neuf grandes masses terrestres sont désormais desservies.
+
+Les 16 cartes ont été contrôlées en formats 2, 3 et 4 joueurs : routes connectées,
+longueurs homologues équivalentes, prix et zones de départ équitables, absence de
+passage dans les bâtiments, et correspondance entre eau et ponts. Toutes les îles
+d’au moins 24 m² sont traversées par une voie dans le contrôle de raster à 0,9 m.
+Le format trois joueurs utilise trois châteaux à 120° et quatre avant-postes.
+
+En PvE, l’île nord-est de l’Atoll reçoit un nouveau front naval à la vague 12.
+Le nombre et les types d’ennemis sont conservés : le front répartit la vague
+existante. Les autres cartes disposaient déjà de routes couvrant leurs grandes îles.
+
+2. DÉFENSES ET TROUPES EN PVP
+Les statistiques PvP des tourelles sont calculées séparément :
+• Facteur de dégâts de base : ×0,60.
+• Dégâts par niveau de tourelle : ×1 / ×1,35 / ×1,80.
+• Bonus de rareté aux dégâts : ×1 / ×1,12 / ×1,24 / ×1,36 / ×1,48.
+• Effets à plusieurs tirs, salves, sous-munitions, chaînes et critiques normalisés
+  pour limiter les cumuls disproportionnés.
+• Ralentissement limité à 30 %, gel à 0,65 s, étourdissement à 0,55 s.
+• Brûlure limitée à 6 PV/s pendant 1,4 s.
+• Prime de destruction PvP : 15 % du coût de la troupe, avec un minimum de 3 énergie.
+• Bombardement orbital PvP : portée maximale de 8 m, au moins 8 s entre frappes,
+  exécution au maximum à 8 % des PV ; une seule atteinte par cible dans une salve,
+  même lorsque plusieurs explosions se recouvrent.
+
+Les soins sont plafonnés par cible à 6 % des PV maximum par seconde, avec un
+minimum de 5 et un maximum de 12 PV/s. Les soigneurs suivent une première ligne
+proche au lieu de dépasser leurs blindés. Les anti-aériens privilégient les
+avions et hélicoptères. Les tirs prêts au même instant se résolvent simultanément.
+Les anciennes capacités de boss PvE ne se transmettent plus aux cartes PvP.
+
+Les 15 scénarios de combat à budgets comparables vérifient des contres utilisables.
+Exemples du scénario final : quatre hélicoptères sur cinq franchissent le trio
+Mitrailleuse/Cryo/Mortier mythique (325 énergie d’attaque, 341 de défense) ; un
+renfort sur six passe deux mythiques améliorées (385 contre 405). L’orbital seul
+entame les groupes mais nécessite désormais des défenses complémentaires.
+Ces simulations contrôlées ne constituent pas une mesure du taux de victoire
+sur des parties humaines complètes.
+
+3. RÉPARATION, COOPÉRATION ET AMÉLIORATIONS
+• Aucune réparation de citadelle pendant une manche. La vérification est appliquée
+  dans le moteur serveur ; un refus ne prélève aucune énergie. Les réparations
+  redeviennent possibles entre deux vagues, si la citadelle est endommagée.
+• Chaque élimination coopérative crédite tous les joueurs. Les primes ordinaires
+  sont ajustées au nombre supplémentaire d’ennemis ; les boss rapportent leur
+  prime entière à chacun. Chaque joueur conserve son portefeuille personnel.
+• Une tourelle alliée peut être améliorée en coopération et en 2 contre 2 avec
+  l’énergie du joueur qui clique. Sa propriété reste inchangée. Vente et choix
+  du ciblage restent réservés à son propriétaire.
+• Soins excessifs, stase, bouclier du Bulldozer, flaques avant impact, portée des
+  mines améliorées, brouillage permanent et perte de cible du laser corrigés.
+• La croissance des PV en PvE et les difficultés ont été ajustées pour éviter
+  l’explosion des PV sur les dernières cartes. Les gains restent inchangés.
+
+4. COLLECTION ET NOUVELLES UNITÉS
+Le jeu contient 160 défenses et 185 troupes. Les 160 anciens identifiants de
+troupes sont conservés. Les 25 nouveautés sont obtenues via les packs habituels,
+cinq par rareté, avec des coûts de 40 à 90 énergie selon leur rôle.
+
+• Commune : Fusilier de ligne, Estafette, Guetteur anti-drone, Secouriste de tranchée, Grenadier léger.
+• Rare : Lancier antichar, Sentinelle du givre, Véhicule atelier, Escorte des rives, Intercepteur Kestrel.
+• Épique : Tireur Faraday, Bastion ambulant, Mortier des brumes, Traqueur de falaises, Aéronef de secours.
+• Légendaire : Batterie mobile Aurore, Intercepteur Mistral, Bélier des frontières, Porte-étendard, Sanctuaire mobile.
+• Mythique : Horizon, Égide du Zénith, Éclat polaire, Valkyrie, Passeur abyssal.
+
+Le poids des mythiques au tirage passe de 0,40 à 0,28. La boutique affiche les
+probabilités calculées avec les mêmes poids et les garanties réelles des packs.
+Le poids est un paramètre de tirage, pas une probabilité fixe de 0,28 % pour
+chaque booster. L’écart de dégâts entre raretés a également été réduit.
+
+Quand un deck de six cartes est plein, ajouter une carte ouvre le choix des
+six emplacements. Le remplacement est confirmé explicitement ; annuler conserve
+le deck. La carte sortante reste possédée. Défenses et unités utilisent ce parcours.
+
+5. COMMANDES ET CONFORT
+• Sélection de la cible et boutons de voie directement au-dessus du deck, y compris
+  sur téléphone. Les états Neutre / Alliée / Adverse / Contestée restent visibles.
+• Départ auto : un toucher déploie la troupe, quelle que soit sa mobilité.
+  Départ précis conserve le choix du point pour hors-piste, aérien et amphibie.
+• L’hôte peut changer la carte dans le salon avant le lancement. Tout changement
+  annule les états Prêt. Le chacun-pour-soi propose trois ou quatre joueurs.
+• Vitesse ×1, ×2, ×3 ou ×4 en solo. En coopération, accord unanime des humains ;
+  les IA acceptent. Le refus ou l’expiration laisse la vitesse actuelle. PvP : ×1.
+• Mes tourelles : surbrillance, liste personnelle et recentrage avec fiche.
+• Pose assistée dans un rayon borné de 1,10 unité monde, sans contourner les
+  restrictions de terrain, les territoires ou l’espacement des socles.
+• HUD restructuré en portrait et paysage, boutons séparés et coins moins arrondis.
+• Secousses réduites et plafonnées. Socles fixes, têtes/canons orientés progressivement,
+  tirs provenant du canon et interpolation des projectiles adaptée à la vitesse.
+• Redimensionnements à 0 × 0 ignorés, caméra remise dans un état valide et reprise
+  du rendu au retour de fenêtre / onglet. Les ressources sont libérées à la fermeture.
+• Sur mobile : pas de flou de profondeur, effets adaptés avant la résolution.
+  Le moteur de secours anime aussi les unités et conserve les annotations de tours.
+
+6. CONTRÔLES EFFECTUÉS SUR CETTE LIVRAISON
+• Syntaxe des deux scripts du HTML et des cinq fichiers serveur vérifiée.
+• index.html et dist/index.html sont identiques ; simulation.js a été régénéré
+  à partir des mêmes modules de moteur que le client.
+• 13 scénarios moteur : réparation, pose, revenus coop, effets, orbital et vitesses.
+• 8 scénarios d’intégration, dont les gestionnaires HTTP réels en requêtes simulées :
+  salon à trois, carte modifiable par l’hôte, prêts réinitialisés, autorisations
+  des tourelles, vote de vitesse, instantanés et refus de réparation en manche.
+• 11 scénarios de rendu / horloge, plus vérification des 36 familles de défenses.
+• 185 troupes déployables, anciens identifiants conservés, soins et tirs simultanés.
+• 48 configurations de carte PvP contrôlées ; 15 scénarios de contre-jeu à budget comparable.
+• Interface utilisée en navigateur : bureau, portrait 390 × 844, paysage 844 × 390,
+  remplacement et annulation de deck, remplacement d’unité, pose et amélioration,
+  repérage, envoi hors-piste/route/aérien, vitesse ×4 et réparation désactivée en manche.
+• Retour d’un autre onglet contrôlé sans écran noir dans le rendu compatible.
+  Après les corrections, aucune nouvelle erreur de rendu n’a été observée dans
+  ces parcours. Les rapports de vérification sont joints dans verification/.
+
+L’environnement de vérification utilise le rendu de secours sans véritable GPU.
+Les calculs et le cycle de récupération WebGL ont des tests ciblés, mais la perte
+et la restauration d’un contexte GPU réel n’ont pas été testées visuellement.
+Les formats mobiles sont simulés en navigateur ; aucune mesure de 60 FPS sur
+un téléphone physique n’est revendiquée.
+
+7. INSTALLATION ET SAUVEGARDES
+Remplace l’ensemble des fichiers de code du projet, y compris server.cjs,
+simulation.js et dist/index.html. Conserve les variables d’environnement et les
+données de ton serveur existant. Commande de démarrage : npm start.
+Recharge tous les clients et ouvre un nouveau salon après redéploiement.
+Les comptes et le format de progression v8 restent compatibles ; les réglages
+locaux et les informations d’hébergement ne sont pas remplacés par ce ZIP.
+TUTO_MULTIJOUEUR.md et INSTALLER_SUPABASE.md détaillent l’installation.

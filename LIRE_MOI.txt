@@ -1,116 +1,98 @@
-OWNED — FRONTIÈRES 3D · SIÈGES PvP
+BASTORYNN — OWNED FRONTIÈRES 3D
+Version 2.2.0 · Mise à jour tactique · 4 novembre 2026
 
 DÉMARRAGE
-• Solo / IA : ouvre index.html dans le navigateur.
-• Entre appareils : extrais tout le ZIP, installe Node.js 20+, puis lance
-  OUVRIR_MULTIJOUER.bat (Windows) ou node server.cjs (macOS/Linux).
-• Garde la fenêtre du serveur ouverte. Tous les amis ouvrent son adresse
-  réseau affichée. Ne partage pas localhost à un autre appareil.
-• Lis TUTO_MULTIJOUEUR.md pour créer un compte, ajouter des amis et les inviter.
+• Solo / IA : ouvre index.html dans ton navigateur.
+• Entre appareils : extrais tout le ZIP et utilise Node.js 20 ou plus récent.
+  Windows : OUVRIR_MULTIJOUER.bat. macOS/Linux : ouvrir-multijoueur.sh.
+  En ligne de commande : npm install, puis npm start.
+• Garde le serveur ouvert. Tous les joueurs utilisent son adresse réseau affichée.
+  Une adresse localhost désigne uniquement l’appareil qui l’ouvre.
+• TUTO_MULTIJOUEUR.md décrit les comptes, les salons, les decks et les commandes.
 
-NOUVEAUTÉS
-• Un château par joueur en PvP, y compris quatre châteaux en 2 contre 2.
-• Six défenses et six troupes différentes équipées au maximum.
-• 160 troupes : 87 types PvE et 73 spécialistes, autant que les défenses ; une troupe bonus dans
-  chaque pack, six troupes de départ offertes.
-• Les troupes combattent entre elles et infligent des dégâts en atteignant
-  le château. Elles ne ciblent, ne détruisent ni ne neutralisent les tourelles.
-• Les tourelles attaquent les troupes adverses, jamais les troupes alliées.
-• Point de départ libre près de sa base pour les unités hors-piste, aériennes
-  et amphibies ; trajet praticable court, ou vol direct pour les aériennes.
-• Énergie personnelle pour tous les joueurs, y compris en coopération.
-• Simulation multijoueur exécutée sur le serveur : changer d’onglet ne l’arrête plus.
-• Comptes persistants, demandes d’amis, présence et invitations reçues en jeu.
-• Réglages mémorisés : taille du HUD, volume du jeu et volume de la musique.
-• Neige moins éblouissante, routes et armées contrastées.
-• Les trajets de préparation disparaissent lorsque la vague commence.
+INSTALLER LA MISE À JOUR SUR TON PROJET EXISTANT
+1. Remplace les fichiers de code du projet par ceux de ce ZIP, à leurs emplacements.
+   Les changements concernent le client ET le serveur : ne remplace pas uniquement
+   index.html. dist/index.html et simulation.js font partie de la mise à jour.
+2. Conserve ta configuration d’hébergement et les variables DATABASE_URL,
+   DATA_DIR et PORT déjà utilisées. Ne mets aucun secret dans le HTML ou le dépôt.
+   Si tu utilises le stockage local du serveur, conserve ton dossier data existant.
+3. Relance / redéploie le service Node.js avec npm start.
+4. Recharge le jeu sur les appareils et crée un nouveau salon.
+   Une partie en cours n’est pas reprise après redémarrage du serveur.
 
-CONTENU CONSERVÉ
-16 cartes de 75 à 87 m de côté ; collines constructibles ; territoires achetables ;
-pose interdite sur les routes, l’eau, les bâtiments et les pentes fortes ; socles
-séparés par 0,10 m ; six défenses équipées ; cinq familles de défenses ajoutées ;
-châteaux mats sans plaques d’approche ; HUD compact portrait/paysage ; minicarte
-agrandissable ; packs scellés et révélation progressive ; enchères corrigées ;
-quatre difficultés dont Apocalypse ; modèles 3D et effets de combat.
+CARTES ET DÉPLACEMENTS
+• Les voies de flanc du PvP passent par les grandes îles latérales et leurs ponts.
+  La voie centrale reste plus directe. Les départs conservent des accès équitables.
+• Chacun pour soi disponible à 3 ou 4 joueurs sur les 16 cartes.
+• En PvE, l’île nord-est de l’Atoll reçoit un front naval à partir de la vague 12,
+  avec une répartition du budget d’ennemis existant.
+• Le choix de la cible et des voies reste directement accessible sur téléphone.
+• Déploiement automatique en un toucher pour toutes les mobilités ; Départ précis
+  permet de choisir le point de départ des unités hors-piste, aériennes et amphibies.
 
-CONSERVATION DES DONNÉES — NOUVELLE VERSION
+COMBAT ET ÉCONOMIE
+• Réparation de la citadelle uniquement entre les vagues. Le serveur refuse
+  toute réparation en pleine manche, sans prélever d’énergie.
+• En coopération, chaque élimination rapporte de l’énergie à tous les joueurs.
+  La prime ordinaire tient compte des effectifs supplémentaires ; les dépenses
+  restent personnelles. Les primes de boss restent entières pour chacun.
+• Améliorer la tourelle d’un allié utilise ton énergie, sans changer son propriétaire.
+  Seul le propriétaire peut la vendre ou changer son ciblage. Aucun upgrade ennemi.
+• Réglages PvP distincts pour rendre les attaques plus efficaces face aux défenses.
+  Les gains de puissance des améliorations de tours et les primes défensives ont
+  été réduits. Le PvE conserve ses réglages propres.
+• Les troupes combattent les troupes adverses et attaquent les châteaux en arrivant.
+  Elles ne détruisent pas les tourelles. Il n’y a ni recharge ni plafond de déploiement :
+  l’énergie personnelle limite les envois.
+• Soins, stase, boucliers, mines, flaques et ciblage laser corrigés.
+• Écart de dégâts entre raretés légèrement réduit.
+
+COLLECTION ET DECKS
+• 160 défenses et 185 troupes : 25 troupes ajoutées, cinq par rareté.
+• Jusqu’à six défenses et six troupes équipées, avec decks nommés enregistrables.
+• Si un deck est plein, sélectionne exactement la carte à remplacer, puis confirme.
+  Annuler conserve le deck. La carte retirée reste dans la collection.
+• Mythiques un peu plus difficiles à obtenir. La boutique affiche les probabilités
+  calculées à partir des mêmes poids que le tirage, avec les garanties des boosters.
+• Identifiants existants conservés et format de progression inchangé.
+
+CONFORT, VITESSE ET RENDU
+• Solo : x1, x2, x3 ou x4. Coopération : vote unanime des joueurs humains ;
+  les IA acceptent. Un refus ou l’expiration du vote conserve la vitesse actuelle.
+  Le PvP reste à x1.
+• L’hôte peut changer la carte avant le lancement du salon. Les états Prêt sont
+  réinitialisés pour que chacun voie la nouvelle configuration.
+• Mes tourelles : repérage visuel des défenses personnelles, liste et recentrage.
+• Pose assistée à courte distance : respecte l’eau, les routes, les territoires,
+  les bâtiments, les pentes fortes et l’espacement entre socles.
+• HUD plus lisible, coins moins arrondis, voies visibles et boutons séparés.
+• Secousses fortement réduites et plafonnées ; visée des tourelles interpolée.
+• Reprise du rendu après changement d’onglet / fenêtre et redimensionnement corrigée.
+• Profil mobile sans flou de profondeur ; adaptation des effets pour conserver
+  une image nette. La fluidité dépend de l’appareil et de la taille des combats.
+
+SAUVEGARDES
 Avec DATABASE_URL, comptes, sessions, amis, campagne, collection, niveau, XP,
-crédits et decks sont enregistrés dans PostgreSQL/Supabase. La table privée
-est créée automatiquement au premier démarrage. Aucun mot de passe de base
-ne doit être ajouté au dépôt ou au HTML.
-Sans DATABASE_URL, le mode serveur local utilise data/accounts.json (ou DATA_DIR).
+crédits et decks sont enregistrés dans PostgreSQL / Supabase.
+Sans DATABASE_URL, le serveur utilise data/accounts.json (ou DATA_DIR).
 Le HTML ouvert seul reste local. Les réglages graphiques/audio restent propres
-à l’appareil. Les parties en cours ne survivent pas à un redémarrage serveur.
-Lis INSTALLER_SUPABASE.md avant le premier déploiement : l’ancienne progression
-locale peut être associée au compte, mais les comptes d’un ancien serveur
-éphémère ne sont pas récupérables si leurs fichiers ont déjà disparu.
+à l’appareil. INSTALLER_SUPABASE.md contient la procédure de configuration.
 
-FICHIERS NÉCESSAIRES AU MULTIJOUEUR
-server.cjs : serveur Node.js ; npm install installe le pilote PostgreSQL pg.
-accounts.cjs : comptes, sessions, amis et progression.
-account-store.cjs : stockage PostgreSQL ou fichier local.
-progress.cjs : validation des sauvegardes.
-simulation.js : moteur de combat commun au serveur et au jeu.
-dist/index.html : jeu servi aux navigateurs (identique à index.html).
-package.json : commande npm start. PORT et DATA_DIR sont configurables.
-OUVRIR_MULTIJOUER.bat / ouvrir-multijoueur.sh : lanceurs.
-TUTO_MULTIJOUEUR.md : tutoriel détaillé.
-conception-3d/ : documents de conception conservés de la version précédente.
+FICHIERS PRINCIPAUX
+index.html et dist/index.html : même jeu, autonome / servi par le serveur.
+server.cjs : salons, réseau et commandes de partie.
+simulation.js : moteur partagé de combat et de cartes.
+accounts.cjs, account-store.cjs, progress.cjs : comptes et sauvegardes.
+package.json et package-lock.json : dépendances et commande npm start.
+OUVRIR_MULTIJOUER.bat / ouvrir-multijoueur.sh : lanceurs locaux.
+TUTO_MULTIJOUEUR.md : règles et prise en main.
+MISE_A_JOUR.txt : détail des changements et vérifications de cette livraison.
+conception-3d/ : documents de conception d’origine conservés.
 
-À DISTANCE
-Héberge le dossier complet sur un service Node.js avec HTTPS et configure
-DATABASE_URL vers Supabase, ou DATA_DIR sur un disque persistant. Un dépôt HTML statique ne suffit pas. Aucun serveur public n’a été créé
-avec cette livraison. Cette version vise les salons privés entre amis ; les
-sauvegardes sont synchronisées, mais les gains du jeu restent calculés côté client :
-ce système ne constitue pas une protection complète contre la triche.
-
-VÉRIFICATIONS
-Moteur : 16 cartes, placement et routes, énergie individuelle en coopération,
-quatre châteaux, combat entre armées, absence de ciblage des tourelles par les
-troupes, 160 modèles déployables, sérialisation et autorité du serveur.
-Comptes : sessions mémorisées, reprise, amis, invitations, quatre clients,
-persistance après redémarrage, contrôles d’accès et absence de mot de passe en clair.
-Interface : essais sur ordinateur et en formats mobiles portrait/paysage,
-réglages, neige, déploiement et ouverture de packs.
-Le rendu 3D compatible a été contrôlé visuellement. L’environnement de contrôle
-ne disposait pas de WebGL : le rendu GPU n’a pas été vérifié visuellement.
-Aucune mesure de performance n’a été faite sur un téléphone physique.
-
-CONQUÊTE : 3 ou 5 avant-postes capturables, plusieurs routes par château.
-Déploiement sans recharge/plafond, énergie personnelle requise.
-Fluidité adaptative visant 60 FPS ; résultat dépendant du matériel.
-Invitations répétées corrigées : nouveaux salons, anciennes invitations nettoyées.
-
-DERNIERS AJOUTS
-• Coop adaptée à 1–4 joueurs, difficulté choisie conservée, ajustement annoncé au salon.
-• Recherche PvP par joueur/type : 3 améliorations pour la partie, troupes actuelles et futures.
-• Défenses améliorées individuellement : disparition du modèle corrigée, badges Niv. 1–3.
-• Onglets contrastés, transitions brèves, filtres tactiles et contrôle clavier.
-
-HUD MOBILE ET RENDU
-• Portrait/paysage : avatar et ressources sur une ligne, six cartes dans un petit bandeau.
-• Outils, en haut à droite : capacités, zoom, réglages et Territoires ; en PvP, Cible et Via.
-  Le volet reste non bloquant : la partie continue.
-• Minicarte masquée au départ : Outils → Carte pour l’afficher, Fermer la carte pour revenir.
-  Le radar est replié sur une ligne ; + affiche les fronts.
-• La fiche de pose montre le nom et le coût ; ⓘ développe les statistiques, × annule.
-• Profil graphique mobile automatique, sans flou de profondeur ni halo lumineux.
-  Résolution, ombres et effets s’adaptent à la charge ; 60 FPS ne sont pas garantis.
-
-CAMPAGNE ET DECKS
-• Combat → Campagne avec des amis : 2 à 4 joueurs, citadelle partagée et énergie personnelle.
-• Victoires et étoiles coop sauvegardées sur chaque compte ; même salon pour la mission suivante.
-• Arsenal → Mes decks : jusqu’à 12 decks nommés de 6 défenses + 6 unités, synchronisés avec le compte connecté.
-• Utiliser ce deck choisit les cartes de la prochaine partie, en PvE comme en PvP.
-• Changer de deck au salon puis se déclarer prêt actualise l’équipement personnel.
-• Projectiles animés entre les mises à jour réseau ; collisions des missiles rapides corrigées.
-• Après la mise à jour, tous les joueurs doivent recharger le jeu et créer un nouveau salon.
-
-GOOGLE SEARCH CONSOLE
-Le fichier dist/googlea6c20ef694929c4d.html doit rester dans le projet déployé.
-Après redéploiement, ouvre son URL sur le domaine Render avant de cliquer Valider.
-
-VISIBILITÉ GOOGLE
-Le jeu porte le nom Bastorynn dans le titre de page, sa description et son en-tête.
-Après déploiement sur bastorynn.onrender.com : Search Console → Inspection de l’URL
-→ Demander une indexation. L’indexation peut prendre plusieurs jours.
+HÉBERGEMENT ET FICHIERS CONSERVÉS
+Le multijoueur nécessite le projet complet exécuté par un service Node.js.
+Un dépôt du seul HTML sur un hébergement statique ne lance pas ce serveur.
+Les fichiers robots.txt, sitemap.xml et googlea6c20ef694929c4d.html dans dist/
+sont conservés pour le déploiement existant. Cette livraison ne déploie pas le jeu
+sur ton hébergement : elle fournit les fichiers prêts à remplacer.

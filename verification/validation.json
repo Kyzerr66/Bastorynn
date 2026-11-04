@@ -1,0 +1,31 @@
+{
+  "version": "2.2.0",
+  "date": "2026-11-04",
+  "client_and_dist_identical": true,
+  "integration_checks_passed": 8,
+  "engine_scenarios_passed": 13,
+  "render_scenarios_passed": 11,
+  "defense_model_families": 36,
+  "troops": 185,
+  "new_troops": 25,
+  "pvp_map_configurations": 48,
+  "controlled_matchups": 15,
+  "browser_viewports": [
+    [
+      1363,
+      936
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      844,
+      390
+    ]
+  ],
+  "browser_rendering": "software",
+  "physical_mobile_fps_measured": false,
+  "gpu_context_restore_visually_verified": false,
+  "simulation_sha256": "e438e55d671ec90165b309d3aa102b4ce97f14f456f376ec0b04f5adb6b716bf"
+}

@@ -1,0 +1,18 @@
+{
+  "checks": 13,
+  "passed": [
+    "Repair only during build; every refused request leaves energy and HP unchanged",
+    "Deterministic local placement; no hidden debit and all constraints remain authoritative",
+    "Equal coop kill credits, preserved cents and no double award; personal spending unchanged",
+    "PvP scaling is isolated; upgrades and collection levels cannot bypass it",
+    "Stasis reaches nearby targets, not distant ones, and briefly stops resistant enemies",
+    "PvE support healing does not stack without limit",
+    "Bulldozer fixed-value shielding produces finite positive shields",
+    "Corrosive fields start damaging on impact; noSlow and boss resistance apply",
+    "Mine footprints follow actual upgraded range and active lanes",
+    "Laser keeps its target and ramp even when strongest-target HP ordering changes",
+    "Turret tracks aim between shots and all original enemy abilities remain finite",
+    "A PvP orbital volley hits each target once; separate towers and PvE remain independent",
+    "x4 uses the same fixed combat steps as x1 over equal simulated time"
+  ]
+}

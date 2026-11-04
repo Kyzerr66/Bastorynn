@@ -1,0 +1,17 @@
+{
+  "passed": 12,
+  "checks": [
+    "Projectile prediction follows ×1, ×2, ×3 and ×4; pause holds position",
+    "Projectile model data stay unchanged; muzzle offset starts at barrel and ends at impact",
+    "Models checked: 36 defense families",
+    "Every defense model has finite rotating heads and muzzles; bases never rotate with aim",
+    "Software depth raster keeps closest opaque face and composites transparent faces",
+    "Software view recovers from hidden zero-size and non-finite camera, with smooth head tracking",
+    "Software walking and rotor parts retain their animation",
+    "Actual Frontier.frame can attach ownership rings to software rigs across placement, upgrade and sale",
+    "Mobile stays sharp with unit animation, all quality tiers report; frames over 250 ms degrade",
+    "Battle clock preserves hidden elapsed time, unlocks after an exception and stops idempotently",
+    "GPU resize rejects zero surfaces, recovers finite zoom, respects pixel budget and releases unused post buffers",
+    "Disposed GPU recovery and disposal callbacks exit before touching renderer resources"
+  ]
+}

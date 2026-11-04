@@ -1,0 +1,578 @@
+[
+  {
+    "map": "aube",
+    "count": 2,
+    "places": [
+      306,
+      306
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "aube",
+    "count": 3,
+    "places": [
+      174,
+      174,
+      186
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "aube",
+    "count": 4,
+    "places": [
+      236,
+      244,
+      236,
+      244
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "delta",
+    "count": 2,
+    "places": [
+      318,
+      318
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "delta",
+    "count": 3,
+    "places": [
+      220,
+      223,
+      231
+    ],
+    "routeSymmetry": 0,
+    "islands": 4,
+    "missed": []
+  },
+  {
+    "map": "delta",
+    "count": 4,
+    "places": [
+      308,
+      318,
+      308,
+      318
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "fjord",
+    "count": 2,
+    "places": [
+      340,
+      340
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "fjord",
+    "count": 3,
+    "places": [
+      226,
+      229,
+      238
+    ],
+    "routeSymmetry": 0,
+    "islands": 5,
+    "missed": []
+  },
+  {
+    "map": "fjord",
+    "count": 4,
+    "places": [
+      324,
+      336,
+      324,
+      336
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "dunes",
+    "count": 2,
+    "places": [
+      343,
+      343
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "dunes",
+    "count": 3,
+    "places": [
+      237,
+      241,
+      249
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "dunes",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "caldeira",
+    "count": 2,
+    "places": [
+      325,
+      325
+    ],
+    "routeSymmetry": 0,
+    "islands": 2,
+    "missed": []
+  },
+  {
+    "map": "caldeira",
+    "count": 3,
+    "places": [
+      164,
+      164,
+      176
+    ],
+    "routeSymmetry": 0,
+    "islands": 2,
+    "missed": []
+  },
+  {
+    "map": "caldeira",
+    "count": 4,
+    "places": [
+      234,
+      241,
+      234,
+      241
+    ],
+    "routeSymmetry": 0,
+    "islands": 2,
+    "missed": []
+  },
+  {
+    "map": "cite",
+    "count": 2,
+    "places": [
+      352,
+      352
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "cite",
+    "count": 3,
+    "places": [
+      226,
+      229,
+      238
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "cite",
+    "count": 4,
+    "places": [
+      328,
+      338,
+      328,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "emeraude",
+    "count": 2,
+    "places": [
+      263,
+      263
+    ],
+    "routeSymmetry": 0,
+    "islands": 5,
+    "missed": []
+  },
+  {
+    "map": "emeraude",
+    "count": 3,
+    "places": [
+      202,
+      203,
+      215
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "emeraude",
+    "count": 4,
+    "places": [
+      290,
+      298,
+      290,
+      298
+    ],
+    "routeSymmetry": 0,
+    "islands": 9,
+    "missed": []
+  },
+  {
+    "map": "atoll",
+    "count": 2,
+    "places": [
+      278,
+      278
+    ],
+    "routeSymmetry": 0,
+    "islands": 9,
+    "missed": []
+  },
+  {
+    "map": "atoll",
+    "count": 3,
+    "places": [
+      116,
+      116,
+      123
+    ],
+    "routeSymmetry": 0,
+    "islands": 7,
+    "missed": []
+  },
+  {
+    "map": "atoll",
+    "count": 4,
+    "places": [
+      248,
+      254,
+      248,
+      254
+    ],
+    "routeSymmetry": 0,
+    "islands": 9,
+    "missed": []
+  },
+  {
+    "map": "cimes",
+    "count": 2,
+    "places": [
+      359,
+      359
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "cimes",
+    "count": 3,
+    "places": [
+      250,
+      254,
+      262
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "cimes",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "toundra",
+    "count": 2,
+    "places": [
+      329,
+      329
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "toundra",
+    "count": 3,
+    "places": [
+      248,
+      251,
+      260
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "toundra",
+    "count": 4,
+    "places": [
+      233,
+      240,
+      233,
+      240
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "automne",
+    "count": 2,
+    "places": [
+      347,
+      347
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "automne",
+    "count": 3,
+    "places": [
+      250,
+      254,
+      262
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "automne",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "canyon",
+    "count": 2,
+    "places": [
+      353,
+      353
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "canyon",
+    "count": 3,
+    "places": [
+      250,
+      254,
+      262
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "canyon",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "baie",
+    "count": 2,
+    "places": [
+      347,
+      347
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "baie",
+    "count": 3,
+    "places": [
+      171,
+      175,
+      178
+    ],
+    "routeSymmetry": 0,
+    "islands": 4,
+    "missed": []
+  },
+  {
+    "map": "baie",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "peninsule",
+    "count": 2,
+    "places": [
+      360,
+      360
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "peninsule",
+    "count": 3,
+    "places": [
+      204,
+      208,
+      214
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "peninsule",
+    "count": 4,
+    "places": [
+      289,
+      297,
+      289,
+      297
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "glacier",
+    "count": 2,
+    "places": [
+      349,
+      349
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "glacier",
+    "count": 3,
+    "places": [
+      260,
+      265,
+      272
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "glacier",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "rempart",
+    "count": 2,
+    "places": [
+      349,
+      349
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "rempart",
+    "count": 3,
+    "places": [
+      260,
+      265,
+      272
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  },
+  {
+    "map": "rempart",
+    "count": 4,
+    "places": [
+      327,
+      338,
+      327,
+      338
+    ],
+    "routeSymmetry": 0,
+    "islands": 1,
+    "missed": []
+  }
+]

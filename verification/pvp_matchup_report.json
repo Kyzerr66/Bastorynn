@@ -1,0 +1,214 @@
+[
+  {
+    "name": "Tirs rapides contre blindés",
+    "defenses": [
+      "gatling_0 L1",
+      "gatling_0 L1",
+      "gatling_0 L1"
+    ],
+    "army": "leger",
+    "defenseCost": 150,
+    "attackCost": 130,
+    "units": 2,
+    "escaped": 2,
+    "killed": 0,
+    "castleDamage": 14,
+    "killIncome": 0,
+    "duration": 67,
+    "alive": 0
+  },
+  {
+    "name": "Tirs rapides contre infanterie",
+    "defenses": [
+      "gatling_0 L1",
+      "gatling_0 L1",
+      "gatling_0 L1"
+    ],
+    "army": "fantassin",
+    "defenseCost": 150,
+    "attackCost": 120,
+    "units": 3,
+    "escaped": 2,
+    "killed": 1,
+    "castleDamage": 8,
+    "killIncome": 6,
+    "duration": 39,
+    "alive": 0
+  },
+  {
+    "name": "Zone+contrôle contre infanterie",
+    "defenses": [
+      "mortar_0 L1",
+      "cryo_0 L1",
+      "canon_0 L1"
+    ],
+    "army": "fantassin",
+    "defenseCost": 260,
+    "attackCost": 240,
+    "units": 6,
+    "escaped": 3,
+    "killed": 3,
+    "castleDamage": 12,
+    "killIncome": 18,
+    "duration": 42,
+    "alive": 0
+  },
+  {
+    "name": "Zone+contrôle contournée par air",
+    "defenses": [
+      "mortar_0 L1",
+      "cryo_0 L1",
+      "canon_0 L1"
+    ],
+    "army": "helico",
+    "defenseCost": 260,
+    "attackCost": 260,
+    "units": 4,
+    "escaped": 4,
+    "killed": 0,
+    "castleDamage": 16,
+    "killIncome": 0,
+    "duration": 36,
+    "alive": 0
+  },
+  {
+    "name": "Zone+contrôle contre blindé/soin",
+    "defenses": [
+      "mortar_0 L1",
+      "cryo_0 L1",
+      "canon_0 L1"
+    ],
+    "army": "leger/medecin/fantassin/renfort_faraday",
+    "defenseCost": 260,
+    "attackCost": 210,
+    "units": 4,
+    "escaped": 1,
+    "killed": 3,
+    "castleDamage": 7,
+    "killIncome": 22,
+    "duration": 69,
+    "alive": 0
+  },
+  {
+    "name": "Défense équilibrée contre attaque mixte",
+    "defenses": [
+      "gatling_0 L1",
+      "cryo_0 L1",
+      "mortar_0 L1",
+      "missile_0 L1"
+    ],
+    "army": "leger/medecin/fantassin/helico/obusier/renfort_faraday",
+    "defenseCost": 370,
+    "attackCost": 350,
+    "units": 6,
+    "escaped": 1,
+    "killed": 5,
+    "castleDamage": 7,
+    "killIncome": 43,
+    "duration": 67,
+    "alive": 0
+  },
+  {
+    "name": "Mythiques contre blindés",
+    "defenses": [
+      "gatling_4 L1",
+      "cryo_4 L1",
+      "mortar_4 L1"
+    ],
+    "army": "leger",
+    "defenseCost": 341,
+    "attackCost": 325,
+    "units": 5,
+    "escaped": 0,
+    "killed": 5,
+    "castleDamage": 0,
+    "killIncome": 50,
+    "duration": 58,
+    "alive": 0
+  },
+  {
+    "name": "Mythiques contre attaque mixte",
+    "defenses": [
+      "gatling_4 L1",
+      "cryo_4 L1",
+      "mortar_4 L1"
+    ],
+    "army": "leger/medecin/fantassin/helico/renfort_faraday",
+    "defenseCost": 341,
+    "attackCost": 340,
+    "units": 6,
+    "escaped": 0,
+    "killed": 6,
+    "castleDamage": 0,
+    "killIncome": 52,
+    "duration": 58,
+    "alive": 0
+  },
+  {
+    "name": "Mythiques améliorées contre renforts",
+    "defenses": [
+      "gatling_4 L3",
+      "cryo_4 L2"
+    ],
+    "army": "renfort_belier/renfort_sanctuaire/helico/renfort_faraday",
+    "defenseCost": 405,
+    "attackCost": 385,
+    "units": 6,
+    "escaped": 1,
+    "killed": 5,
+    "castleDamage": 8,
+    "killIncome": 49,
+    "duration": 76,
+    "alive": 0
+  },
+  {
+    "name": "Orbital mythique contre blindés",
+    "defenses": [
+      "orbital_4 L1"
+    ],
+    "army": "leger",
+    "defenseCost": 266,
+    "attackCost": 260,
+    "units": 4,
+    "escaped": 4,
+    "killed": 0,
+    "castleDamage": 28,
+    "killIncome": 0,
+    "duration": 69,
+    "alive": 0
+  },
+  {
+    "name": "Anti-air contre aéronefs",
+    "defenses": [
+      "flak_0 L1",
+      "missile_0 L1"
+    ],
+    "army": "helico",
+    "defenseCost": 245,
+    "attackCost": 195,
+    "units": 3,
+    "escaped": 1,
+    "killed": 2,
+    "castleDamage": 4,
+    "killIncome": 20,
+    "duration": 35,
+    "alive": 0
+  },
+  {
+    "name": "Anti-air contourné au sol",
+    "defenses": [
+      "flak_0 L1",
+      "missile_0 L1"
+    ],
+    "army": "leger/medecin/fantassin",
+    "defenseCost": 245,
+    "attackCost": 215,
+    "units": 4,
+    "escaped": 4,
+    "killed": 0,
+    "castleDamage": 20,
+    "killIncome": 0,
+    "duration": 69,
+    "alive": 0
+  }
+]

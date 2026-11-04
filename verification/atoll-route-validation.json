@@ -1,0 +1,18 @@
+{
+  "routes": 6,
+  "added": {
+    "id": 5,
+    "name": "Îlot nord-est",
+    "unlock": 12,
+    "kind": "w",
+    "length": 47.13
+  },
+  "northeastIslandNearestRoute": 0.01,
+  "sameEnemyCountsAtWaves": [
+    12,
+    13,
+    14,
+    18,
+    26
+  ]
+}

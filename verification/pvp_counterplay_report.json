@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Trio mythique contourné en aérien",
+    "defenses": [
+      "gatling_4 L1",
+      "cryo_4 L1",
+      "mortar_4 L1"
+    ],
+    "army": "helico",
+    "defenseCost": 341,
+    "attackCost": 325,
+    "units": 5,
+    "escaped": 4,
+    "killed": 1,
+    "castleDamage": 16,
+    "killIncome": 10,
+    "duration": 41,
+    "alive": 0
+  },
+  {
+    "name": "Orbital face à vague aérienne espacée",
+    "defenses": [
+      "orbital_4 L1"
+    ],
+    "army": "helico",
+    "defenseCost": 266,
+    "attackCost": 260,
+    "units": 4,
+    "escaped": 4,
+    "killed": 0,
+    "castleDamage": 16,
+    "killIncome": 0,
+    "duration": 40,
+    "alive": 0
+  },
+  {
+    "name": "Orbital face à éclaireurs espacés",
+    "defenses": [
+      "orbital_4 L1"
+    ],
+    "army": "moto",
+    "defenseCost": 266,
+    "attackCost": 225,
+    "units": 5,
+    "escaped": 5,
+    "killed": 0,
+    "castleDamage": 15,
+    "killIncome": 0,
+    "duration": 29,
+    "alive": 0
+  }
+]

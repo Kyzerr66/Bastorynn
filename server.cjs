@@ -7,6 +7,8 @@ const rooms=new Map(),maps=new Set(['aube','delta','fjord','dunes','caldeira','c
 const json=(res,status,data)=>accounts.defer(()=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));});
 const publicRoom=r=>({code:r.code,config:r.config,capacity:r.capacity,started:r.started,completed:!!r.ended,authority:'server',players:r.players.map(p=>p?{id:p.id,name:p.name,friendId:p.accountId,ready:p.ready,connected:!!p.stream}:null)});
 const accounts=require('./accounts.cjs')({json,rooms,publicRoom});
+const capacityFor=c=>c.mode==='duel'?2:c.mode==='ffa'?(c.count===3?3:4):4;
+const validConfig=c=>['coop','duel','duo','ffa'].includes(c.mode)&&maps.has(c.map)&&Number.isInteger(c.diff)&&c.diff>=0&&c.diff<=3&&(c.mode!=='ffa'||c.count==null||[3,4].includes(c.count));
 const emit=(p,m)=>{if(!p?.stream)return;try{if(p.stream.writableLength>2e6){p.stream.end();p.stream=null;return;}p.stream.write(typeof m==='string'?m:'data: '+JSON.stringify(m)+'\n\n');}catch{p.stream=null;}};
 const broadcast=(r,m)=>{const wire='data: '+JSON.stringify(m)+'\n\n';r.players.forEach(p=>emit(p,wire));},roster=r=>broadcast(r,{type:'room',room:publicRoom(r)});
 function notifyRoom(r){accounts.roomChanged();accounts.notify(r.players.filter(Boolean).flatMap(p=>[p.accountId,...(accounts.user(p.accountId)?.friends||[])]));}
@@ -25,7 +27,7 @@ const server=http.createServer(async(req,res)=>{try{await ((req.url.startsWith('
  const u=new URL(req.url,'http://localhost');
  if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host)return json(res,403,{error:'Origine refusée'});
  if(req.headers['sec-fetch-site']==='cross-site'&&u.pathname.startsWith('/api/'))return json(res,403,{error:'Origine refusée'});
- if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,version:'frontieres-2',accounts:true,authority:'server',storage:accounts.status()});
+ if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,version:'frontieres-2.2',accounts:true,authority:'server',storage:accounts.status()});
  if(req.method==='GET'&&(u.pathname==='/sitemap.xml'||u.pathname==='/robots.txt')){
   const file=path.join(__dirname,'dist',u.pathname.slice(1));
   const body=fs.readFileSync(file);
@@ -49,20 +51,27 @@ const server=http.createServer(async(req,res)=>{try{await ((req.url.startsWith('
    if(u.pathname==='/api/resume'){if(!existing)return json(res,404,{error:'Aucune partie à reprendre.'});return json(res,200,result(existing,existing.players.find(p=>p?.accountId===user.id)));}
    if(existing){
     const same=u.pathname==='/api/join'&&existing.code===String(data.code).trim().toUpperCase();if(same)return json(res,200,result(existing,existing.players.find(p=>p?.accountId===user.id)));
-    equipment(data.loadout);if(u.pathname==='/api/create'){const c=data.config||{};if(!['coop','duel','duo','ffa'].includes(c.mode)||!maps.has(c.map)||!Number.isInteger(c.diff)||c.diff<0||c.diff>3)return json(res,400,{error:'Configuration invalide'});if(rooms.size>=20&&(existing.started||existing.players.find(p=>p?.accountId===user.id)?.id!==0))return json(res,429,{error:'Trop de salons actifs'});}
+    equipment(data.loadout);if(u.pathname==='/api/create'){const c=data.config||{};if(!validConfig(c))return json(res,400,{error:'Configuration invalide'});if(rooms.size>=20&&(existing.started||existing.players.find(p=>p?.accountId===user.id)?.id!==0))return json(res,429,{error:'Trop de salons actifs'});}
     if(u.pathname==='/api/join'){const dest=rooms.get(String(data.code).trim().toUpperCase());if(!dest||dest.started||dest.players.filter(Boolean).length>=dest.capacity)return json(res,409,{error:'Cette invitation ne correspond plus à un salon disponible.'});}
     if(u.pathname==='/api/create'&&existing.started&&!existing.ended)return json(res,409,{error:'Quitte ta partie en cours avant de créer un nouveau salon.'});
     leaveRoom(existing,existing.players.find(p=>p?.accountId===user.id));
    }
    if(u.pathname==='/api/create'){
-    if(rooms.size>=20)return json(res,429,{error:'Trop de salons actifs'});const c=data.config||{};if(!['coop','duel','duo','ffa'].includes(c.mode)||!maps.has(c.map)||!Number.isInteger(c.diff)||c.diff<0||c.diff>3)return json(res,400,{error:'Configuration invalide'});
-    let code;do{code=crypto.randomBytes(3).toString('hex').toUpperCase();}while(rooms.has(code));const p=player(0,user,data.loadout),r={code,config:{mode:c.mode,campaign:c.mode==='coop'&&c.campaign===true,map:c.map,diff:c.diff,count:c.mode==='duel'?2:4},capacity:c.mode==='duel'?2:4,players:[p],started:false,last:Date.now(),state:null};rooms.set(code,r);notifyRoom(r);return json(res,200,result(r,p));
+    if(rooms.size>=20)return json(res,429,{error:'Trop de salons actifs'});const c=data.config||{};if(!validConfig(c))return json(res,400,{error:'Configuration invalide'});
+    let code;do{code=crypto.randomBytes(3).toString('hex').toUpperCase();}while(rooms.has(code));const p=player(0,user,data.loadout),r={code,config:{mode:c.mode,campaign:c.mode==='coop'&&c.campaign===true,map:c.map,diff:c.diff,count:capacityFor(c)},capacity:capacityFor(c),players:[p],started:false,last:Date.now(),state:null};rooms.set(code,r);notifyRoom(r);return json(res,200,result(r,p));
    }
    const r=rooms.get(String(data.code).trim().toUpperCase());if(!r)return json(res,404,{error:'Salon introuvable ou invitation expirée.'});if(r.started)return json(res,409,{error:'La partie a déjà commencé. Attends le prochain salon.'});let i=r.players.findIndex(p=>p===null);if(i<0)i=r.players.length;if(i>=r.capacity)return json(res,409,{error:'Salon complet'});const p=player(i,user,data.loadout);r.players[i]=p;roster(r);notifyRoom(r);return json(res,200,result(r,p));
   }
   if(u.pathname==='/api/send'){
    const {r,p}=auth(req,data),type=data.type,msg=data.data||{};p.rate=p.rate.filter(t=>Date.now()-t<1000);if(p.rate.length>=30)return json(res,429,{error:'Trop d’actions'});p.rate.push(Date.now());
-   if(type==='loadout'){if(r.started)throw Error('Le deck est verrouillé pour cette partie.');Object.assign(p,equipment(msg));p.ready=false;roster(r);}
+   if(type==='configure'){
+    if(p.id!==0)throw Error('Seul l’hôte peut changer la carte du salon.');
+    if(r.started)throw Error('La carte est verrouillée pendant la partie.');
+    const next={...r.config,map:msg.map??r.config.map,diff:msg.diff??r.config.diff,count:r.config.mode==='ffa'?(msg.count??r.capacity):r.capacity};
+    if(!validConfig(next))throw Error('Carte ou nombre de joueurs invalide.');
+    const capacity=capacityFor(next);if(r.players.filter(Boolean).length>capacity)throw Error('Le salon contient trop de joueurs pour ce format.');
+    r.config=next;r.capacity=capacity;for(const q of r.players)if(q)q.ready=false;roster(r);notifyRoom(r);
+   }else if(type==='loadout'){if(r.started)throw Error('Le deck est verrouillé pour cette partie.');Object.assign(p,equipment(msg));p.ready=false;roster(r);}
    else if(type==='ready'){if(r.started)throw Error('Partie déjà en cours');p.ready=!p.ready;roster(r);}
    else if(type==='start'){
     if(p.id!==0)throw Error('Seul l’hôte démarre la partie');if(r.started)throw Error('Partie déjà démarrée');const required=r.config.mode==='coop'?2:r.capacity;if(r.players.filter(Boolean).length<required)throw Error('Il faut '+required+' joueurs pour ce mode');if(r.players.some(p=>!p||!p.ready||!p.stream))throw Error('Tous les joueurs doivent être connectés et prêts');
@@ -72,7 +81,7 @@ const server=http.createServer(async(req,res)=>{try{await ((req.url.startsWith('
     const won=r.state?.boards?.[0]?.phase==='win',list=[...maps],index=list.indexOf(r.config.map);if(won&&index<list.length-1)r.config.map=list[index+1];
     r.config.diff=0;r.started=false;r.ended=false;r.state=null;r.game=null;r.startConfig=null;r.players=r.players.filter(Boolean);r.players.forEach((q,i)=>{q.id=i;q.ready=false;emit(q,{type:'seat',self:i});});roster(r);notifyRoom(r);
    }else if(type==='command'){
-    if(!r.started)throw Error('Partie non démarrée');if(!['place','upgrade','sell','target','annex','repair','ability','wave','troop','troopUpgrade'].includes(msg.k)||!msg.d||typeof msg.d!=='object')throw Error('Action invalide');const answer=r.game.Frontier.apply(p.id,msg);if(typeof answer==='string')throw Error(answer);r.dirty=true;
+    if(!r.started)throw Error('Partie non démarrée');if(!['place','upgrade','sell','target','annex','repair','ability','wave','troop','troopUpgrade','speed','speedVote'].includes(msg.k)||!msg.d||typeof msg.d!=='object')throw Error('Action invalide');const answer=r.game.Frontier.apply(p.id,msg);if(typeof answer==='string')throw Error(answer);r.dirty=true;
    }else if(type==='leave'){
     leaveRoom(r,p);
    }else throw Error('Action réservée au serveur ou inconnue');return json(res,200,{ok:true});

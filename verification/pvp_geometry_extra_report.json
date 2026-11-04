@@ -1,0 +1,338 @@
+[
+  {
+    "map": "aube",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "aube",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "aube",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "delta",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "delta",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "delta",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "fjord",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "fjord",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "fjord",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "dunes",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "dunes",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "dunes",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "caldeira",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "caldeira",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "caldeira",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "cite",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "cite",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "cite",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "emeraude",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "emeraude",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "emeraude",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "atoll",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "atoll",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "atoll",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "cimes",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "cimes",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "cimes",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "toundra",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "toundra",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "toundra",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "automne",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "automne",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "automne",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "canyon",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "canyon",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "canyon",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "baie",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "baie",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "baie",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "peninsule",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "peninsule",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "peninsule",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "glacier",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "glacier",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "glacier",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "rempart",
+    "count": 2,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "rempart",
+    "count": 3,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  },
+  {
+    "map": "rempart",
+    "count": 4,
+    "maxError": 0,
+    "buildingCollisions": 0,
+    "uncrossedIslands": []
+  }
+]

@@ -1,177 +1,164 @@
-> **Mise à jour sauvegarde :** avec DATABASE_URL, le niveau, la collection et les decks du compte sont désormais synchronisés. Pour installer et tester Supabase, suivre INSTALLER_SUPABASE.md dans le ZIP. Les anciens passages décrivant une collection uniquement locale concernent le mode invité ou HTML seul.
-
-# OWNED — Jouer à plusieurs
+# OWNED — Frontières / Bastorynn : jouer à plusieurs
 
 ## Démarrer avec des amis
 
-**Utilise le nouveau ZIP multijoueur.** Le fichier HTML seul permet de jouer en solo ou contre l’IA. Déposer uniquement ce HTML sur Netlify ne lance pas le serveur nécessaire aux comptes, aux amis et aux parties entre appareils.
+Le **ZIP complet** contient le jeu et son serveur multijoueur. Le HTML seul permet le solo et les parties avec IA ; un hébergement statique du HTML ne lance pas les comptes, les invitations ou les parties entre appareils.
 
-1. Extrais entièrement `OWNED_Frontieres_3D_Multijoueur.zip` sur un PC.
-2. Installe Node.js 20 ou plus récent si nécessaire. Sous Windows, double-clique sur **OUVRIR_MULTIJOUER.bat**. Sur macOS/Linux, lance `node server.cjs` dans le dossier extrait.
-3. Garde la fenêtre du serveur ouverte. Le jeu fonctionne sur le PC à `http://localhost:8787`.
-4. Pour jouer sur le même Wi-Fi, **tous les joueurs ouvrent l’adresse réseau affichée par le serveur**, par exemple `http://192.168.1.25:8787`. Utilise l’adresse réellement affichée chez toi. Un lien contenant `localhost` ne fonctionne pas pour tes amis.
-5. Dans **Combat → Amis & salons**, chaque joueur crée son compte, puis se connecte. Coche **Rester connecté sur cet appareil** pour retrouver ta session.
-6. Ajoute l’identifiant ou le code ami de ton ami. Il accepte ta demande dans le même panneau.
-7. Avant de créer le salon, prépare tes cartes : **Arsenal** pour les défenses, les unités et les decks enregistrés.
-8. Crée un salon et choisis le mode et la carte. Dans **Inviter des amis**, clique **Inviter** à côté d’un ami. Il reçoit une invitation directement dans le jeu et clique **Rejoindre**. Vous pouvez aussi partager le code à six caractères.
-9. Chaque joueur clique **Je suis prêt**, puis l’hôte lance la partie.
+1. Extrais entièrement le ZIP sur un PC. Installe Node.js 20 ou plus récent si nécessaire.
+2. Sous Windows, double-clique sur **OUVRIR_MULTIJOUER.bat**. Sur macOS/Linux, lance `node server.cjs` dans le dossier extrait.
+3. Garde la fenêtre du serveur ouverte. Sur le PC hôte, le jeu est accessible à `http://localhost:8787`.
+4. Sur le même Wi-Fi, tous les autres joueurs ouvrent **l’adresse réseau affichée par le serveur**, par exemple `http://192.168.1.25:8787`. Utilise ton adresse réelle ; `localhost` désigne l’appareil de la personne qui l’ouvre.
+5. Dans **Combat → Amis & salons**, crée ton compte ou connecte-toi. **Rester connecté sur cet appareil** conserve la session.
+6. Ajoute l’identifiant ou le code ami d’un autre joueur. Après acceptation, crée un salon puis utilise **Inviter**. Un ami peut aussi rejoindre avec le code à six caractères du salon.
+7. Prépare tes cartes dans **Arsenal**, puis reviens au salon. Chaque joueur clique **Je suis prêt** ; l’hôte lance la partie.
 
-Les invitations concernent les salons qui n’ont pas encore commencé. Elles expirent après dix minutes. Si tu joues déjà, utilise « Quitter et rejoindre » pour accepter explicitement une invitation vers un autre salon.
+Les invitations concernent les salons en préparation et expirent après dix minutes. Si une partie est déjà ouverte, **Quitter et rejoindre** permet d’accepter une autre invitation.
 
-| Mode | Joueurs humains | Châteaux | Organisation |
-|---|---:|---:|---|
-| Coopération | 2 à 4 | 1 partagé | Chacun possède son énergie et ses tourelles ; les zones sont partagées |
-| 1 contre 1 | 2 | 2 | Un château par joueur |
-| 2 contre 2 | 4 | 4 | Places 1–2 contre places 3–4, chacun garde son château |
-| Chacun pour soi | 4 | 4 | Tous adversaires |
+| Mode | Joueurs humains | Organisation |
+|---|---:|---|
+| Coopération | 2 à 4 | Une citadelle et des territoires partagés ; dépenses personnelles |
+| 1 contre 1 | 2 | Un château par joueur |
+| 2 contre 2 | 4 | Places 1–2 contre places 3–4 ; chacun garde son château |
+| Chacun pour soi | 3 ou 4 | Un château par joueur ; tous adversaires |
 
-Pour jouer avec des IA identifiées ou en coopération seul, utilise **Escarmouche → Jouer avec les IA**.
+Les **16 cartes** sont disponibles en escarmouche coopérative et en PvP, y compris chacun pour soi à trois joueurs. Pour une partie locale avec des IA, utilise **Escarmouche → Jouer avec les IA**.
 
-## Enregistrer et choisir un deck
+### Modifier le salon
 
-1. Dans **Arsenal**, équipe jusqu’à **6 défenses et 6 unités différentes** parmi tes cartes obtenues.
-2. En haut, dans **Mes decks**, saisis un nom puis clique **Enregistrer l’équipement actuel**. Tu peux conserver jusqu’à **12 decks**. Réutiliser le même nom remplace ce deck.
-3. Choisis un deck enregistré puis **Utiliser ce deck**. Le nom du deck actif s’affiche et le choix reste mémorisé après rechargement sur cet appareil.
-4. Lance une partie : les défenses choisies sont utilisées en solo, campagne coopérative et escarmouche ; en PvP, les six unités choisies sont également utilisées.
-5. Dans un salon en préparation, **Changer de deck** ouvre l’Arsenal. Reviens par **Amis**, puis déclare-toi prêt : ton nouvel équipement est envoyé au salon.
+L’hôte peut changer la **carte avant le lancement**, sans recréer le salon. En chacun pour soi, il peut aussi sélectionner trois ou quatre places, tant que le salon ne contient pas plus de joueurs que le format choisi. Un changement de configuration annule les états « prêt » : chacun valide de nouveau. La carte et les decks sont verrouillés pendant la partie.
 
-Chaque joueur utilise son propre équipement, même en coopération. Une partie déjà lancée conserve ses cartes ; charger un autre deck prépare la partie suivante. Les cartes peuvent être modifiées après chargement : l’Arsenal signale alors « Sélection modifiée ». Enregistre à nouveau pour mettre à jour le deck nommé. Les decks restent sur cet appareil et cette adresse de jeu.
+## Collection et decks
 
-## Faire la campagne à plusieurs
+L’Arsenal rassemble **160 défenses et 185 troupes**. Cette mise à jour ajoute **25 troupes : cinq communes, cinq rares, cinq épiques, cinq légendaires et cinq mythiques**. Les nouvelles cartes ont leurs rôles, coûts et visuels ; les cartes déjà obtenues sont conservées.
 
-1. Ouvre **Combat → Campagne avec des amis**. Choisis une mission débloquée et sa difficulté, puis **Créer le salon de campagne**.
-2. Invite tes amis depuis le salon ou partage son code. Vous devez être **2 à 4 joueurs**, connectés au même serveur.
-3. Chacun prépare son deck et clique **Je suis prêt** ; l’hôte lance la mission.
-4. Défendez la même citadelle : chacun garde son énergie et ses défenses. Les territoires sont communs et la difficulté s’adapte au nombre de participants.
-5. À la fin, les victoires et étoiles sont enregistrées sur les comptes des participants. Les récompenses de collection restent dans le navigateur de chacun.
-6. Choisis **Continuer avec le groupe**. L’hôte prépare la mission suivante après une victoire, ou la même après une défaite, dans le même salon. La difficulté de cette nouvelle préparation revient à Normal et chacun doit se déclarer prêt à nouveau. Après la dernière mission, le groupe peut la rejouer.
+1. Équipe jusqu’à **6 défenses et 6 troupes différentes**. Les deux sélections sont indépendantes.
+2. Lorsqu’un deck est plein, touche la carte que tu veux ajouter : le jeu présente les six emplacements. **Choisis la carte à remplacer**, vérifie le changement puis confirme. La carte retirée reste dans ta collection.
+3. Dans **Mes decks**, saisis un nom puis choisis **Enregistrer l’équipement actuel**. Jusqu’à douze decks peuvent être conservés ; réutiliser un nom met à jour le deck correspondant.
+4. Sélectionne un deck enregistré et **Utiliser ce deck**. Si tu modifies ensuite des cartes, enregistre de nouveau pour mettre à jour ce deck nommé.
+5. Depuis un salon en préparation, **Changer de deck** ouvre l’Arsenal. Reviens par **Amis**, puis déclare-toi prêt : ton nouvel équipement est transmis au salon.
 
-Si un coffre occupe l’écran de résultat, ouvre-le puis retrouve le salon depuis **Combat → Campagne avec des amis**. Les parties en cours ne sont pas sauvegardées lors d’un redémarrage du serveur ; seule la progression de campagne terminée est conservée.
+Chaque joueur utilise son équipement, même en coopération. Changer de deck pendant qu’une partie existe prépare les parties suivantes ; cela ne remplace pas les cartes du combat déjà lancé.
 
-## Difficulté adaptée en coopération
+Le catalogue propose les filtres **Tout / Défenses / Unités**, **Mes cartes / Catalogue complet**, la rareté et une recherche. Les cartes non obtenues restent consultables. Les six troupes de départ sont le Fantassin, l’Éclaireur à moto, la Jeep armée, le Char léger, l’Hélicoptère d’attaque et le Médecin. Chaque pack ajoute une troupe bonus aux défenses prévues. Les doublons sont conservés ; posséder plusieurs exemplaires d’une troupe ne multiplie pas sa puissance en PvP. Les probabilités des packs sont affichées dans la boutique ; les mythiques sont plus difficiles à obtenir.
 
-La difficulté choisie (Normal, Difficile, Cauchemar ou Apocalypse) reste la base. Le jeu ajoute cet ajustement selon le nombre de joueurs présents au lancement, humains et IA compris :
+## Coopération : énergie, amélioration et campagne
 
-| Joueurs | Effectifs ennemis | PV et boucliers ordinaires | PV et boucliers des boss |
-|---:|---:|---:|---:|
-| 1 | ×1 | ×1 | ×1 |
-| 2 | ×1,5 | ×1,2 | ×1,8 |
-| 3 | ×2 | ×1,4 | ×2,6 |
-| 4 | ×2,5 | ×1,6 | ×3,4 |
+**Chaque élimination crédite la même prime à tous les joueurs de l’équipe.** La prime des ennemis ordinaires est ajustée au volume supplémentaire d’ennemis en coopération ; les centimes sont conservés pour que les petites primes ne disparaissent pas. Un ennemi ne peut donner sa prime qu’une fois.
 
-Le nombre de boss reste identique. Les arrivées sont légèrement étalées pour garder les vagues lisibles. Ces paramètres sont affichés dans la préparation et le salon. Une déconnexion temporaire ou un changement d’onglet ne les modifie pas. L’énergie reste individuelle.
+Les réserves restent individuelles : construire, acheter une zone ou améliorer débite uniquement le joueur qui effectue l’action. Les revenus des forges et leurs bonus restent associés à leur propriétaire. Les territoires achetés sont utilisables par l’équipe.
 
-## Le siège PvP, étape par étape
+Tu peux **améliorer une tourelle alliée avec ta propre énergie**, en coopération ou en équipe PvP. Son propriétaire ne change pas. La vente et le choix de son mode de ciblage restent réservés au propriétaire. Le bouton **Mes tourelles** permet de retrouver tes défenses et de centrer la caméra sur celle choisie.
 
-1. Équipe **jusqu’à six défenses et six troupes différentes**. Les deux sélections sont indépendantes. Un exemplaire suffit pour utiliser une troupe plusieurs fois ; sa carte n’est pas consommée.
-2. Chaque joueur commence avec **100 PV de château**, **300 énergie personnelle** et trois zones disponibles près de sa base. Tu disposes de vingt secondes pour préparer les défenses.
-3. Choisis une défense dans le HUD puis un sol autorisé. Les voies de passage, l’eau, les bâtiments, les autres tourelles et les abords des châteaux restent interdits. Les autres zones s’achètent via **Territoires**.
-4. Passe à l’onglet **Troupes** du HUD et sélectionne un château adverse dans **Cible**. Sur téléphone, les champs **Cible** et **Via** se trouvent dans **Outils**, en haut à droite.
-5. Pour une troupe **Route**, touche sa carte : choisis d’abord « Via » pour la faire passer par un avant-poste, puis elle part de ton château jusqu’à la cible.
-6. Pour une troupe **Hors-piste**, **Aérienne** ou **Amphibie**, touche sa carte puis place son départ entre **2,4 et 12 mètres de ton château**. Les aériennes volent en ligne droite. Les véhicules calculent un trajet praticable court à travers le terrain et les ponts, en évitant les bâtiments et l’eau. Les amphibies peuvent également traverser l’eau. Si aucun trajet n’existe, choisis un autre départ : aucune énergie n’est dépensée.
-7. Les troupes tirent sur les troupes adverses à portée. Certaines touchent aussi les aériennes. Les alliées ne se blessent pas. **Les troupes ne ciblent, ne détruisent et ne neutralisent jamais les tourelles en PvP. Les tourelles peuvent tirer sur les troupes.**
-8. Une troupe qui atteint le château adverse inflige ses dégâts au château puis disparaît. Le coût, les PV, les dégâts par tir, l’intervalle de tir, la portée et les dégâts au château sont indiqués dans la collection.
+La difficulté choisie — Normal, Difficile, Cauchemar ou Apocalypse — s’ajuste au nombre de joueurs présents au lancement, humains et IA compris. Les effectifs, les PV et l’étalement des vagues sont adaptés ; une déconnexion ou un changement d’onglet ne recalcule pas la difficulté en cours de route.
 
-Les déploiements n’ont **ni recharge ni plafond de troupes** : seule ton énergie limite les envois. Le revenu de base est de **8 énergie/seconde**, plus **1,5 par zone achetée** et les forges. Toutes les zones peuvent être achetées directement en PvP, sans influence ni zone voisine, pour 120 à 200 énergie.
+### Suivre la campagne ensemble
 
-**3 bases en duel, 5 à quatre joueurs.** Les troupes terrestres s’arrêtent dans leur cercle pour capturer. L’infanterie et les éclaireurs capturent plus vite ; la puissance cumulée est plafonnée pour éviter une prise instantanée. La présence adverse conteste la capture. Pour reprendre une base, neutralise-la puis capture-la. Une base non contestée rapporte **2 énergie/s à partager entre les joueurs de son alliance**. Les aéronefs ne capturent pas. Les petites forteresses ont des drapeaux et des indicateurs de progression.
+1. Ouvre **Combat → Campagne avec des amis**, choisis la mission et la difficulté, puis crée le salon de campagne.
+2. Invite tes amis. À deux, trois ou quatre, préparez vos decks puis confirmez que vous êtes prêts.
+3. Défendez la citadelle commune. Les victoires et étoiles sont enregistrées pour les participants ; la progression et les récompenses du profil connecté sont sauvegardées avec le compte.
+4. Après le résultat, **Continuer avec le groupe** prépare la mission suivante en cas de victoire, ou la même après une défaite. Le salon est conservé, la difficulté revient à Normal et chacun doit se déclarer prêt de nouveau. Après la dernière mission, le groupe peut la rejouer.
 
-**Rôles et contre-jeu.** Infanterie pour capturer, éclaireurs rapides mais fragiles, blindés résistants, artillerie contre groupes et blindages, anti-air contre aéronefs, médecins au soin limité, Cryo pour ralentir et briser les boucliers, porte-boucliers en première ligne. La rareté ne donne aucun multiplicateur de puissance en PvP. Les coûts payent les capacités et la mobilité.
+Si un coffre occupe le résultat, ouvre-le puis retrouve le salon par **Campagne avec des amis**.
 
-La dernière alliance avec un château debout gagne. Une partie dure au maximum quinze minutes : les PV cumulés des châteaux encore debout départagent alors les alliances. Une égalité reste possible. Les niveaux des défenses sont égalisés en PvP ; les statistiques des troupes sont adaptées au siège, distinctes de celles des ennemis de campagne. Les effets de création automatique d’unités et les attaques spéciales contre les défenses ne s’appliquent pas en PvP.
+### Réparer et accélérer
 
-## Améliorer pendant une partie
+**La citadelle se répare uniquement entre deux manches, en phase de construction.** Le serveur refuse toute réparation pendant l’assaut, même si le joueur dispose de l’énergie nécessaire. Une demande refusée ne retire aucune énergie. En PvP, la réparation est donc indisponible dès que le siège commence.
 
-**Défenses :** clique une tourelle posée puis **Améliorer**. Seule cette tourelle progresse, jusqu’au niveau 3. Son badge centré affiche Niv. 1, Niv. 2 ou Niv. 3 et suit la caméra ; le modèle reste visible après chaque amélioration.
+En solo, le bouton de vitesse permet **×1, ×2, ×3 et ×4**. En coopération, un joueur propose la vitesse ; **tous les autres joueurs humains doivent accepter** pour l’appliquer à la partie entière. Un refus ou la fin du délai laisse la vitesse actuelle. Avec des IA uniquement, la proposition du joueur humain peut s’appliquer directement. **Tous les modes PvP restent à ×1.**
 
-**Troupes en PvP :** dans l’onglet Troupes du HUD, touche le bouton **↑ / niveau** associé à une carte. Le panneau compare les statistiques actuelles et suivantes et affiche le coût en énergie personnelle. Le clic principal sur la carte continue à envoyer une troupe.
+## Le siège PvP
 
-Chaque type peut recevoir **trois améliorations**, du niveau 1 au niveau 4. Elles s’appliquent à tes unités de ce type déjà présentes et à tes futurs déploiements pour le reste de cette partie. Les autres types, les unités alliées et les défenses ne sont pas affectés. Les PV et boucliers gardent leur proportion restante : améliorer ne soigne pas gratuitement. Le prix de déploiement reste identique. Une nouvelle partie remet les recherches à zéro.
+### Construire et déployer
 
-Les bases capturées rapportent +2 énergie/s à leur alliance, partagées entre ses joueurs encore en jeu. Le HUD indique ta part personnelle ; une base contestée ne produit plus tant que l’affrontement dure.
+1. Chaque joueur protège son château, dispose de sa réserve d’énergie et prépare sa défense pendant le compte à rebours.
+2. Choisis une défense puis touche un sol autorisé. La pose peut s’ajuster légèrement vers une position libre proche. Le socle doit rester hors des voies, de l’eau, des bâtiments, des autres tourelles et des zones non achetées.
+3. Dans le HUD, passe à **Troupes**, sélectionne le château adverse dans **Cible**, puis utilise les **boutons de voie numérotés**. Ils restent directement accessibles sur téléphone. Tu peux aussi toucher une base à capturer pour sélectionner sa voie.
+4. En **Départ auto**, un appui sur la carte déploie la troupe depuis un emplacement valide près de ton château. Les troupes routières empruntent la voie choisie ; les véhicules hors piste, aéronefs et amphibies utilisent leur mode de déplacement.
+5. Active **Départ précis** pour choisir toi-même le point de départ des troupes hors piste, aériennes ou amphibies : touche leur carte, puis le terrain autorisé près de ton château. Les troupes routières partent toujours par la voie sélectionnée. Un départ ou un trajet refusé ne consomme pas d’énergie.
+6. Les troupes combattent les troupes adverses à portée et infligent leurs dégâts de siège lorsqu’elles atteignent le château ennemi. Les alliées ne se blessent pas. **Les troupes ne ciblent et ne détruisent pas les tourelles ; les tourelles tirent sur les troupes.**
 
-## Obtenir les troupes
+Les envois n’ont pas de recharge propre : ton énergie limite les déploiements. Le HUD affiche le revenu personnel et l’état des bases. Les territoires supplémentaires s’achètent depuis **Territoires**.
 
-La collection comporte **160 troupes, comme les 160 défenses** : les 87 modèles du PvE et 73 variantes spécialistes avec équipements 3D distincts. Six cartes de départ sont offertes : Fantassin, Éclaireur à moto, Jeep armée, Char léger, Hélicoptère d’attaque et Médecin.
+### Capturer et contourner
 
-Chaque ouverture de pack ajoute **une troupe bonus**, en plus des défenses prévues par ce pack. Toutes les troupes peuvent être obtenues, avec des raretés et des probabilités différentes. Les cartes restent cachées jusqu’à l’ouverture du sceau puis leur révélation. Les doublons de troupes sont conservés comme exemplaires supplémentaires ; ils n’augmentent pas les statistiques de siège.
+Les troupes terrestres s’arrêtent dans les cercles des bases pour les capturer. L’infanterie et les éclaireurs capturent plus rapidement ; la présence de troupes adverses conteste la prise. Une base ennemie doit d’abord être neutralisée, puis capturée. Une base alliée non contestée produit de l’énergie à partager entre les membres de l’équipe encore en jeu. Les aéronefs ne capturent pas.
 
-Dans **Troupes · collection**, retire une carte équipée pour libérer un emplacement, puis équipe une autre carte obtenue. La sélection est enregistrée sur cet appareil. Prépare-la avant de créer ou rejoindre un salon.
+Les terrains PvP répartissent les châteaux et objectifs de façon symétrique, y compris à trois joueurs. Les voies utilisent aussi les îles latérales et leurs liaisons : changer de voie permet d’ouvrir un autre front et de contourner une concentration de défenses. Les véhicules évitent l’eau et les bâtiments ; les amphibies peuvent traverser l’eau et les aéronefs prennent une trajectoire directe.
 
-## Changer d’onglet et reprendre une partie
+En PvE, les fronts s’ouvrent progressivement. Sur l’Atoll, un front naval supplémentaire dessert l’îlot nord-est à partir de la vague 12, avec le même budget d’ennemis réparti sur les voies.
 
-**Le serveur fait avancer les parties multijoueurs.** L’hôte n’a plus besoin de garder l’onglet visible. Tant que le serveur fonctionne, les ennemis et les autres joueurs continuent. Une reconnexion à ton compte permet de reprendre ta place et de recevoir l’état actuel de la partie. Quitter volontairement le salon abandonne cette place.
+### Rôles et équilibrage
 
-Le jeu solo suit le temps écoulé quand l’onglet est masqué. Un téléphone ou un navigateur peut toutefois suspendre complètement une page : au retour, le jeu rattrape le temps écoulé. Fermer le fichier HTML ne lance pas un serveur en arrière-plan.
+Compose une armée complémentaire : infanterie pour les bases, éclaireurs pour la mobilité, blindés pour encaisser, artillerie contre les groupes, anti-air contre les aéronefs, soins pour soutenir, Cryo pour ralentir et porte-boucliers en première ligne. Les soins se cumulent dans une limite commune par cible ; les capacités de boss inadaptées au siège ne sont pas importées depuis la campagne.
 
-Les salons sans aucun joueur connecté sont nettoyés après dix minutes. L’arrêt ou le redémarrage du serveur termine les parties en cours ; les comptes et amis restent conservés si leurs fichiers sont préservés.
+Les défenses ont un **équilibrage propre au PvP** : dégâts et progression en combat réduits, effets de contrôle limités et avantage de rareté resserré. Les statistiques PvE restent distinctes. La collection et ses niveaux ne permettent pas de contourner cette égalisation ; les améliorations achetées pendant le match gardent leur rôle tactique. La fiche de la tourelle affiche les statistiques appliquées au combat en cours.
 
-## Comptes et sauvegarde
+La dernière équipe avec un château debout gagne. À la limite de durée, les PV cumulés des châteaux encore debout départagent les équipes ; une égalité reste possible.
 
-- Le compte conserve ton identifiant, ton pseudo, tes amis et les invitations sur **ce serveur**. La session mémorisée dure jusqu’à trente jours ; tu peux te déconnecter depuis le panneau des amis après avoir quitté ton salon.
-- Les comptes de deux serveurs indépendants sont distincts. Tous les amis doivent utiliser la même adresse.
-- Les victoires, étoiles et difficultés débloquées en campagne coopérative sont conservées sur le compte de chaque participant. La progression solo, la collection, les crédits, les decks et les réglages restent dans le navigateur de chaque appareil ; ils ne sont pas synchronisés entre appareils.
-- Le serveur conserve ses comptes dans `data/accounts.json`, ou dans le dossier indiqué par `DATA_DIR`. Sauvegarde ce dossier lorsque tu mets le jeu à jour. Ne le publie pas dans un dépôt de code.
-- Les mots de passe sont enregistrés sous forme de dérivés salés, pas en clair. Ce serveur ne propose pas de récupération par e-mail : conserve tes identifiants.
+## Améliorer pendant le combat
 
-## Jouer à distance
+**Tourelles :** sélectionne une défense puis **Améliorer**. Seule cette tourelle monte de niveau, jusqu’au niveau 3. Le panneau précise à qui elle appartient et le coût débité sur ton énergie. Son badge suit la caméra. Sa tête mobile s’oriente vers la cible ; le socle reste fixe.
 
-Pour des amis sur des réseaux différents, héberge **le projet complet** sur un service capable d’exécuter un serveur Node.js durable. Une page statique seule ne suffit pas.
+**Troupes :** dans le HUD, touche le petit bouton **↑ / niveau**, séparé du bouton de déploiement. Le panneau compare les statistiques et le coût de recherche. Chaque type peut recevoir trois améliorations pendant la partie, du niveau 1 au niveau 4. Elles concernent tes unités de ce type déjà présentes et tes futurs envois, sans améliorer celles des alliés. Les proportions de PV et de bouclier restantes sont préservées : l’amélioration ne soigne pas gratuitement. Le prix de déploiement ne change pas ; les recherches repartent de zéro au match suivant.
 
-Le point d’entrée est `server.cjs`, la commande de démarrage est `npm start` et le port peut être fourni par la variable `PORT`. Conserve `accounts.cjs`, `simulation.js` et `dist/index.html` à leurs emplacements. Le service doit accepter les connexions HTTP longues utilisées par les notifications et les parties.
+## Commandes et confort
 
-Pour conserver les comptes après un redéploiement, utilise un **disque persistant** et définis `DATA_DIR` vers son dossier. Utilise l’adresse HTTPS du service pour les connexions à distance. Partage ensuite cette même adresse à tous tes amis. Aucun hébergement public n’est créé automatiquement avec ces fichiers.
+- **Téléphone :** glisse pour déplacer la caméra, pince pour zoomer. Les cartes, la cible et les voies ont des zones de toucher distinctes. Portrait et paysage sont pris en charge.
+- **PC :** clique pour sélectionner ou poser, glisse pour déplacer la vue, utilise la molette pour zoomer. Les touches 1–6 sélectionnent les cartes de l’onglet actif ; Échap annule une pose.
+- **Mes tourelles :** repère tes défenses, consulte leur liste et centre la caméra sur une tourelle. Sa fiche distingue tes défenses des défenses alliées.
+- **Outils :** capacités, zoom, réglages, territoires et accès à la minicarte. **Château** recentre la vue ; la minicarte peut être refermée pour libérer l’écran.
+- **Pose :** le nom et le coût restent visibles. **ⓘ** ouvre les statistiques ; **×** annule. Une aide bornée corrige les petits décalages du toucher sans autoriser la construction dans une zone interdite.
+- **Réglages :** taille du HUD, volumes et coupure générale sont mémorisés sur l’appareil. Le HUD utilise des panneaux plus sobres et des angles moins arrondis.
+- **Rendu :** adaptation des ombres, des effets et des particules à la charge ; absence de flou de profondeur sur mobile, projectiles interpolés et secousses limitées. La simulation conserve les unités et les dégâts lorsque le rendu réduit ses effets.
+- **Fronts PvE :** les lignes de préparation peuvent se masquer au lancement ; les marqueurs d’entrée indiquent les arrivées. Le radar permet de centrer la caméra sur un front.
 
-## Confort et commandes
+## Comptes, sauvegarde et retour sur un autre appareil
 
-- **⚙ Réglages** : taille du HUD de 80 à 120 %, volume des effets et du jeu, volume de la musique, coupure générale. Ces réglages sont mémorisés sur cet appareil. Le HUD limite son agrandissement si nécessaire pour tenir dans l’écran.
-- **Téléphone** : portrait et paysage sont pris en charge ; glisse pour déplacer la caméra, pince pour zoomer. Le haut tient sur une ligne avec ton avatar ; les six cartes restent accessibles dans le petit bandeau du bas. Touche l’avatar pour retrouver ton profil et tes amis.
-- **Outils** (en haut à droite) : ouvre le volet des capacités, du zoom, des réglages et des **Territoires**. En PvP, il contient aussi **Cible** et **Via**. La partie continue pendant que ce volet est ouvert.
-- **Carte à la demande** : dans Outils, touche **Carte** pour afficher la minicarte, puis **Fermer la carte** pour libérer le terrain. **Château** recentre la vue. Le radar démarre sur une seule ligne ; son **+** affiche les détails des fronts.
-- **Pose d’une défense** : la fiche résumée affiche son nom et son coût. Touche **ⓘ** pour voir ses statistiques, ou **×** pour annuler la pose. Les noms des territoires et des vigies sont masqués sur le petit écran ; les zones restent accessibles par **Outils → Territoires**.
-- **Rendu mobile** : le profil graphique se choisit automatiquement, sans effet de flou de profondeur ni halo lumineux. Il réduit d’abord les ombres et les effets avant de diminuer légèrement la résolution. Sur téléphone, le rendu WebGL vise jusqu’à 2 pixels par pixel CSS avec un plancher de netteté à 1,25 ; le rendu de secours conserve aussi une définition supérieure. La fluidité dépend du téléphone et de la taille des combats ; 60 FPS ne sont pas garantis.
-- **PC** : clique pour poser, glisse pour déplacer la caméra, utilise la molette pour zoomer. Les touches 1–6 sélectionnent les cartes de l’onglet actif ; Échap annule une pose.
-- **PvE** : les trajets de préparation disparaissent au lancement de la vague. Les marqueurs d’entrée restent visibles pour indiquer d’où viennent les ennemis.
-- **Neige** : routes brunes, unités plus sombres et luminosité réduite pour distinguer les éléments.
+**Connecté au même compte sur la même adresse de jeu, tu retrouves ta progression sur un autre appareil** : niveau, expérience, monnaies, collection, decks équipés et enregistrés, progression et récompenses sont synchronisés automatiquement. Les réglages de son, d’affichage et de taille du HUD restent propres à chaque appareil.
 
-## Si quelque chose ne fonctionne pas
-
-| Symptôme | À vérifier |
+| Situation | Où les données sont conservées |
 |---|---|
-| « Serveur indisponible » | Le lanceur est-il ouvert et l’adresse est-elle celle du serveur ? |
-| Ton ami ne trouve pas le salon | Même adresse et même réseau pour la méthode Wi-Fi ; ne partage pas `localhost` |
-| Le téléphone ne charge pas le jeu | Réseau Wi-Fi invité isolé, pare-feu du PC ou mauvaise adresse réseau |
-| Impossible de lancer | Toutes les places nécessaires sont remplies, connectées et marquées prêtes |
-| Le bouton Inviter est grisé | Crée un salon qui n’a pas encore démarré |
-| Déploiement refusé | Énergie personnelle, cible ennemie, route et point de départ autorisé |
-| Les comptes disparaissent après un redéploiement | Le dossier `DATA_DIR` doit être sur un stockage persistant |
-| Une troupe ne tire pas sur une tourelle | C’est la règle du PvP : seules les troupes adverses sont ciblées |
+| Compte connecté et `DATABASE_URL` configurée | Base PostgreSQL, dont Supabase ; sauvegarde indépendante du disque temporaire de l’hébergement |
+| Compte connecté sans `DATABASE_URL` | Fichier `accounts.json` du serveur, dans `DATA_DIR` ou `data/` ; accessible aux appareils connectés à ce serveur |
+| Invité ou HTML ouvert seul | Navigateur de cet appareil ; pas de synchronisation de compte entre appareils |
 
+La sauvegarde se fait automatiquement après les changements. Le panneau du profil sert à signaler une erreur ou à réessayer lorsque nécessaire. Il n’est pas nécessaire d’exporter un fichier JSON.
 
-## Fluidité et invitations répétées
+À la première connexion d’un compte sans progression, le jeu peut proposer de lui associer la progression locale. Si une autre session a déjà modifié le même compte, le jeu demande de recharger la version du compte plutôt que d’écraser silencieusement des changements. Les comptes de deux serveurs indépendants restent distincts.
 
-Le rendu adapte automatiquement la résolution, les ombres et les effets pour viser 60 FPS. La simulation conserve toutes les troupes et tous les dégâts ; les recherches de cibles et les trajets utilisent des caches et des voisinages spatiaux. Les mises à jour réseau sont regroupées et interpolées. Ce réglage ne garantit pas 60 FPS sur tous les appareils, notamment dans le mode de rendu logiciel.
+Le serveur fait avancer les parties multijoueurs même si l’hôte change d’onglet. Tant que le serveur et la partie fonctionnent, une reconnexion au même compte permet de retrouver sa place et l’état actuel. Quitter volontairement le salon abandonne cette place. Le rendu reprend au retour dans la fenêtre ; une récupération du contexte graphique ne réinitialise pas le combat.
 
-Les nouvelles invitations pointent vers le nouveau salon. Les invitations expirées ou liées à une partie lancée/terminée sont retirées. Si tu joues déjà, « Quitter et rejoindre » permet de changer explicitement de salon. La liste d’amis permet la recherche et le filtre En ligne.
+En solo, la simulation suit le temps écoulé et peut le rattraper au retour d’un onglet suspendu. Fermer le HTML ne crée pas de service en arrière-plan. Les salons sans joueur connecté sont nettoyés après dix minutes. Un redémarrage du serveur termine les combats en cours, mais conserve les comptes et la progression dès lors que leur stockage persistant est préservé.
 
-## Catalogue partagé dans l’Arsenal
+## Héberger et mettre à jour le projet
 
-L’Arsenal rassemble 160 défenses et 160 unités. Choisis Tout, Défenses ou Unités, puis Mes cartes ou Catalogue complet. Le filtre de rareté propose Commune, Rare, Épique, Légendaire et Mythique. La recherche et le filtre de famille des défenses se combinent avec ces choix. Les cartes apparaissent par lots de 24 avec Afficher davantage. Touche une unité pour consulter son rôle et ses statistiques, puis l’équiper ou la retirer : 6 défenses et 6 unités maximum, au moins une unité équipée. Les unités non obtenues restent consultables dans le catalogue.
+Pour jouer depuis plusieurs réseaux, déploie **le projet complet** sur un service qui exécute un serveur Node.js durable. Une page statique seule ne fournit pas le serveur multijoueur.
 
+- Installation des dépendances : `npm ci`.
+- Démarrage : `npm start`, avec `server.cjs` comme point d’entrée.
+- Le port est fourni par `PORT` lorsque l’hébergeur le demande.
+- Conserve ensemble `server.cjs`, `simulation.js`, `accounts.cjs`, `account-store.cjs`, `progress.cjs`, `package.json`, `package-lock.json` et le dossier `dist/`.
+- Le service doit accepter les connexions HTTP longues des notifications et des parties.
+- Pour une sauvegarde PostgreSQL, configure `DATABASE_URL` côté serveur en suivant **INSTALLER_SUPABASE.md**. Cette variable n’a pas à être ajoutée au HTML.
+- Sans PostgreSQL, place `DATA_DIR` sur un disque persistant et conserve son contenu lors des mises à jour.
 
-## Équité des cartes PvP et présentation des unités
+Partage ensuite la même adresse HTTPS à tous les joueurs. Pour mettre à jour le jeu, remplace les fichiers du projet, conserve la configuration de sauvegarde et les données, puis redéploie. Recharge le jeu sur tous les appareils et crée un nouveau salon pour utiliser les mêmes règles et les nouvelles cartes. Les fichiers de validation Google, `sitemap.xml` et `robots.txt` restent dans `dist/`.
 
-Les parties PvP utilisent désormais une implantation symétrique sur les 16 cartes. En duel, les deux châteaux sont opposés et les trois bases à capturer sont à égale distance de chaque camp. À quatre joueurs, les quatre châteaux et les cinq bases forment une disposition symétrique : chaque position dispose des mêmes distances vers les objectifs. Relief, collines, zones de départ et prix des territoires suivent cette symétrie. Les routes contournent les bâtiments des bases pour laisser passer les troupes.
+## Résoudre un blocage
 
-Ces cartes s’appliquent aux nouvelles parties. Après avoir remplacé le projet sur ton hébergement, recharge le jeu sur tous les appareils et crée un nouveau salon pour que tout le monde utilise la même version.
-
-Les cartes d’unités utilisent la même présentation que les défenses dans le catalogue et le deck : cadre et fond de rareté, cinq losanges, coût en énergie, nom, rôle et statistiques. Les unités non obtenues affichent le même état verrouillé que les défenses. Les visuels des unités sont recadrés pour limiter les modèles coupés.
-
-## Projectiles et niveaux des défenses
-
-Les obus de mortier et missiles s’animent entre les mises à jour de simulation et du réseau. Leur trajectoire visuelle est indépendante de la fréquence des messages ; les dégâts restent calculés par le serveur. Les missiles rapides détectent aussi une cible traversée entre deux positions, et les salves respectent leur décalage de départ. Une interruption réseau prolongée cesse l’extrapolation pour éviter des projectiles fantômes.
-
-Les niveaux des défenses utilisent les chiffres 1 à 3, sont centrés sous les tourelles et se mettent à jour après le déplacement de la caméra. Les badges qui se chevauchent sont masqués pour préserver la lisibilité.
+| Symptôme | Vérification utile |
+|---|---|
+| Serveur indisponible | Le serveur est démarré et l’adresse ouverte est bien celle qu’il affiche |
+| Salon introuvable chez un ami | Même adresse de jeu ; sur Wi-Fi, utilise l’adresse réseau réelle du PC, pas `localhost` |
+| Le téléphone ne charge pas la page | Même réseau pour la méthode locale ; vérifier l’adresse et l’accès autorisé par le pare-feu du PC |
+| Impossible de lancer | Toutes les places du format choisi sont occupées, connectées et prêtes ; après un changement de carte, chacun doit valider de nouveau |
+| Amélioration ou vente indisponible | Une tourelle ennemie ne s’améliore pas ; seul le propriétaire peut vendre ou changer le ciblage |
+| Réparation indisponible | Attendre la phase de construction entre deux manches |
+| Déploiement refusé | Vérifier énergie, cible adverse, voie et point de départ ; essayer Départ auto |
+| Progression absente sur un autre appareil | Même compte et même adresse de serveur ; vérifier que la sauvegarde du premier appareil est terminée |
+| Comptes perdus après redéploiement | Vérifier `DATABASE_URL` ou la persistance du dossier `DATA_DIR` |
+| Vote de vitesse non appliqué | Tous les joueurs humains doivent accepter avant la fin du délai ; en PvP la vitesse est fixée à ×1 |
+| Une troupe ignore une tourelle | C’est la règle du siège : elle combat les troupes adverses et avance vers le château |
 
 ## Validation Google Search Console
 
