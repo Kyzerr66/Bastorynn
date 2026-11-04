@@ -24,13 +24,19 @@ const sha=crypto.createHash('sha256').update(client).digest('hex').slice(0,12);
 let html=read('src/index.html').replace('/* RENDERER_MODULE */',()=>read('src/renderer.js')).replace('/* TACTICAL_STYLE */',()=>read('src/tactical.css')+'\n'+read('src/citadelles.css'));
 html=html.replace('<!-- ENGINE_SCRIPTS -->',assetNames.map(([name])=>'<script src="assets/'+name+'?v='+sha+'"></script>').join('\n'));
 html=html.replace('src="assets/citadelles-pack.js"','src="assets/citadelles-pack.js?v='+modelHash+'"').replace('src="assets/blender-models.js"','src="assets/blender-models.js?v='+modelHash+'"');
+const startupConfig={renderer:'assets/renderer.js?v='+crypto.createHash('sha256').update(read('src/renderer.js')).digest('hex').slice(0,12),adapter:'assets/blender-models.js?v='+modelHash,models:'assets/citadelles-pack.js?v='+modelHash,engine:'assets/engine.js?v='+sha};
+const startup=read('src/startup.js').replace('/* STARTUP_CONFIG */',JSON.stringify(startupConfig));
+html=html.replace('assets/startup.js','assets/startup.js?v='+crypto.createHash('sha256').update(startup).digest('hex').slice(0,12));
 html=html.trimEnd()+'\n';
-client='';
+const engine=client+'\nwindow.BastorynnReady=true;\n';client='';
 for(const dir of ['assets','dist/assets']){
  const dest=path.join(root,dir);fs.mkdirSync(dest,{recursive:true});
  // Only remove known generated fragments, never recurse into user data.
  for(const f of fs.readdirSync(dest))if(/^engine-part-\d{2}\.js$/.test(f))fs.unlinkSync(path.join(dest,f));
  for(const [name,body]of assetNames)fs.writeFileSync(path.join(dest,name),body);
+ fs.writeFileSync(path.join(dest,'renderer.js'),read('src/renderer.js'));
+ fs.writeFileSync(path.join(dest,'startup.js'),startup);
+ fs.writeFileSync(path.join(dest,'engine.js'),engine);
  fs.writeFileSync(path.join(dest,'audio-bank.js'),read('src/audio-bank.js'));
  fs.writeFileSync(path.join(dest,'citadelles-pack.js'),read('src/models/citadelles-pack.js'));
  fs.writeFileSync(path.join(dest,'blender-models.js'),read('src/blender-models.js'));

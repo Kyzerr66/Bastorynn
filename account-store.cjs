@@ -13,7 +13,7 @@ module.exports=async function createStore(){
  const url=new URL(process.env.DATABASE_URL);
  // TLS options are explicit; do not accidentally disable certificate verification.
  for(const key of ['sslmode','sslcert','sslkey','sslrootcert'])url.searchParams.delete(key);
- const pool=new Pool({connectionString:url.toString(),max:2,connectionTimeoutMillis:10000,idleTimeoutMillis:30000,ssl:process.env.DATABASE_TLS==='local-test'?false:{rejectUnauthorized:true,...(process.env.DATABASE_CA_CERT?{ca:process.env.DATABASE_CA_CERT.replace(/\\n/g,'\n')}:{})}});
+ const pool=new Pool({connectionString:url.toString(),max:2,connectionTimeoutMillis:10000,idleTimeoutMillis:30000,query_timeout:12000,statement_timeout:12000,ssl:process.env.DATABASE_TLS==='local-test'?false:{rejectUnauthorized:true,...(process.env.DATABASE_CA_CERT?{ca:process.env.DATABASE_CA_CERT.replace(/\\n/g,'\n')}:{})}});
  pool.on('error',()=>console.error('Connexion de sauvegarde interrompue. Les prochaines écritures seront retentées.'));
  try{
   await pool.query('CREATE SCHEMA IF NOT EXISTS bastorynn_private');

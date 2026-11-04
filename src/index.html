@@ -1172,23 +1172,7 @@ button,input,select{font:inherit}button:focus-visible,select:focus-visible{outli
 </nav>
 <div class="toasts" id="toasts"></div>
 <canvas id="fx"></canvas>
-<script>/* RENDERER_MODULE */</script>
-<script src="assets/citadelles-pack.js"></script>
-<script src="assets/blender-models.js"></script>
-<div id="v4-loading" role="status" style="position:fixed;inset:0;z-index:300;display:grid;place-content:center;background:#101c23;color:#f4eedc;text-align:center;font-family:system-ui"><b style="letter-spacing:.12em;font-size:28px">BASTORYNN</b><p>Préparation de la citadelle…</p></div>
-<script>window.__bastorynnScriptParts=[];</script>
-<!-- ENGINE_SCRIPTS -->
-<script>
-(async function () {
- try {
-  await CitadellesModels.init();
-  const script = document.createElement('script');
-  script.textContent = window.__bastorynnScriptParts.join('');
-  document.body.appendChild(script);
-  delete window.__bastorynnScriptParts;
-  document.getElementById("v4-loading").remove();
- } catch(error) { document.getElementById("v4-loading").lastElementChild.textContent="Chargement impossible : "+error.message; console.error(error); }
-})();
-</script>
+<div id="v4-loading" role="status" style="position:fixed;inset:0;z-index:300;display:grid;place-content:center;background:#101c23;color:#f4eedc;text-align:center;font-family:system-ui;padding:24px"><b style="letter-spacing:.12em;font-size:28px">BASTORYNN</b><p id="load-message">Connexion à la citadelle…</p><button id="load-retry" hidden style="padding:12px;background:#d4ee8a;color:#101c23;border-radius:8px">Réessayer</button></div>
+<script>document.getElementById('load-retry').onclick=()=>location.reload();setTimeout(()=>{if(!window.BastorynnBoot){document.getElementById('load-message').textContent='Le serveur met du temps à répondre. Tu peux relancer le chargement.';document.getElementById('load-retry').hidden=false;}},22000);</script>
+<script defer src="assets/startup.js"></script>
 </body></html>
-

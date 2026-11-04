@@ -4,9 +4,9 @@ const test=require('node:test'),assert=require('node:assert/strict'),vm=require(
 // The fixture controls the end of a mission; no debug endpoint is added to the game.
 test('campaign promotes a departed host only after final state, then opens the next mission',async()=>{
  const root=path.join(__dirname,'..'),realRequire=createRequire(path.join(root,'server.cjs')),events=[],recorded=[],intervals=[];let handler;
- const accountStub={ready:new Promise(()=>{}),defer:fn=>fn(),transaction:fn=>fn(),route:()=>false,roomChanged(){},notify(){},user(){},recordCampaign:(...args)=>recorded.push(args),requireUser:()=>({id:'user1'})};
+ const accountStub={ready:new Promise(()=>{}),status:()=>({type:"local",connected:true}),defer:fn=>fn(),transaction:fn=>fn(),route:()=>false,roomChanged(){},notify(){},user(){},recordCampaign:(...args)=>recorded.push(args),requireUser:()=>({id:'user1'})};
  const context=vm.createContext({console,Buffer,URL,process:{env:{},argv:['node','server.cjs'],once(){}},__dirname:root,
-  require(name){if(name==='./accounts.cjs')return ()=>accountStub;if(name==='node:http')return {createServer:fn=>{handler=fn;return {on(){}};}};return realRequire(name);},
+  require(name){if(name==='./accounts.cjs')return ()=>accountStub;if(name==='node:http')return {createServer:fn=>{handler=fn;return {on(){},listen(){}};}};return realRequire(name);},
   setInterval(fn,ms){intervals.push({fn,ms});return {unref(){}};},setTimeout,clearTimeout});
  new vm.Script(fs.readFileSync(path.join(root,'server.cjs'),'utf8')+'\nglobalThis.fixture={runtime,rooms,state,leaveRoom};').runInContext(context);
  const {runtime,rooms,state,leaveRoom}=context.fixture;

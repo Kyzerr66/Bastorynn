@@ -1,6 +1,6 @@
 /* Blender-authored, indexed and quantized mesh archive. No remote asset service. */
 window.CitadellesModels=(()=>{
- const T=R3.THREE,cache=new Map();let pack=null;
+ const T=R3.THREE,cache=new Map();let pack=null,disabled=false;
  function decode(data,accent,unitPaint,foliage=false){
   if(!data)return null;
   const n=data.i.length,positions=new Float32Array(n*3),colors=new Float32Array(n*3),mr=new Float32Array(n*2),em=new Float32Array(n*2);
@@ -29,8 +29,8 @@ window.CitadellesModels=(()=>{
   if(!window.BastorynnAssetArchive)throw Error('Archive 3D Citadelles manquante');
   const bytes=Uint8Array.from(atob(window.BastorynnAssetArchive),c=>c.charCodeAt(0));delete window.BastorynnAssetArchive;
   if(typeof DecompressionStream!=='function')throw Error('Ce navigateur ne prend pas en charge les assets 3D. Utilise une version récente de Chrome, Edge, Firefox ou Safari.');
-  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));pack=JSON.parse(await new Response(stream).text());
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));const parsed=JSON.parse(await new Response(stream).text());if(disabled||window.BastorynnSkipModels)return null;pack=parsed;
   return {families:Object.keys(pack.towers).length,baseUnits:Object.keys(pack.units).length,trees:Object.keys(pack.trees).length};
  }
- return {init,tower,unit,tree,decor,stats:()=>({ready:!!pack,cached:cache.size,families:pack?Object.keys(pack.towers):[],baseUnits:pack?Object.keys(pack.units):[]})};
+ return {init,disable(){disabled=true;pack=null;},tower,unit,tree,decor,stats:()=>({ready:!!pack,cached:cache.size,families:pack?Object.keys(pack.towers):[],baseUnits:pack?Object.keys(pack.units):[]})};
 })();

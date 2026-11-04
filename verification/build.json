@@ -1,9 +1,9 @@
 {
-  "version": "4.0.0",
-  "hash": "0a59b01570b9",
-  "modelHash": "fcca0f623089",
+  "version": "4.0.1",
+  "hash": "fbf681541e8e",
+  "modelHash": "0383b7e6b245",
   "fragments": 3,
   "simulationBytes": 276045,
-  "clientBytes": 689457,
+  "clientBytes": 689971,
   "source": "src/client.js + src/tactics.js"
 }

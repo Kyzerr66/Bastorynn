@@ -8,7 +8,7 @@ test('HTTP guards, deck ownership, authoritative coop, duel departure and final 
  const streams=[],base='http://127.0.0.1:'+port;
  try{
   await new Promise((resolve,reject)=>{server.stdout.on('data',b=>{if(b.toString().includes('localhost:'+port))resolve();});server.on('exit',c=>reject(Error('Test server exit '+c)));server.on('error',reject);});
-  const health=await fetch(base+'/api/health');assert.equal((await health.json()).version,'bastorynn-3.2');
+  const health=await fetch(base+'/api/health');assert.equal((await health.json()).version,'bastorynn-4.0.1');
   assert.match(health.headers.get('content-security-policy'),/frame-ancestors 'none'/);
   // An unfinished upload must not enter the global account transaction queue.
   const slow=net.connect(port,'127.0.0.1');slow.on('error',()=>{});await new Promise(r=>slow.once('connect',r));
@@ -19,7 +19,7 @@ test('HTTP guards, deck ownership, authoritative coop, duel departure and final 
   const same=await fetch(base,{headers:{'accept-encoding':'gzip','if-none-match':compressed.headers.get('etag')}});assert.equal(same.status,304);
   const plain=await fetch(base,{headers:{'accept-encoding':'gzip;q=0'}});assert.equal(plain.headers.get('content-encoding'),null);await plain.arrayBuffer();
   async function api(user,url,data){const res=await fetch(base+'/api/'+url,{method:'POST',headers:{'Content-Type':'application/json',...(user.cookie?{Cookie:user.cookie}:{})},body:JSON.stringify(data)});const cookie=res.headers.get('set-cookie');if(cookie)user.cookie=cookie.split(';')[0];return {status:res.status,data:await res.json()};}
-  const users=[{},{}];for(let i=0;i<users.length;i++)assert.equal((await api(users[i],'account/register',{username:'qa_player_'+i,password:'Local_test_only_2026',name:'Test '+i})).status,200);
+  const users=[{},{}];for(let i=0;i<users.length;i++)assert.equal((await api(users[i],'account/register',{username:'qa_'+require('node:crypto').randomBytes(8).toString('hex'),password:require('node:crypto').randomBytes(24).toString('base64url'),name:'Test '+i})).status,200);
   const game=load(),troops=[...game.TroopData.starters],initialDeck=['gatling_0','cryo_0','canon_0','radar_0','mortar_0','tesla_0'];
   assert.equal((await api(users[0],'create',{config:{mode:'coop',map:'aube',diff:0},loadout:{defenses:['gatling_4'],troops}})).status,409);
   const a=await api(users[0],'create',{config:{mode:'coop',map:'aube',diff:0},loadout:{defenses:initialDeck,troops}});assert.equal(a.status,200);const b=await api(users[1],'join',{code:a.data.room.code});assert.equal(b.status,200);const seats=[a.data,b.data];
@@ -59,7 +59,7 @@ test('HTTP guards, deck ownership, authoritative coop, duel departure and final 
   duelFeeds[1].controller.abort();const finalReconnect=await stream(1);const saved=await finalReconnect.wait(e=>e.type==='state'&&e.data.ended);
   assert.equal(saved.data.clock,final.data.clock);assert.equal(saved.data.boards[0].energy,undefined);
   assert.equal((await send(1,'leave')).status,200);
-  for(let i=2;i<4;i++){users.push({});assert.equal((await api(users[i],'account/register',{username:'qa_player_'+i,password:'Local_test_only_2026',name:'Test '+i})).status,200);}
+  for(let i=2;i<4;i++){users.push({});assert.equal((await api(users[i],'account/register',{username:'qa_'+require('node:crypto').randomBytes(8).toString('hex'),password:require('node:crypto').randomBytes(24).toString('base64url'),name:'Test '+i})).status,200);}
   const duo=await api(users[0],'create',{config:{mode:'duo',map:'aube',diff:0}});assert.equal(duo.status,200);seats[0]=duo.data;
   for(let i=1;i<4;i++){const joined=await api(users[i],'join',{code:duo.data.room.code});assert.equal(joined.status,200);seats[i]=joined.data;}
   const duoFeeds=[];for(let i=0;i<4;i++){duoFeeds.push(await stream(i));assert.equal((await send(i,'ready')).status,200);}

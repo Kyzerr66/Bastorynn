@@ -1,0 +1,43 @@
+{
+  "databaseOutage": {
+    "home": 200,
+    "health": {
+      "ok": true,
+      "version": "bastorynn-4.0.1",
+      "accounts": false,
+      "authority": "server",
+      "storage": {
+        "type": "initializing",
+        "connected": false,
+        "persistent": false
+      }
+    },
+    "account": 503
+  },
+  "runs": [
+    {
+      "kind": "missing-models",
+      "elapsedMs": 5496,
+      "boot": {
+        "phase": "ready",
+        "fallback": true
+      }
+    },
+    {
+      "kind": "stalled-models",
+      "elapsedMs": 10684,
+      "boot": {
+        "phase": "ready",
+        "fallback": true
+      }
+    },
+    {
+      "kind": "missing-engine",
+      "elapsedMs": 441,
+      "boot": {
+        "phase": "error",
+        "fallback": false
+      }
+    }
+  ]
+}

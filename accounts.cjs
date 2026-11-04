@@ -78,5 +78,5 @@ module.exports=function accounts({json,rooms,publicRoom}){
   return false;
  }
  function recordCampaign(ids,result){if(!(scope.getStore()?.active?scope.getStore():null)){background(()=>recordCampaign(ids,result));return;}for(const id of new Set(ids)){const u=user(id);if(!u)continue;u.campaign||={};const p=u.campaign[result.map]||={};p.best=Math.max(p.best||0,result.waves);if(result.win){p.win=true;p.stars=Math.max(p.stars||0,result.stars);p.d=Math.max(p.d||0,result.diff+1);}}save();notify(ids);}
- return {ready,transaction,defer,status,close:async()=>{await queue;await store.close();},route,requireUser,cookie,view,safe,activeRoom,roomChanged,ended,notify,user,recordCampaign};
+ return {ready,transaction,defer,status,close:async()=>{await queue;if(store)await store.close();},route,requireUser,cookie,view,safe,activeRoom,roomChanged,ended,notify,user,recordCampaign};
 };
