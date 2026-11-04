@@ -1,10 +1,13 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{promisify}=require('node:util');
+const guards=require('./server-guards.cjs');
 const scrypt=promisify(crypto.scrypt),hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 module.exports=function accounts({json,rooms,publicRoom}){
  const {AsyncLocalStorage}=require('node:async_hooks'),scope=new AsyncLocalStorage();
  let db={version:1,users:[],sessions:[]},store,queue=Promise.resolve(),storageOK=false;
- const presence=new Map(),limits=new Map(),inviteLimits=new Map();
+ const presence=new Map(),limiter=guards.createRateLimiter(),inviteLimits=new Map();
+ // Both tables would otherwise grow for as long as the process lives.
+ setInterval(()=>{limiter.purge();const old=Date.now()-10000;for(const [key,time] of inviteLimits)if(time<old)inviteLimits.delete(key);},300000).unref();
  const ready=require('./account-store.cjs')().then(async value=>{store=value;db=await store.begin();await store.commit(db,false);storageOK=true;});
  function save(){const ctx=(scope.getStore()?.active?scope.getStore():null);if(!ctx)throw Error('Écriture hors transaction');ctx.dirty=true;}
  function defer(fn){const ctx=(scope.getStore()?.active?scope.getStore():null);if(ctx)ctx.after.push(fn);else fn();}
@@ -26,7 +29,7 @@ module.exports=function accounts({json,rooms,publicRoom}){
  function notify(ids){for(const id of new Set(ids)){const u=user(id);if(u)emit(u);}}
  function onlineChanged(u){notify([u.id,...u.friends]);}
  function setSession(req,res,u,remember){const key=crypto.randomBytes(32).toString('base64url'),expires=Date.now()+(remember?30:1)*86400000;db.sessions=db.sessions.filter(s=>s.expires>Date.now());db.sessions.push({hash:hash(key),user:u.id,expires});if(db.sessions.filter(s=>s.user===u.id).length>12){const i=db.sessions.findIndex(s=>s.user===u.id);db.sessions.splice(i,1);}save();const secure=req.socket.encrypted||req.headers['x-forwarded-proto']==='https';res.setHeader('Set-Cookie',`owned_session=${key}; Path=/; HttpOnly; SameSite=Lax${remember?'; Max-Age=2592000':''}${secure?'; Secure':''}`);}
- function rate(req,label,max,period){const key=req.socket.remoteAddress+':'+label,now=Date.now(),r=limits.get(key)||{n:0,until:now+period};if(now>r.until){r.n=0;r.until=now+period;}limits.set(key,r);if(++r.n>max){const e=Error('Trop de tentatives. Réessaie dans quelques minutes.');e.status=429;throw e;}}
+ function rate(req,label,max,period){if(!limiter.allow(guards.clientAddress(req)+':'+label,max,period)){const e=Error('Trop de tentatives. Réessaie dans quelques minutes.');e.status=429;throw e;}}
  async function route(req,res,u,data){const p=u.pathname;
   if(p==='/api/account/progress'&&['GET','POST'].includes(req.method)){
    const account=requireUser(req);
@@ -45,8 +48,10 @@ module.exports=function accounts({json,rooms,publicRoom}){
   }
   if(req.method!=='POST'||!/^\/api\/(account|social)\//.test(p))return false;
   if(p==='/api/account/register'||p==='/api/account/login'){
-   const username=String(data.username||'').trim().toLowerCase(),password=String(data.password||'');rate(req,'auth:'+username,18,900000);
+   const username=String(data.username||'').trim().toLowerCase(),password=String(data.password||'');
+   // Validated first: the rate-limit key must never hold an attacker-sized username.
    if(!/^[a-z0-9_-]{3,24}$/.test(username)||password.length<8||password.length>128)throw Error('Identifiant : 3–24 lettres/chiffres. Mot de passe : 8–128 caractères.');
+   rate(req,'auth:'+username,18,900000);rate(req,'auth-ip',120,900000);
    let account=db.users.find(a=>a.username===username);
    if(p.endsWith('/register')){rate(req,'register',12,3600000);if(account)throw Error('Cet identifiant est déjà utilisé.');if(db.users.length>=10000)throw Error('La capacité de comptes de ce serveur est atteinte.');const salt=crypto.randomBytes(16).toString('hex'),passwordHash=(await scrypt(password,salt,64)).toString('hex');
     if(db.users.some(a=>a.username===username))throw Error('Cet identifiant est déjà utilisé.');let id;do{id='OW-'+crypto.randomBytes(3).toString('hex').toUpperCase();}while(user(id));account={id,username,name:String(data.name||username).trim().slice(0,24)||username,salt,passwordHash,friends:[],requests:[],invites:[]};db.users.push(account);

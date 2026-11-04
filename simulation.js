@@ -54,6 +54,25 @@ Object.assign(FAM, {
   skyguard: { n:'Garde-ciel', role:'DCA de zone', kind:'flak', dt:'phys', cost:125, dmg:32, rate:.95, range:4.3, splash:.9, air:true, airOnly:true, c:'#AFC2E8', desc:'Batterie à fragmentation longue portée. Frappe les groupes aériens mais ne peut pas viser le sol.' },
   siege: { n:'Briseur de siège', role:'Impact lourd à recharge lente', kind:'shell', dt:'phys', cost:220, dmg:125, rate:5.2, range:6.3, splash:1.2, pierce:.6, air:false, c:'#E7AA78', desc:'Un énorme obus contre les groupes au sol, avec 60 % de pénétration. Puissant mais coûteux et lent : protège-le avec des tirs rapides.' }
 });
+// Quatorze familles de défenses : elles réutilisent les comportements de combat du moteur.
+// Les identifiants et réglages existants ne changent pas.
+Object.assign(FAM, {
+  baliste: { n:'Baliste lourde', role:'Carreaux perforants', kind:'bullet', dt:'phys', cost:70, dmg:24, rate:1.35, range:3.4, pierce:.25, air:false, prefer:'strong', c:'#C9A26B', desc:'Un carreau d’acier qui traverse les protections légères. Vise d’abord les cibles résistantes.' },
+  mitraille: { n:'Canon à mitraille', role:'Cône à courte portée', kind:'cone', dt:'phys', cost:80, dmg:7, rate:.55, range:1.9, infMul:1.3, air:false, c:'#D8D2B0', desc:'Une gerbe de plombs à bout portant. Dévaste l’infanterie groupée, mais sa portée est courte.' },
+  vitriol: { n:'Cracheur de vitriol', role:'Artillerie corrosive', kind:'shell', dt:'acid', cost:115, dmg:26, rate:2.5, range:3.9, splash:.8, pierce:.7, air:false, c:'#A6E05A', desc:'Des obus corrosifs qui ignorent presque tout le blindage. Moins de dégâts bruts qu’un mortier.' },
+  arcvolt: { n:'Arc voltaïque', role:'Chaîne longue', kind:'chain', dt:'energy', cost:90, dmg:10, rate:.85, range:2.5, chains:3, air:true, c:'#7FB2FF', desc:'L’arc saute sur quatre cibles. Chaque coup est faible, mais il punit les vagues nombreuses.' },
+  prisme: { n:'Prisme solaire', role:'Faisceau à montée lente', kind:'beam', dt:'energy', cost:135, dmg:12, rate:0, range:3, ramp:2.6, pierce:.3, air:true, c:'#FFC46B', desc:'Un faisceau modeste au départ, redoutable s’il reste sur la même cible. Parfait contre les boss.' },
+  gauss: { n:'Canon Gauss', role:'Tir de ligne rapide', kind:'line', dt:'true', cost:165, dmg:58, rate:2.2, range:4.2, air:false, c:'#90E8D8', desc:'Plus rapide qu’un railgun, avec moins de portée. Traverse tout ce qui marche sur sa ligne.' },
+  guepes: { n:'Ruche à guêpes', role:'Micro-missiles', kind:'missile', dt:'phys', cost:125, dmg:10, rate:1.5, range:3.6, salvo:3, splash:0, air:true, c:'#F6D55C', desc:'Trois petits missiles par salve. Bon contre les cibles légères et les aéronefs isolés.' },
+  seisme: { n:'Marteau sismique', role:'Choc de zone', kind:'pulse', dt:'energy', cost:125, dmg:24, rate:2.6, range:1.8, slow:{p:.25,d:1}, air:false, c:'#D29A62', desc:'Frappe le sol et ralentit tout ce qui l’entoure. Les versions rares étourdissent.' },
+  balise: { n:'Balise de tir', role:'Marquage étendu', kind:'radar', dt:'none', cost:70, dmg:0, rate:0, range:2.8, mark:.14, air:false, c:'#6FF0C8', desc:'Révèle les unités camouflées et leur fait subir 14 % de dégâts en plus.' },
+  faille: { n:'Puits de faille', role:'Attraction continue', kind:'gravity', dt:'energy', cost:150, dmg:16, rate:2.8, range:2.3, pull:1.2, air:false, c:'#8E7BFF', desc:'Ramène les ennemis plus loin en arrière qu’une singularité, mais avec moins de dégâts.' },
+  magnetique: { n:'Semeur magnétique', role:'Champ de mines dense', kind:'mine', dt:'phys', cost:95, dmg:46, rate:1.9, range:2.6, splash:.5, max:6, air:false, c:'#B8B8C8', desc:'Pose jusqu’à six mines plus légères sur la route. Idéal pour user les colonnes.' },
+  solaire: { n:'Centrale solaire', role:'Économie avancée', kind:'eco', dt:'none', cost:95, dmg:0, rate:0, range:1.4, income:22, air:false, c:'#FFDD6B', desc:'Plus rentable qu’une forge, mais plus chère à poser. Produit de l’énergie à chaque fin de vague.' },
+  commandement: { n:'Poste de commandement', role:'Soutien offensif', kind:'aura', dt:'none', cost:105, dmg:0, rate:0, range:1.8, buffRate:.1, air:false, c:'#F08FA8', desc:'Accélère un peu moins qu’un relais, mais les versions rares ajoutent dégâts et portée aux voisines.' },
+  comete: { n:'Canon à comètes', role:'Plasma incendiaire', kind:'plasma', dt:'energy', cost:140, dmg:34, rate:2, range:3.4, burn:.25, air:false, c:'#7FF0FF', desc:'Une boule d’énergie qui traverse la ligne et enflamme ce qu’elle touche.' },
+});
+
 const DEFENSE_MODEL_ALIASES = {sentry:'gatling',frostbattery:'mortar',ionlance:'tesla',skyguard:'flak',siege:'obusier'};
 const MAX_DECK = 6;
 const EXPANSION_CARDS = ['sentry_0','frostbattery_0','ionlance_0','skyguard_0','siege_0'];
@@ -286,6 +305,108 @@ Object.assign(CARD_DEF, {
   skyguard:[['Garde-ciel','commune',{},'Une zone du ciel sous contrôle.']],
   siege:[['Briseur de siège','epique',{},'Un tir décisif. Une longue attente.']]
 });
+// Cinq cartes par nouvelle famille, comme les familles d'origine : la série complète donne le bonus d'ensemble.
+Object.assign(CARD_DEF, {
+  baliste: [
+    ['Baliste de rempart', 'commune', {}, 'Une corde d’acier et une bonne raison de tenir.'],
+    ['Perce-cuirasse', 'rare', { pierce: .4 }, 'Le carreau ne s’arrête pas au premier blindage.'],
+    ['Scorpion', 'epique', { rateMul: 1.15, pierce: .45 }, 'Rechargée avant que l’écho ne meure.'],
+    ['Chasseuse de titans', 'legendaire', { pierce: .55, execute: .1 }, 'Faite pour ce qui ne devrait pas tomber.'],
+    ['Lance de l’Aube', 'mythique', { pierce: .7, execute: .14, rangeMul: 1.12 }, 'On la voit partir. On ne la voit pas arriver.'],
+  ],
+  mitraille: [
+    ['Tromblon de garde', 'commune', {}, 'Personne ne le trouve élégant. Personne ne s’en approche.'],
+    ['Pluie de plombs', 'rare', { rateMul: 1.14 }, 'Le couloir est vite dégagé.'],
+    ['Gueule d’acier', 'epique', { width: .18, rateMul: 1.1 }, 'Une gerbe large comme un portail.'],
+    ['Faucheuse', 'legendaire', { width: .24, knock: .25 }, 'Elle ne vise pas. Elle balaie.'],
+    ['Dernière ligne', 'mythique', { width: .3, knock: .35, stun: { c: .14, d: .5 } }, 'Quand tout a cédé, elle tire encore.'],
+  ],
+  vitriol: [
+    ['Cracheur M4', 'commune', {}, 'Une odeur qu’on n’oublie pas.'],
+    ['Pluie acide', 'rare', { splash: .15 }, 'Elle ronge même les certitudes.'],
+    ['Bile de fer', 'epique', { splash: .2, burn: .4 }, 'Le blindage fond avant le moral.'],
+    ['Sang de wyverne', 'legendaire', { splash: .3, burn: .6, split: 2 }, 'Chaque obus se partage en gouttes mortelles.'],
+    ['Déluge noir', 'mythique', { splash: .4, burn: .8, split: 3 }, 'Après lui, le sol reste muet.'],
+  ],
+  arcvolt: [
+    ['Étincelle', 'commune', {}, 'Une petite décharge, plusieurs fois.'],
+    ['Pont d’arc', 'rare', { chains: 1 }, 'Elle saute un soldat de plus.'],
+    ['Arc de Volta', 'epique', { chains: 1, rateMul: 1.14 }, 'Le fer devient mauvais conducteur de courage.'],
+    ['Orage captif', 'legendaire', { chains: 2, stun: { c: .1, d: .4 } }, 'On l’a enfermé. Il n’a pas apprécié.'],
+    ['Colère de Zeus', 'mythique', { chains: 3, noDecay: true, stun: { c: .14, d: .5 } }, 'La dernière cible reçoit autant que la première.'],
+  ],
+  prisme: [
+    ['Prisme d’essai', 'commune', {}, 'Le soleil, bien cadré.'],
+    ['Lentille fine', 'rare', { ramp: .4 }, 'Plus elle regarde, plus elle brûle.'],
+    ['Œil de midi', 'epique', { ramp: .7, rangeMul: 1.08 }, 'Il n’y a plus d’ombre à cette heure.'],
+    ['Couronne solaire', 'legendaire', { ramp: 1, beams: 2 }, 'Deux rayons pour une seule leçon.'],
+    ['Zénith', 'mythique', { ramp: 1.4, beams: 2, melt: .1 }, 'Même l’acier finit par couler.'],
+  ],
+  gauss: [
+    ['Bobine G1', 'commune', {}, 'Une ligne droite, sans discussion.'],
+    ['Accélérateur', 'rare', { rateMul: 1.12 }, 'Plus vite que le bruit qu’il fait.'],
+    ['Fendeur', 'epique', { rateMul: 1.14, width: .08 }, 'Un couloir de plus sur la carte.'],
+    ['Aiguille noire', 'legendaire', { rateMul: 1.18, width: .12, crit: { c: .16, m: 2 } }, 'Elle coud les rangs ensemble.'],
+    ['Méridien', 'mythique', { rateMul: 1.22, width: .16, crit: { c: .22, m: 2.4 } }, 'Tout ce qui est aligné appartient à l’histoire.'],
+  ],
+  guepes: [
+    ['Ruche de campagne', 'commune', {}, 'Bourdonnement, puis silence.'],
+    ['Essaim vif', 'rare', { rateMul: 1.12 }, 'Toujours une de plus dans le nid.'],
+    ['Reine rousse', 'epique', { salvo: 1, rateMul: 1.08 }, 'Elle n’envoie jamais ses filles seules.'],
+    ['Nuée d’acier', 'legendaire', { salvo: 2, splash: .2 }, 'Le ciel n’a plus de place libre.'],
+    ['Dard du crépuscule', 'mythique', { salvo: 3, splash: .3, burn: .4 }, 'La piqûre continue longtemps après.'],
+  ],
+  seisme: [
+    ['Dame de chantier', 'commune', {}, 'Elle tasse le sol et le reste.'],
+    ['Pilon de faille', 'rare', { stun: { c: .12, d: .45 } }, 'On perd l’équilibre avant la tête.'],
+    ['Secousse', 'epique', { stun: { c: .18, d: .55 }, rangeMul: 1.1 }, 'Les lignes de front bougent toutes seules.'],
+    ['Pas du géant', 'legendaire', { stun: { c: .24, d: .65 }, rangeMul: 1.16 }, 'Il n’y a qu’un pas. C’est le dernier.'],
+    ['Cœur de la terre', 'mythique', { stun: { c: .3, d: .8 }, rangeMul: 1.22, execute: .08 }, 'La planète répond à sa place.'],
+  ],
+  balise: [
+    ['Balise T3', 'commune', {}, 'Un point rouge, beaucoup de questions.'],
+    ['Désignateur', 'rare', { mark: .03 }, 'Les autres tours n’ont plus qu’à suivre.'],
+    ['Œil d’aigle', 'epique', { mark: .05, rangeMul: 1.1 }, 'Rien ne bouge sans être noté.'],
+    ['Réseau de tir', 'legendaire', { mark: .07, rangeMul: 1.18 }, 'Chaque cible devient une priorité.'],
+    ['Vigie absolue', 'mythique', { mark: .1, rangeMul: 1.3 }, 'Elle voit le coup avant le canon.'],
+  ],
+  faille: [
+    ['Puits instable', 'commune', {}, 'Mieux vaut ne pas se pencher.'],
+    ['Reflux', 'rare', { pull: .2 }, 'Chaque pas en avant en coûte deux.'],
+    ['Marée noire', 'epique', { pull: .3, rateMul: 1.08 }, 'Le terrain recule sous les bottes.'],
+    ['Horizon brisé', 'legendaire', { pull: .4, rateMul: 1.14, execute: .08 }, 'On entre. On ne ressort pas tout à fait.'],
+    ['Abîme', 'mythique', { pull: .55, rateMul: 1.2, execute: .12 }, 'Il regarde aussi.'],
+  ],
+  magnetique: [
+    ['Semeur léger', 'commune', {}, 'Une route calme, en apparence.'],
+    ['Pose rapide', 'rare', { rateMul: 1.14 }, 'Le déminage n’aura pas le temps.'],
+    ['Champ croisé', 'epique', { maxAdd: 2, rateMul: 1.08 }, 'Les sapeurs démissionnent.'],
+    ['Aimant de guerre', 'legendaire', { maxAdd: 3, splash: .15 }, 'Le blindage attire sa propre fin.'],
+    ['Terre interdite', 'mythique', { maxAdd: 4, splash: .25, stun: { c: .2, d: .6 } }, 'Personne ne l’a traversée deux fois.'],
+  ],
+  solaire: [
+    ['Panneau de base', 'commune', {}, 'Le soleil paie ses dettes.'],
+    ['Miroirs orientés', 'rare', {}, 'Un peu plus chaque matin.'],
+    ['Tour héliaque', 'epique', { interest: .02 }, 'L’épargne, version militaire.'],
+    ['Foyer doré', 'legendaire', { interest: .03 }, 'La guerre aussi a des actionnaires.'],
+    ['Sphère de Dyson', 'mythique', { interest: .05 }, 'Une ambition démesurée pour un fossé.'],
+  ],
+  commandement: [
+    ['Poste de campagne', 'commune', {}, 'Une radio, une carte, du café.'],
+    ['Officier de tir', 'rare', { buffDmg: .06 }, 'Il corrige, ça touche.'],
+    ['État-major', 'epique', { buffDmg: .08, buffRange: .05 }, 'Plus loin, plus fort, sans discuter.'],
+    ['Maréchal de fer', 'legendaire', { buffDmg: .11, buffRange: .07 }, 'Les canons se tiennent droit quand il passe.'],
+    ['Stratège immortel', 'mythique', { buffDmg: .14, buffRange: .1, buffCrit: .06 }, 'Il a déjà gagné. Il attend que vous le sachiez.'],
+  ],
+  comete: [
+    ['Lanceur de braises', 'commune', {}, 'Ça file lentement, et ça brûle longtemps.'],
+    ['Queue de feu', 'rare', { burn: .2 }, 'La trace reste quand elle est passée.'],
+    ['Pluie d’étoiles', 'epique', { burn: .3, rateMul: 1.1 }, 'Faites un vœu, ils en auront besoin.'],
+    ['Périhélie', 'legendaire', { burn: .45, width: .14 }, 'Au plus près, au plus chaud.'],
+    ['Astre mort', 'mythique', { burn: .6, width: .2, execute: .1 }, 'Sa lumière arrive après l’impact.'],
+  ],
+});
+
 const CARDS = [];
 for (const f of FAM_ORDER) CARD_DEF[f].forEach(([n, r, tr, lore], i) => CARDS.push({ id: f + '_' + i, fam: f, n, r, tr, lore, i }));
 const CARD = Object.fromEntries(CARDS.map((c) => [c.id, c]));
@@ -749,7 +870,7 @@ const Engine = (() => {
   const income = (B) => B.W.sectors.reduce((a, s, i) => a + (B.owned[i] ? s.income : 0), 0);
 
   // ---------------- tours ----------------
-  const pvpDeadZones=Object.freeze({canon:.8,mortar:1.65,sniper:1.95,rail:1.9,mlrs:2.5,obusier:2.7,siege:2.8,orbital:3.2,antitank:1.2,frostbattery:1.75,skyguard:1.6,flak:1.1,plasma:1.1,missile:.9});
+  const pvpDeadZones=Object.freeze({canon:.8,mortar:1.65,sniper:1.95,rail:1.9,mlrs:2.5,obusier:2.7,siege:2.8,orbital:3.2,antitank:1.2,frostbattery:1.75,skyguard:1.6,flak:1.1,plasma:1.1,missile:.9,baliste:1.2,vitriol:1.7,gauss:1.5,guepes:.9,comete:1.1});
   function cost(cardId,pvp=false) { const c = CARD[cardId]; return Math.round(FAM[c.fam].cost * (1 + 0.12 * RI(c.r))+(pvp&&c.fam==='orbital'?110:0)); }
   function upCost(tw) { return tw.lvl >= 3 ? 0 : Math.round(cost(tw.card,!!tw.pvp) * [0.75, 1.25][tw.lvl - 1]); }
   function stats(tw) {
@@ -1450,6 +1571,61 @@ const TroopData=(()=>{
   {id:'renfort_valkyrie',n:'Valkyrie',base:'dronelourd',role:'antiair',rarity:'mythique',stats:{hp:145,damage:14,rate:1.25,range:4.1,speed:1.2,armor:.1,maxShield:35,bonusMultiplier:1.85},ability:'35 PV de bouclier ; privilégie les aéronefs, +85 % contre eux.',counter:'Aviation lourde et escorte aérienne',weakness:'DCA et énergie'},
   {id:'renfort_abyssal',n:'Passeur abyssal',base:'sousmarin',role:'scout',rarity:'mythique',stats:{hp:110,damage:9,rate:1,range:2.7,speed:1.35,armor:.12,capturePower:2.2,castleDamage:4},ability:'Amphibie visible : traverse l’eau et capture 120 % plus vite.',counter:'Bases côtières et contournements',weakness:'Cryo et tirs rapides'}
  ];
+ // Douze nouveaux modèles et trente spécialistes (six par rareté). Ils sont réservés à la collection :
+// les vagues ennemies, les identifiants et les réglages existants ne changent pas.
+Object.assign(UNIT, {
+  x_tireur: { n: 'Binôme de précision', t: 'inf', mv: 'g', hp: 60, spd: .9, rew: 8, dmg: 1, r: .2, _collectibleOnly: true, desc: 'Un tireur et son observateur.' },
+  x_roquette: { n: 'Lance-roquettes portable', t: 'inf', mv: 'g', hp: 65, spd: .95, rew: 8, dmg: 2, r: .2, _collectibleOnly: true, desc: 'Infanterie antichar équipée d’un tube lourd.' },
+  x_mule: { n: 'Mule robotisée', t: 'veh', mv: 'g', hp: 90, spd: 1.2, rew: 8, dmg: 1, r: .28, _collectibleOnly: true, desc: 'Quadrupède de transport et de soutien.' },
+  x_tripode: { n: 'Tripode d’assaut', t: 'veh', mv: 'g', hp: 240, spd: .7, arm: .3, rew: 14, dmg: 2, r: .42, _collectibleOnly: true, desc: 'Marcheur à trois jambes, canon en tourelle.' },
+  x_chenille: { n: 'Robot à chenilles', t: 'veh', mv: 'g', hp: 150, spd: .85, arm: .25, rew: 10, dmg: 1, r: .32, _collectibleOnly: true, desc: 'Petit châssis autonome à tourelle.' },
+  x_semi: { n: 'Semi-chenillé', t: 'veh', mv: 'g', hp: 160, spd: 1, arm: .2, rew: 10, dmg: 2, r: .38, _collectibleOnly: true, desc: 'Roues à l’avant, chenilles à l’arrière, canon automatique.' },
+  x_bombarde: { n: 'Porte-mortier', t: 'veh', mv: 'g', hp: 140, spd: .8, arm: .12, rew: 11, dmg: 2, r: .38, _collectibleOnly: true, desc: 'Châssis ouvert avec mortier lourd.' },
+  x_iem: { n: 'Char à bobines', t: 'veh', mv: 'g', hp: 210, spd: .75, arm: .3, rew: 13, dmg: 2, r: .42, _collectibleOnly: true, desc: 'Blindé équipé de bobines électriques.' },
+  x_hover: { n: 'Aéroglisseur d’assaut', t: 'veh', mv: 'w', hp: 120, spd: 1.25, arm: .1, rew: 10, dmg: 2, r: .4, _collectibleOnly: true, desc: 'Passe de la terre à l’eau sans s’arrêter.' },
+  x_quadri: { n: 'Quadricoptère', t: 'air', mv: 'a', hp: 70, spd: 1.5, rew: 9, dmg: 1, r: .3, _collectibleOnly: true, desc: 'Grand drone à quatre rotors carénés.' },
+  x_autogire: { n: 'Autogire', t: 'air', mv: 'a', hp: 110, spd: 1.35, rew: 10, dmg: 2, r: .34, _collectibleOnly: true, desc: 'Petit appareil à rotor libre et hélice arrière.' },
+  x_intercepteur: { n: 'Chasseur Falco', t: 'air', mv: 'a', hp: 150, spd: 1.8, rew: 14, dmg: 2, r: .38, _collectibleOnly: true, desc: 'Avion d’interception à ailes en flèche.' },
+});
+for (const base of ['x_mule', 'x_chenille', 'x_semi']) wheels.add(base);
+reinforcements.push(
+  // Communes
+  {id:'renfort_x_voltigeur',n:'Voltigeur de pointe',base:'x_tireur',role:'infantry',rarity:'commune',stats:{hp:85,damage:13,rate:1.05,range:3.2,speed:1.08,capturePower:1.3},ability:'Reste à distance : fusil de portée 3,2 m ; capture 30 % plus vite.',counter:'Infanterie et soutiens',weakness:'Éclaireurs et explosions'},
+  {id:'renfort_x_fantome',n:'Fantôme de liaison',base:'x_mule',role:'scout',rarity:'commune',stats:{hp:70,damage:6,rate:.85,range:2.2,speed:1.55,capturePower:1.9},ability:'Quadrupède tout-terrain ; capture 90 % plus vite.',counter:'Bases laissées sans garde',weakness:'Tirs rapides et ralentissement'},
+  {id:'renfort_x_tube',n:'Pointeur antichar',base:'x_roquette',role:'siege',rarity:'commune',stats:{hp:80,damage:20,rate:2,range:3.5,speed:.9,armor:.03,splash:.35,bonusMultiplier:1.2,castleDamage:6,capturePower:1},ability:'Roquette à petite explosion ; +20 % contre les blindés.',counter:'Blindés légers',weakness:'Infanterie rapide'},
+  {id:'renfort_x_veilleur',n:'Veilleur de ciel',base:'x_quadri',role:'antiair',rarity:'commune',stats:{hp:75,damage:8,rate:.8,range:3.3,speed:1.2,armor:0,bonusMultiplier:1.6},ability:'Drone léger ; +60 % de dégâts contre les aéronefs.',counter:'Drones adverses',weakness:'Défenses anti-aériennes'},
+  {id:'renfort_x_infirmier',n:'Mule sanitaire',base:'x_mule',role:'medic',rarity:'commune',stats:{hp:100,damage:3,rate:1.3,range:2.3,speed:1.05,heal:3.5,healTargets:2,healRadius:2.6},ability:'Répartit 3,5 PV/s entre deux alliés blessés à 2,6 m, hors soigneurs.',counter:'Usure en petite escouade',weakness:'Attaques directes'},
+  {id:'renfort_x_rempart',n:'Porte-pavois',base:'bouclier',role:'shield',rarity:'commune',stats:{hp:125,damage:8,rate:1.15,range:2.6,speed:.8,armor:.1,maxShield:45,shieldRegen:2,castleDamage:4},ability:'45 PV de bouclier, rechargés à 2 PV/s après 3 s sans dégâts.',counter:'Premières salves',weakness:'Énergie et explosions'},
+  // Rares
+  {id:'renfort_x_lunette',n:'Œil de faucon',base:'x_tireur',role:'infantry',rarity:'rare',stats:{hp:80,damage:22,rate:1.7,range:3.9,speed:.92,pierce:.2,capturePower:1},ability:'Tir lent à 3,9 m, ignore 20 % du blindage.',counter:'Soutiens et cibles isolées',weakness:'Assauts rapides'},
+  {id:'renfort_x_chenille',n:'Sentinelle autonome',base:'x_chenille',role:'armor',rarity:'rare',stats:{hp:210,damage:14,rate:1.1,range:2.9,speed:.9,armor:.26,castleDamage:5},ability:'Petit blindé rapide : réduit les dégâts subis de 26 %.',counter:'Infanterie légère',weakness:'Tirs perforants'},
+  {id:'renfort_x_mortier',n:'Mortier mobile',base:'x_bombarde',role:'siege',rarity:'rare',stats:{hp:115,damage:24,rate:2.1,range:4.4,speed:.78,armor:.08,splash:.95,bonusMultiplier:1.2,castleDamage:8},ability:'Bombarde à 4,4 m dans un rayon de 0,95 m.',counter:'Groupes immobiles',weakness:'Éclaireurs et aéronefs'},
+  {id:'renfort_x_autogire',n:'Autogire de chasse',base:'x_autogire',role:'antiair',rarity:'rare',stats:{hp:105,damage:12,rate:1,range:3.7,speed:1.15,armor:.05,bonusMultiplier:1.7},ability:'+70 % de dégâts contre les aéronefs.',counter:'Hélicoptères',weakness:'DCA adverse'},
+  {id:'renfort_x_givrant',n:'Quadricoptère givrant',base:'x_quadri',role:'cryo',rarity:'rare',stats:{hp:90,damage:7,rate:1.2,range:3,speed:1.2,armor:0,slow:.26,slowDuration:1.4},ability:'Ralentit de 26 % pendant 1,4 s, depuis les airs.',counter:'Colonnes de blindés',weakness:'Tirs anti-aériens'},
+  {id:'renfort_x_hover',n:'Glisseur de raid',base:'x_hover',role:'scout',rarity:'rare',stats:{hp:95,damage:10,rate:.95,range:2.5,speed:1.5,armor:.08,capturePower:1.9},ability:'Amphibie : coupe par l’eau et capture 90 % plus vite.',counter:'Bases côtières',weakness:'Cryo et blindés'},
+  // Épiques
+  {id:'renfort_x_semi',n:'Semi-chenillé d’assaut',base:'x_semi',role:'armor',rarity:'epique',stats:{hp:255,damage:18,rate:1.15,range:3.05,speed:.88,armor:.28,castleDamage:6},ability:'Canon automatique et bonne vitesse pour un blindé.',counter:'Infanterie et éclaireurs',weakness:'Artillerie'},
+  {id:'renfort_x_iem',n:'Brise-bouclier',base:'x_iem',role:'cryo',rarity:'epique',stats:{hp:170,damage:12,rate:1.25,range:3.1,speed:.76,armor:.2,slow:.3,slowDuration:1.5,damageType:'energy'},ability:'Bobines énergétiques : efficaces contre les boucliers, ralentissent de 30 %.',counter:'Porte-boucliers',weakness:'Artillerie à longue portée'},
+  {id:'renfort_x_salve',n:'Tube de salve',base:'x_roquette',role:'siege',rarity:'epique',stats:{hp:95,damage:28,rate:2.1,range:4,speed:.86,armor:.05,splash:.55,pierce:.3,bonusMultiplier:1.3,castleDamage:7},ability:'Ignore 30 % du blindage ; +30 % contre les blindés.',counter:'Blindés moyens',weakness:'Tirs rapides'},
+  {id:'renfort_x_falcon',n:'Falco patrouilleur',base:'x_intercepteur',role:'antiair',rarity:'epique',stats:{hp:125,damage:15,rate:1.05,range:4,speed:1.4,armor:.05,bonusMultiplier:1.8},ability:'+80 % contre les aéronefs, à grande vitesse.',counter:'Aviation et drones',weakness:'DCA de zone'},
+  {id:'renfort_x_pavois',n:'Tripode bouclier',base:'x_tripode',role:'shield',rarity:'epique',stats:{hp:190,damage:12,rate:1.3,range:2.9,speed:.7,armor:.16,maxShield:80,shieldRegen:3,castleDamage:6},ability:'80 PV de bouclier, recharge de 3 PV/s après 3 s sans dégâts.',counter:'Tenue d’un avant-poste',weakness:'Dégâts d’énergie'},
+  {id:'renfort_x_sanitaire',n:'Hospitalier blindé',base:'x_chenille',role:'medic',rarity:'epique',stats:{hp:165,damage:4,rate:1.4,range:2.5,speed:.84,armor:.2,heal:6.5,healTargets:3,healRadius:3},ability:'Répartit 6,5 PV/s entre trois alliés à 3 m, hors soigneurs.',counter:'Offensives longues',weakness:'Artillerie et assaut direct'},
+  // Légendaires
+  {id:'renfort_x_tripode',n:'Tripode Argus',base:'x_tripode',role:'armor',rarity:'legendaire',stats:{hp:370,damage:24,rate:1.6,range:3.5,speed:.68,armor:.34,castleDamage:8},ability:'Marcheur haut : tir à 3,5 m et blindage de 34 %.',counter:'Lignes d’infanterie',weakness:'Tirs perforants et aviation'},
+  {id:'renfort_x_grandmortier',n:'Grand mortier Vulcain',base:'x_bombarde',role:'siege',rarity:'legendaire',stats:{hp:130,damage:34,rate:2.5,range:4.7,speed:.68,armor:.1,splash:1.15,bonusMultiplier:1.3,castleDamage:10},ability:'Obus lourd à 4,7 m dans un rayon de 1,15 m.',counter:'Avant-postes tenus',weakness:'Tout ce qui arrive vite'},
+  {id:'renfort_x_orage',n:'Bobine d’orage',base:'x_iem',role:'cryo',rarity:'legendaire',stats:{hp:215,damage:14,rate:1.2,range:3.4,speed:.72,armor:.24,slow:.33,slowDuration:1.7,damageType:'energy'},ability:'Ralentit de 33 % pendant 1,7 s à 3,4 m.',counter:'Assauts mécanisés',weakness:'Artillerie'},
+  {id:'renfort_x_seigneur',n:'Seigneur des vents',base:'x_intercepteur',role:'antiair',rarity:'legendaire',stats:{hp:150,damage:18,rate:1.05,range:4.3,speed:1.5,armor:.08,bonusMultiplier:1.9},ability:'+90 % contre les aéronefs, portée de 4,3 m.',counter:'Toute l’aviation',weakness:'DCA de zone'},
+  {id:'renfort_x_raid',n:'Glisseur Cuirassier',base:'x_hover',role:'armor',rarity:'legendaire',stats:{hp:290,damage:18,rate:1.2,range:3,speed:.95,armor:.28,castleDamage:7},ability:'Blindé amphibie : traverse l’eau avec 28 % de blindage.',counter:'Défenses côtières',weakness:'Tirs perforants'},
+  {id:'renfort_x_abri',n:'Abri roulant',base:'x_semi',role:'shield',rarity:'legendaire',stats:{hp:220,damage:12,rate:1.25,range:2.9,speed:.76,armor:.2,maxShield:105,shieldRegen:3.5,castleDamage:6},ability:'105 PV de bouclier, recharge de 3,5 PV/s après 3 s sans dégâts.',counter:'Salves concentrées',weakness:'Dégâts d’énergie'},
+  // Mythiques
+  {id:'renfort_x_oracle',n:'Oracle à longue vue',base:'x_tireur',role:'infantry',rarity:'mythique',stats:{hp:95,damage:30,rate:1.8,range:4.3,speed:.95,pierce:.35,capturePower:1.2},ability:'Tir à 4,3 m, ignore 35 % du blindage.',counter:'Soutiens et officiers',weakness:'Assauts rapides et zones'},
+  {id:'renfort_x_colosse',n:'Colosse Tripode',base:'x_tripode',role:'armor',rarity:'mythique',stats:{hp:470,damage:30,rate:1.8,range:3.6,speed:.58,armor:.4,castleDamage:10},ability:'Blindage de 40 % et canon lourd à 3,6 m.',counter:'Lignes défendues',weakness:'Tirs perforants et aviation'},
+  {id:'renfort_x_apocalypse',n:'Salve Apocalypse',base:'x_bombarde',role:'siege',rarity:'mythique',stats:{hp:145,damage:38,rate:2.4,range:5,speed:.62,armor:.12,splash:1.3,bonusMultiplier:1.35,castleDamage:12},ability:'Obus à 5 m dans un rayon de 1,3 m ; 12 dégâts à la citadelle.',counter:'Tout groupe immobile',weakness:'Éclaireurs et aéronefs'},
+  {id:'renfort_x_tempete',n:'Tempête Falco',base:'x_intercepteur',role:'antiair',rarity:'mythique',stats:{hp:170,damage:22,rate:1,range:4.5,speed:1.6,armor:.1,bonusMultiplier:2},ability:'Double les dégâts contre les aéronefs, à 4,5 m.',counter:'Domination aérienne',weakness:'DCA de zone'},
+  {id:'renfort_x_miracle',n:'Autogire Miracle',base:'x_autogire',role:'medic',rarity:'mythique',stats:{hp:130,damage:5,rate:1.3,range:2.7,speed:1.2,armor:.05,heal:8,healTargets:3,healRadius:3.4},ability:'Répartit 8 PV/s entre trois alliés à 3,4 m, depuis les airs.',counter:'Attaques d’usure',weakness:'Tirs anti-aériens'},
+  {id:'renfort_x_tesla',n:'Forteresse à bobines',base:'x_iem',role:'shield',rarity:'mythique',stats:{hp:255,damage:16,rate:1.3,range:3.1,speed:.66,armor:.22,maxShield:135,shieldRegen:4,castleDamage:8,damageType:'energy'},ability:'135 PV de bouclier, recharge de 4 PV/s ; tirs énergétiques.',counter:'Fronts longs',weakness:'Artillerie et assaut groupé'},
+);
+
  for(let i=0;i<reinforcements.length;i++){
   const spec=reinforcements[i],base=UNIT[spec.base];
   if(!base||Object.hasOwn(UNIT,spec.id))throw Error('Spécialiste invalide : '+spec.id);
@@ -1621,7 +1797,7 @@ const SiegePvP=(()=>{
  function configure(s,self){const P=MAPS.find(m=>m.id===s.map),W=world(MapGen.get(P.id),s.players.length);let uid=1;s.pvp=true;s.world=W;s.started=false;s.deployCd={};s.incomeClock=0;s.botClock=0;s.outposts=W.outposts.map(o=>({id:o.id,owner:null,claimTeam:null,progress:0,contested:false}));
   s.boards=s.players.map((p,i)=>{const cit=W.bases[i],near=[W.sectorAt(cit.x,cit.y),...[...W.sectors].filter(z=>z.id!==W.sectorAt(cit.x,cit.y)).sort((a,b)=>distance(a,cit)-distance(b,cit)).slice(0,2).map(z=>z.id)],owned=W.sectors.map(z=>near.includes(z.id)),sectors=W.sectors.map(z=>({...z,name:z.id===W.sectorAt(cit.x,cit.y)?'Secteur de ta base':z.id===0?'Secteur sud':z.name,owned:owned[z.id],cost:Math.min(200,120+Math.round(distance(z,cit))),inf:0,passive:owned[z.id]?0:1.5})),world={...W,cit,sectors};const deck=(p.defenses||['gatling_0','canon_0','cryo_0','mortar_0','missile_0','forge_0']).filter(id=>CARD[id]).slice(0,6).map(id=>({id,lvl:1,setb:1})),b=Engine.create({preset:P,world,deck,seed:443+i});b.pvp=true;b.player=i;b.team=s.teams[i];b.maxHp=b.hp=100;b.wallets={[i]:300};b.viewer=i;Object.defineProperty(b,'energy',{enumerable:true,configurable:true,get(){return this.wallets[i];},set(v){this.wallets[i]=v;}});b.next=()=>uid++;b.playerBoard=i=>s.boards[i];b.allTowers=()=>s.boards.flatMap(q=>q.towers);b.troopDeck=TroopData.valid(p.troops||TroopData.starters);if(!b.troopDeck.length)b.troopDeck=[...TroopData.starters];return b;});TroopUpgrades.configure(s);
  }
- function start(s){if(s.started)return;s.started=true;s.startedAt=s.clock;s.troopEra=0;s.nextWaveAt=null;for(const b of s.boards){b.phase='wave';b.wave=1;b.maxWave=1;}}
+ function start(s){if(s.started)return;s.started=true;s.startedAt=s.clock;s.troopEra=0;s.nextWaveAt=null;for(const b of s.boards){if(b.phase==='lose')continue;b.phase='wave';b.wave=1;b.maxWave=1;}}
  function board(s,player){return s.boards[s.pvp?player:s.teams[player]];}
  function cachedTerrainPath(W,start,end,amphibious){const key=(amphibious?'w:':'g:')+Math.floor(start.x*2)+','+Math.floor(start.y*2)+':'+end.x+','+end.y,cache=W._deployPaths||(W._deployPaths=new Map());if(cache.has(key)){const pts=cache.get(key);return [start,...pts.slice(1)];}const pts=terrainPath(W,start,end,amphibious);if(pts){if(cache.size>=96)cache.delete(cache.keys().next().value);cache.set(key,pts);}return pts;}
  function defaultSpawn(s,player,type,route=0,target){

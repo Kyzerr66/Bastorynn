@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node server.cjs",
-    "dev": "node server.cjs"
+    "dev": "node server.cjs",
+    "build": "node tools/build.cjs",
+    "test": "node --test test/server-guards.test.cjs test/catalog.test.cjs"
   },
   "engines": {
     "node": ">=20"
