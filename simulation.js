@@ -1632,7 +1632,7 @@ const SiegePvP=(()=>{
    return p;
   }return null;
  }
- function combatDefinition(type,stats){const unit=UNIT[type];return {n:unit.n,t:unit.t,mv:unit.mv,hp:stats.hp,spd:stats.speed,dmg:stats.castleDamage,arm:stats.armor||0,r:Math.min(.65,unit.r||.3),boss:false,rew:0};}
+ const combatDefCache=new WeakMap();function combatDefinition(type,stats){let def=combatDefCache.get(stats);if(def)return def;const unit=UNIT[type];def=Object.freeze({n:unit.n,t:unit.t,mv:unit.mv,hp:stats.hp,spd:stats.speed,dmg:stats.castleDamage,arm:stats.armor||0,r:Math.min(.65,unit.r||.3),boss:false,rew:0});combatDefCache.set(stats,def);return def;}
  function deployment(s,player,d){
   if(!s?.pvp||!Number.isInteger(player)||!s.boards?.[player]||!d||!Number.isInteger(d.slot)||!Number.isInteger(d.target))return 'Troupe ou cible invalide.';
   const b=s.boards[player],target=s.boards[d.target],type=b.troopDeck[d.slot];if(!type)return 'Sélectionne une des six troupes équipées.';if(!s.started)return 'Le siège n’a pas encore commencé.';if(s.ended||b.phase==='lose')return 'Ton château est détruit ou la partie est terminée.';if(!target||target.team===b.team||target.phase==='lose')return 'Choisis un château adverse encore debout.';
@@ -1661,9 +1661,9 @@ const SiegePvP=(()=>{
   const origin=MapGen.posAt(m.path,m.d);m.x=origin.x;m.y=origin.y;b.energy-=stats.cost;b.ev.push({k:'build',x:m.x,y:m.y,r:.5,c:'#e6b96b'});return true;
  }
  function spatialIndex(all){const buckets=new Map(),size=5;for(const m of all){const key=Math.floor(m.x/size)+':'+Math.floor(m.y/size);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(m);}return (p,r)=>{const out=[],x=Math.floor(p.x/size),y=Math.floor(p.y/size),n=Math.ceil(r/size);for(let dy=-n;dy<=n;dy++)for(let dx=-n;dx<=n;dx++){const list=buckets.get((x+dx)+':'+(y+dy));if(list)for(const m of list)if(!m.dead&&distance(m,p)<=r)out.push(m);}return out;};}
- function captureStep(s,dt,all=s.boards.flatMap(b=>b.mobs).filter(m=>!m.dead)){
+ function captureStep(s,dt,all=s.boards.flatMap(b=>b.mobs).filter(m=>!m.dead),nearby=spatialIndex(all)){
   for(const m of all)m.capturing=false;
-  for(const state of s.outposts){const o=s.world.outposts[state.id],troops=all.filter(m=>!m.dead&&!m.air&&m.spawnT<=0&&s.boards[m.owner]?.phase!=='lose'&&distance(m,o)<=o.r),teams=[...new Set(troops.map(m=>m.faction))];state.contested=teams.length>1;
+  for(const state of s.outposts){const o=s.world.outposts[state.id],troops=nearby(o,o.r).filter(m=>!m.air&&m.spawnT<=0&&s.boards[m.owner]?.phase!=='lose'),teams=[...new Set(troops.map(m=>m.faction))];state.contested=teams.length>1;
    if(state.contested)continue;if(!teams.length){state.progress=Math.max(0,state.progress-dt*.08);if(!state.progress)state.claimTeam=null;continue;}
    const team=teams[0];if(state.owner===team){state.progress=Math.max(0,state.progress-dt*.25);if(!state.progress)state.claimTeam=null;continue;}
    if(state.claimTeam!==team){state.claimTeam=team;state.progress=0;}
@@ -1717,7 +1717,7 @@ const SiegePvP=(()=>{
  function step(s,dt){if(s.ended)return;s.clock+=dt;if(!s.started&&s.clock>=s.nextWaveAt)start(s);if(!s.started)return;TroopUpgrades.sync(s);
   const all=s.boards.flatMap(b=>b.mobs).filter(m=>!m.dead&&s.boards[m.owner]?.phase!=='lose'&&s.boards[m.targetPlayer]?.phase!=='lose'),nearby=spatialIndex(all);
   combatStep(s,dt,all,nearby);
-  captureStep(s,dt,all);
+  captureStep(s,dt,all,nearby);
   for(const b of s.boards){b.enemyPool=all.filter(m=>!m.dead&&m.faction!==b.team);Engine.step(b,dt);for(const m of b.mobs)if(m.engaged&&Number.isFinite(m.aimAng))m.ang=m.aimAng;delete b.enemyPool;}
   for(const b of s.boards)b.mobs=b.mobs.filter(m=>!m.dead&&s.boards[m.owner]?.phase!=='lose'&&s.boards[m.targetPlayer]?.phase!=='lose');
   s.incomeClock+=dt;if(s.incomeClock>=1){s.incomeClock-=1;for(const b of s.boards)if(b.phase!=='lose'){const income=b.towers.reduce((n,t)=>n+(t.S.income||0),0)/20;const ownedPosts=s.outposts.filter(o=>o.owner===b.team&&!o.contested).length,teamSize=s.boards.filter(q=>q.team===b.team&&q.phase!=='lose').length;b.energy+=8+Math.max(0,b.owned.filter(Boolean).length-3)*1.5+income+ownedPosts*2/teamSize;b.inf=Math.min(20,b.inf+1/20);}}
@@ -1897,7 +1897,7 @@ const Frontier = (()=>{
     if(chosen&&b.towers.filter(t=>t.owner===i).length<14)apply(i,{k:'place',d:chosen});else{const tw=b.towers.find(t=>t.owner===i&&t.lvl<3&&b.energy>=Engine.upCost(t));if(tw)apply(i,{k:'upgrade',d:{id:tw.id}});}
     if(s.mode!=='coop'&&r()<.3&&b.energy>130){const targets=s.boards.filter(t=>t!==b&&t.phase==='wave');if(targets.length)apply(i,{k:'attack',d:{target:targets[Math.floor(r()*targets.length)].team}});}
   }
-  function step(dt){const s=session;if(!s||s.disconnected)return;if(s.ended){if(room&&s.host&&!netBusy&&!s.finalSent){netBusy=true;send('state',snapshot()).then(()=>s.finalSent=true).catch(()=>{}).finally(()=>netBusy=false);}return;}if(!s.host){for(const b of s.boards)for(const m of b.mobs)if(m._target){m.x+=(m._target.x-m.x)*Math.min(1,dt*16);m.y+=(m._target.y-m.y)*Math.min(1,dt*16);}return;}
+  function step(dt){const s=session;if(!s||s.disconnected)return;if(s.ended){if(room&&s.host&&!netBusy&&!s.finalSent){netBusy=true;send('state',snapshot()).then(()=>s.finalSent=true).catch(()=>{}).finally(()=>netBusy=false);}return;}if(!s.host){const smoothing=1-Math.exp(-Math.max(0,dt)*9);for(const b of s.boards)for(const m of b.mobs)if(m._target){m.x+=(m._target.x-m.x)*smoothing;m.y+=(m._target.y-m.y)*smoothing;}return;}
     MatchSpeed.tick(s,dt);dt*=s.pvp?1:s.speed;
     if(s.pvp){SiegePvP.step(s,dt);s.boards.forEach((b,i)=>{pendingEvents[i].push(...b.ev);if(pendingEvents[i].length>240)pendingEvents[i].splice(0,pendingEvents[i].length-240);if(!B)b.ev.length=0;else if(b.ev.length>120)b.ev.splice(0,b.ev.length-120);});return;}
     s.clock+=dt;for(const b of s.boards){Engine.step(b,dt);if(s.mode!=='coop'&&b.phase==='wave'&&s.clock-b.mpWaveTime>180){b.hp=0;b.phase='lose';b.ev.push({k:'lose'});}pendingEvents[b.team].push(...b.ev);if(pendingEvents[b.team].length>240)pendingEvents[b.team].splice(0,pendingEvents[b.team].length-240);if(b!==B)b.ev.length=0;}
@@ -1912,7 +1912,7 @@ const Frontier = (()=>{
   function snapshot(){const s=session;return {speed:s.speed,realClock:s.realClock,speedVote:s.speedVote,pvp:!!s.pvp,started:s.started,startedAt:s.startedAt,troopEra:s.troopEra,outposts:s.outposts,troopUpgrades:s.troopUpgrades,deployCd:s.deployCd,clock:s.clock,nextWaveAt:s.nextWaveAt,ended:s.ended,winner:s.winner,attackCd:s.attackCd,boards:s.boards.map((b,i)=>{const copy={};for(const k of ['speed','t','phase','wave','maxWave','hp','maxHp','energy','wallets','inf','owned','towers','mobs','shots','puddles','smokes','mines','kills','leaks','bosses','ab','stats','seen','team','player','troopDeck','coop'])copy[k]=b[k];copy.radarState=b.pvp?null:WaveRadar.describe(b);copy.ev=pendingEvents[i].splice(0);return JSON.parse(JSON.stringify(copy,(k,v)=>['def','path','lane','spots','_target','weapon','shieldQuiet','fireCd'].includes(k)?undefined:typeof v==='number'&&Number.isFinite(v)&&!Number.isInteger(v)?Math.round(v*1000)/1000:k==='tw'&&v&&typeof v==='object'?{__tw:v.id}:v));})};}
   function applySnapshot(data){const s=session;if(!s||!data?.boards)return;s.clock=data.clock;s.speed=[1,2,3,4].includes(data.speed)?data.speed:1;s.realClock=data.realClock||0;s.speedVote=data.speedVote||null;s.started=data.started;s.startedAt=data.startedAt??s.startedAt;s.troopEra=data.troopEra??s.troopEra;s.outposts=data.outposts||s.outposts;s.troopUpgrades=data.troopUpgrades||s.troopUpgrades;s.deployCd=data.deployCd||{};s.nextWaveAt=data.nextWaveAt;s.attackCd=data.attackCd||{};
     data.boards.forEach((src,i)=>{const b=s.boards[i];if(!b)return;const old=new Map(b.mobs.map(m=>[m.id,m]));const events=[...b.ev,...src.ev];Object.assign(b,src);b.ev=events.slice(-300);for(const m of b.mobs){m.def=s.pvp?SiegePvP.combatDefinition(m.type,TroopUpgrades.stats(s,m.owner,m.type)):UNIT[m.type];const prior=old.get(m.id);if(prior&&!(globalThis.document?.hidden)){m._target={x:m.x,y:m.y};m.x=prior.x;m.y=prior.y;}}
-      for(const arr of [b.shots,b.puddles,b.mines])for(const q of arr){if(q.tw?.__tw)q.tw=b.towers.find(t=>t.id===q.tw.__tw)||{id:0,card:'gatling_0',x:q.x,y:q.y};}
+      const towerById=new Map(b.towers.map(t=>[t.id,t]));for(const arr of [b.shots,b.puddles,b.mines])for(const q of arr){if(q.tw?.__tw)q.tw=towerById.get(q.tw.__tw)||{id:0,card:'gatling_0',x:q.x,y:q.y};}
     });
     if(data.ended&&!s.ended){s.ended=true;s.winner=data.winner;s.resultDue=performance.now()+800;}
   }
