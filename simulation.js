@@ -749,8 +749,9 @@ const Engine = (() => {
   const income = (B) => B.W.sectors.reduce((a, s, i) => a + (B.owned[i] ? s.income : 0), 0);
 
   // ---------------- tours ----------------
-  function cost(cardId) { const c = CARD[cardId]; return Math.round(FAM[c.fam].cost * (1 + 0.12 * RI(c.r))); }
-  function upCost(tw) { return tw.lvl >= 3 ? 0 : Math.round(cost(tw.card) * [0.75, 1.25][tw.lvl - 1]); }
+  const pvpDeadZones=Object.freeze({canon:.8,mortar:1.65,sniper:1.95,rail:1.9,mlrs:2.5,obusier:2.7,siege:2.8,orbital:3.2,antitank:1.2,frostbattery:1.75,skyguard:1.6,flak:1.1,plasma:1.1,missile:.9});
+  function cost(cardId,pvp=false) { const c = CARD[cardId]; return Math.round(FAM[c.fam].cost * (1 + 0.12 * RI(c.r))+(pvp&&c.fam==='orbital'?110:0)); }
+  function upCost(tw) { return tw.lvl >= 3 ? 0 : Math.round(cost(tw.card,!!tw.pvp) * [0.75, 1.25][tw.lvl - 1]); }
   function stats(tw) {
     const c = CARD[tw.card], f = FAM[c.fam], tr = c.tr, ri = RI(c.r), L = tw.lvl - 1, cl = tw.pvp?1:(tw.clvl || 1), b = tw.buff || { rate: 0, dmg: 0, range: 0, crit: 0 };
     const rarityDamage=tw.pvp?1+.075*ri:RMUL.dmg[ri],rarityRate=tw.pvp?1+.035*ri:RMUL.rate[ri];
@@ -758,7 +759,7 @@ const Engine = (() => {
     if (f.kind === 'radar' && (tr.rangeMul || 1) >= 9) range = 99;
     const bc = tr.crit || f.crit; const crit = bc ? { c: bc.c + b.crit, m: bc.m } : b.crit ? { c: b.crit, m: 2 } : null;
     const S = {
-      kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), crit,
+      kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), minRange:tw.pvp?(pvpDeadZones[c.fam]||0):0, crit,
       dmg: f.dmg * rarityDamage * (tw.pvp?[1,1.22,1.5]:[1,1.55,2.3])[L] * (tw.pvp ? .44 : 1) * (1 + 0.08 * (cl - 1)) * (1 + b.dmg) * (tw.pvp?1:(tw.setb || 1)) * (tw.high ? 1.1 : 1),
       rate: f.rate ? f.rate / (rarityRate * (tr.rateMul || 1) * [1, 1.06, 1.14][L]) / (1 + b.rate) : 0,
       splash: f.splash ? f.splash + (tr.splash || 0) + L * 0.1 : tr.splash || 0,
@@ -789,7 +790,7 @@ const Engine = (() => {
       const critPower=c=>c?1+c.c*(c.m-1):1;
       const critical=critPower(S.crit)/critPower(f.crit);
       S.dmg/=Math.sqrt(Math.max(1,cluster)*salvo*Math.max(1,chain)*Math.max(1,ramp)*Math.max(1,critical));
-      if(S.kind==='orbital'){S.range=Math.min(8,S.range);S.rate=Math.max(11.5,S.rate);S.dmg=Math.min(78,S.dmg);S.exec=Math.min(.06,S.exec);}
+      if(S.kind==='orbital'){S.range=Math.min(7.5,S.range);S.rate=Math.max(15,S.rate);S.dmg=Math.min(45,S.dmg);S.splash=Math.min(.6,S.splash);S.multi=Math.min(2,S.multi);S.exec=0;}
       if(S.slow)S.slow={...S.slow,p:Math.min(.3,S.slow.p),d:Math.min(1.5,S.slow.d)};
       if(S.freeze)S.freeze={...S.freeze,d:Math.min(.65,S.freeze.d)};
       if(S.stun)S.stun={...S.stun,d:Math.min(.55,S.stun.d)};
@@ -837,7 +838,7 @@ const Engine = (() => {
     if(high-low>.24)return 'Pente trop forte pour cette défense';
     const locked=lockedSector(B,p,r);if(locked>=0)return 'ZONE VERROUILLÉE · Achète '+W.sectors[locked].name+' pour construire ici';
     if((B.allTowers?B.allTowers():B.towers).some(t=>Math.hypot(x-t.x,y-t.y)<r+radius(t.card)+.10))return 'Défenses trop proches : espace de sécurité requis';
-    if(B.energy<cost(d.id))return 'Énergie insuffisante';
+    if(B.energy<cost(d.id,!!B.pvp))return 'Énergie insuffisante';
     if(['lose','win'].includes(B.phase))return 'Partie terminée';
     return null;
   }
@@ -847,14 +848,14 @@ const Engine = (() => {
   const placementOffsets=[[.16,8],[.32,12],[.5,16],[.72,20],[.9,24],[1.1,28]].flatMap(([r,n])=>Array.from({length:n},(_,i)=>({x:Math.cos(i*Math.PI*2/n)*r,y:Math.sin(i*Math.PI*2/n)*r})));
   function resolvePlacement(B,di,p){
     const d=B?.deck?.[di];
-    if(!d||!CARD[d.id]||!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<0||p.y<0||p.x>B.W.S||p.y>B.W.S||B.energy<cost(d.id)||B.towers.length>=120||['win','lose'].includes(B.phase))return null;
+    if(!d||!CARD[d.id]||!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<0||p.y<0||p.x>B.W.S||p.y>B.W.S||B.energy<cost(d.id,!!B.pvp)||B.towers.length>=120||['win','lose'].includes(B.phase))return null;
     if(!checkPlace(B,di,p))return {x:p.x,y:p.y};
     for(const q of placementOffsets){const candidate={x:p.x+q.x,y:p.y+q.y};if(!checkPlace(B,di,candidate))return candidate;}
     return null;
   }
   function place(B, di, p) {
     const error=checkPlace(B,di,p);if(error)return error;
-    const d=B.deck[di],k=cost(d.id);B.energy-=k;
+    const d=B.deck[di],k=cost(d.id,!!B.pvp);B.energy-=k;
     const tw={id:B.next(),card:d.id,pvp:!!B.pvp,clvl:d.lvl||1,setb:d.setb||1,slot:-1,x:p.x,y:p.y,high:B.W.hills.some(h=>Math.hypot(p.x-h.x,p.y-h.y)<h.r-.6),lvl:1,cd:.65,ang:-Math.PI/2,mode:FAM[CARD[d.id].fam].prefer==='strong'?'strong':'first',spent:k,kills:0,dmg:0,beams:[],fire:0,jam:0};
     B.towers.push(tw);B.stats.built++;refresh(B);B.ev.push({k:'build',x:tw.x,y:tw.y,c:FAM[CARD[d.id].fam].c,r:CARD[d.id].r,tw:tw.id});return tw;
   }
@@ -1033,7 +1034,7 @@ const Engine = (() => {
       if (tw.jam > 0) { tw.beams = []; continue; }
       if (S.kind === 'aura' || S.kind === 'eco' || S.kind === 'radar') continue;
       const tracked=aimingTargets.get(tw.aimId);
-      if(tracked&&targetable(tracked,S)&&(!S.airOnly||tracked.air)&&dist(tracked,tw)<=S.range+tracked.def.r*.6)aim(tw,tracked);
+      if(tracked&&targetable(tracked,S)&&(!S.airOnly||tracked.air)&&inFiringBand(tw,tracked,S))aim(tw,tracked);
       else {tw.aimId=null;if(tw.cd>0&&S.kind!=='mine')pick(B,tw,1);}
       if (S.kind === 'beam') { beam(B, tw, dt); continue; }
       tw.cd -= dt; if (tw.cd > 0) continue;
@@ -1120,9 +1121,10 @@ const Engine = (() => {
   function nearestD(L, pt) { let best = 0, bd = 1e9; for (let d = 0; d <= L.len; d += 0.3) { const p = posAt(L, d), dd = Math.hypot(p.x - pt.x, p.y - pt.y); if (dd < bd) { bd = dd; best = d; } } return best; }
   function aim(tw,m){if(!m)return;tw.aimId=m.id;tw.aimX=m.x;tw.aimY=m.y;tw.ang=Math.atan2(m.y-tw.y,m.x-tw.x);}
   const targetable = (m, S) => !m.dead && m.spawnT <= 0 && (!m.air || S.air) && ((!m.def.stealth && m.hid <= 0 && !(m.def.sub && m.onWater)) || m.rev || m.revT > 0);
+  const inFiringBand=(tw,m,S=tw.S,outer=S.range)=>{const d=dist(tw,m);return d>=(S.minRange||0)&&d<=outer+(m.def?.r||0)*.6;};
   function pick(B, tw, n, rangeOverride) {
     const S = tw.S, rg = rangeOverride || S.range;
-    let c = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && (!S.airOnly || m.air) && dist(m, tw) <= rg + m.def.r * 0.6);
+    let c = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && (!S.airOnly || m.air) && inFiringBand(tw,m,S,rg));
     if (!c.length) return c;
     const tt = c.filter((m) => m.def.taunt); if (tt.length && !S.airOnly) {aim(tw,tt[0]);return tt.slice(0,n);}
     if (tw.mode === 'strong') c.sort((a, b) => b.hp + b.shield - a.hp - a.shield);
@@ -1208,7 +1210,7 @@ const Engine = (() => {
         const T = pick(B, tw, 1); if (!T.length) return false;
         const a = Math.atan2(T[0].y - tw.y, T[0].x - tw.x); tw.ang = a;
         const L = S.range + 0.5, ex = tw.x + Math.cos(a) * L, ey = tw.y + Math.sin(a) * L;
-        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || !targetable(m, { air: true })) continue; const px = m.x - tw.x, py = m.y - tw.y, along = px * Math.cos(a) + py * Math.sin(a), perp = Math.abs(-px * Math.sin(a) + py * Math.cos(a)); if (along > 0 && along < L && perp < 0.28 + m.def.r * 0.6) { hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S); } }
+        for (const m of (B.enemyPool||B.mobs)) { if (m.dead || !targetable(m, { air: true })) continue; const px = m.x - tw.x, py = m.y - tw.y, along = px * Math.cos(a) + py * Math.sin(a), perp = Math.abs(-px * Math.sin(a) + py * Math.cos(a)); if (along >= (S.minRange||0) && along < L && perp < 0.28 + m.def.r * 0.6) { hit(B, m, S.dmg, { ...S, tw }); applyFx(B, m, S); } }
         B.ev.push({ k: 'rail', x: tw.x, y: tw.y, x2: ex, y2: ey, c: FAM.rail.c, tw: tw.id });
         return true;
       }
@@ -1240,7 +1242,7 @@ const Engine = (() => {
         return true;
       }
       case 'orbital': {
-        const locked = new Set(B.shots.filter((s) => s.kind === 'orbital').map((s) => s.tg)); const T = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && !locked.has(m.id) && (!tw.pvp||dist(m,tw)<=S.range+m.def.r*.6)).sort((a, b) => b.hp + b.shield - a.hp - a.shield).slice(0, S.multi);
+        const locked = new Set(B.shots.filter((s) => s.kind === 'orbital').map((s) => s.tg)); const T = (B.enemyPool||B.mobs).filter((m) => targetable(m, S) && !locked.has(m.id) && (!tw.pvp||inFiringBand(tw,m,S))).sort((a, b) => b.hp + b.shield - a.hp - a.shield).slice(0, S.multi);
         if (!T.length) return false;
         aim(tw,T[0]);
         const volleyHits=tw.pvp?[]:null;
@@ -1268,7 +1270,7 @@ const Engine = (() => {
   function beam(B, tw, dt) {
     const S = tw.S;
     const old = tw.beams || [];
-    const pool=B.enemyPool||B.mobs,held=tw._beamMode===tw.mode?old.map(b=>pool.find(m=>m.id===b.id)).filter(m=>m&&targetable(m,S)&&(!S.airOnly||m.air)&&dist(m,tw)<=S.range+m.def.r*.6):[];
+    const pool=B.enemyPool||B.mobs,held=tw._beamMode===tw.mode?old.map(b=>pool.find(m=>m.id===b.id)).filter(m=>m&&targetable(m,S)&&(!S.airOnly||m.air)&&inFiringBand(tw,m,S)):[];
     const T=[...held,...pick(B,tw,S.beams).filter(m=>!held.includes(m))].slice(0,S.beams);tw._beamMode=tw.mode;
     tw.beams = T.map((m) => { const o = old.find((b) => b.id === m.id); return { id: m.id, rt: o ? o.rt + dt : 0, x: m.x, y: m.y }; });
     if (T.length) aim(tw,T[0]);
@@ -1295,7 +1297,7 @@ const Engine = (() => {
     return true;
   }
   function stars(B) { return B.phase !== 'win' ? 0 : B.hp >= B.maxHp ? 3 : B.hp >= B.maxHp * 0.6 ? 2 : 1; }
-  return { spawn, hit, radius, lockedSector, checkPlace, resolvePlacement, create, step, place, upgrade, sell, repair, annex, income, startWave, preview, ability, cost, upCost, stats, canBuild, refresh, stars, hpMul, activeLanes, posAt };
+  return { spawn, hit, inFiringBand, radius, lockedSector, checkPlace, resolvePlacement, create, step, place, upgrade, sell, repair, annex, income, startWave, preview, ability, cost, upCost, stats, canBuild, refresh, stars, hpMul, activeLanes, posAt };
 })();
 
 // =====================================================================
