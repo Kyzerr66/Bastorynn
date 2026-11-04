@@ -753,13 +753,13 @@ const Engine = (() => {
   function upCost(tw) { return tw.lvl >= 3 ? 0 : Math.round(cost(tw.card) * [0.75, 1.25][tw.lvl - 1]); }
   function stats(tw) {
     const c = CARD[tw.card], f = FAM[c.fam], tr = c.tr, ri = RI(c.r), L = tw.lvl - 1, cl = tw.pvp?1:(tw.clvl || 1), b = tw.buff || { rate: 0, dmg: 0, range: 0, crit: 0 };
-    const rarityDamage=tw.pvp?1+.12*ri:RMUL.dmg[ri],rarityRate=tw.pvp?1+.035*ri:RMUL.rate[ri];
+    const rarityDamage=tw.pvp?1+.075*ri:RMUL.dmg[ri],rarityRate=tw.pvp?1+.035*ri:RMUL.rate[ri];
     let range = f.range * RMUL.rng[ri] * (tr.rangeMul || 1) * [1, 1.08, 1.16][L] * (1 + b.range);
     if (f.kind === 'radar' && (tr.rangeMul || 1) >= 9) range = 99;
     const bc = tr.crit || f.crit; const crit = bc ? { c: bc.c + b.crit, m: bc.m } : b.crit ? { c: b.crit, m: 2 } : null;
     const S = {
       kind: f.kind, dt: f.dt, pvp:!!tw.pvp, range: range * (tw.high ? 1.25 : 1), crit,
-      dmg: f.dmg * rarityDamage * (tw.pvp?[1,1.35,1.8]:[1,1.55,2.3])[L] * (tw.pvp ? .6 : 1) * (1 + 0.08 * (cl - 1)) * (1 + b.dmg) * (tw.pvp?1:(tw.setb || 1)) * (tw.high ? 1.1 : 1),
+      dmg: f.dmg * rarityDamage * (tw.pvp?[1,1.22,1.5]:[1,1.55,2.3])[L] * (tw.pvp ? .44 : 1) * (1 + 0.08 * (cl - 1)) * (1 + b.dmg) * (tw.pvp?1:(tw.setb || 1)) * (tw.high ? 1.1 : 1),
       rate: f.rate ? f.rate / (rarityRate * (tr.rateMul || 1) * [1, 1.06, 1.14][L]) / (1 + b.rate) : 0,
       splash: f.splash ? f.splash + (tr.splash || 0) + L * 0.1 : tr.splash || 0,
       pierce: Math.max(f.pierce || 0, tr.pierce || 0), air: f.air || !!tr.air, airBonus: f.airBonus || 1,
@@ -789,7 +789,7 @@ const Engine = (() => {
       const critPower=c=>c?1+c.c*(c.m-1):1;
       const critical=critPower(S.crit)/critPower(f.crit);
       S.dmg/=Math.sqrt(Math.max(1,cluster)*salvo*Math.max(1,chain)*Math.max(1,ramp)*Math.max(1,critical));
-      if(S.kind==='orbital'){S.range=Math.min(8,S.range);S.rate=Math.max(8,S.rate);S.exec=Math.min(.08,S.exec);}
+      if(S.kind==='orbital'){S.range=Math.min(8,S.range);S.rate=Math.max(11.5,S.rate);S.dmg=Math.min(78,S.dmg);S.exec=Math.min(.06,S.exec);}
       if(S.slow)S.slow={...S.slow,p:Math.min(.3,S.slow.p),d:Math.min(1.5,S.slow.d)};
       if(S.freeze)S.freeze={...S.freeze,d:Math.min(.65,S.freeze.d)};
       if(S.stun)S.stun={...S.stun,d:Math.min(.55,S.stun.d)};
@@ -1383,6 +1383,22 @@ const TroopData=(()=>{
   cryo:{name:'Contrôle Cryo',hp:115,damage:8,rate:1.1,range:3.2,speed:.85,armor:.05,castleDamage:3,capturePower:1,air:true,slow:.28,slowDuration:1.5,damageType:'energy',ability:'Ralentit les troupes touchées de 28 % pendant 1,5 s.',counter:'Éclaireurs et boucliers',weakness:'Artillerie à longue portée'},
   shield:{name:'Porte-bouclier',hp:155,damage:10,rate:1.2,range:2.8,speed:.75,armor:.12,maxShield:65,castleDamage:5,capturePower:1.2,air:false,shieldRegen:2.5,ability:'65 PV de bouclier ; recharge de 2,5 PV/s après 3 s sans subir de dégâts.',counter:'Premières salves et tenue de position',weakness:'Énergie : dégâts doublés au bouclier'}
  };
+ const armorProfiles={
+  // Unique PvP tank stats: 3 mythic/legendary tanks must not share generic role stats.
+  leger:{hp:285,damage:16,rate:1.35,range:3,speed:.84,armor:.29,castleDamage:6},
+  chardesert:{hp:320,damage:19,rate:1.48,range:3.15,speed:.82,armor:.29,castleDamage:6},
+  polaire:{hp:360,damage:22,rate:1.75,range:3,speed:.67,armor:.37,castleDamage:7},
+  robot:{hp:290,damage:16,rate:1.1,range:3.2,speed:.8,armor:.32,castleDamage:5},
+  mecha:{hp:440,damage:26,rate:2,range:3.25,speed:.58,armor:.38,castleDamage:8},
+  td:{hp:390,damage:32,rate:2.2,range:4,speed:.60,armor:.33,pierce:.45,bonusVs:'armor',bonusMultiplier:1.35,castleDamage:8},
+  lourd:{hp:445,damage:24,rate:1.8,range:3,speed:.55,armor:.40,castleDamage:8},
+  mastodonte:{hp:575,damage:26,rate:1.95,range:3,speed:.48,armor:.47,castleDamage:9},
+  rupture:{hp:590,damage:30,rate:2,range:3.2,speed:.46,armor:.46,castleDamage:10},
+  b_garde:{hp:530,damage:21,rate:1.2,range:2.95,speed:.74,armor:.35,castleDamage:7},
+  b_behemoth:{hp:750,damage:38,rate:2.6,range:3.6,speed:.42,armor:.42,castleDamage:11},
+  b_general:{hp:605,damage:22,rate:1.45,range:3.2,speed:.56,armor:.37,castleDamage:8},
+  b_titan:{hp:840,damage:33,rate:2.4,range:3.45,speed:.37,armor:.47,castleDamage:12}
+ };
  const families=[
   ['infantry',['fantassin','commando','grenadier'],['Voltigeur','Fusilier sentinelle','Grenadier tactique','Légionnaire','Ranger urbain','Éclaireur de ligne','Infanterie de réserve','Commando de garnison','Vétéran de frontière']],
   ['scout',['moto','jeep','quad'],['Moto d’avant-garde','Jeep de reconnaissance','Quad éclaireur','Moto des steppes','Jeep des marais','Quad de liaison','Moto de flanc','Jeep d’interception','Quad patrouilleur']],
@@ -1451,17 +1467,17 @@ const TroopData=(()=>{
  const mobility=id=>{const u=UNIT[id],base=model(id);return u.mv==='a'?'air':u.mv==='w'?'amphibie':wheels.has(base)?'terrain':'route';};
  function rarity(id){if(variants[id]){if(variants[id].rarity)return variants[id].rarity;const i=variants[id].index;return i<4?'commune':i<7?'rare':i===7?'epique':i===8?'legendaire':'mythique';}const u=UNIT[id];return u.boss?'mythique':u.hp>=550?'legendaire':u.hp>=260?'epique':u.hp>=100||u.mv==='a'?'rare':'commune';}
  const cached={};
- function stats(id){if(cached[id])return cached[id];const u=UNIT[id],role=roleOf(id),v=variants[id],specification=v?.profile,a=specification?{...roles[role],...specification.stats,ability:specification.ability,counter:specification.counter,weakness:specification.weakness}:roles[role],mv=mobility(id);
+ function stats(id){if(cached[id])return cached[id];const u=UNIT[id],role=roleOf(id),v=variants[id],specification=v?.profile,tailored=!v&&role==='armor'?armorProfiles[id]:null,a=specification?{...roles[role],...specification.stats,ability:specification.ability,counter:specification.counter,weakness:specification.weakness}:tailored?{...roles[role],...tailored}:roles[role],mv=mobility(id);
   // Sidegrades exchange durability, damage or movement; neither rarity nor boss HP
   // is used as an unrestricted PvP multiplier. Original colossal models are capped.
   const style=v?v.index%3:(u.spd>=1.5?2:u.arm>=.3?0:1),bulk=style===0?1.15:style===2?.85:1,damageFactor=style===1?1.08:1;
   const spec=v?Math.floor(v.index/3)%3:0,range=Number((a.range+(spec===1?.4:spec===2?-.25:0)).toFixed(2));
-  const hp=Math.round(a.hp*(specification?1:bulk)),damage=Math.round(a.damage*(specification?1:damageFactor*(spec===1?.88:spec===2?1.12:1))),speed=Number((a.speed*(specification?1:(style===2?1.15:style===0?.92:1)*(mv==='air'?1.12:1))).toFixed(2)),effectiveRange=specification?a.range:range;
+  const hp=Math.round(a.hp*(specification||tailored?1:bulk)),damage=Math.round(a.damage*(specification||tailored?1:damageFactor*(spec===1?.88:spec===2?1.12:1))),speed=Number((a.speed*(specification||tailored?1:(style===2?1.15:style===0?.92:1)*(mv==='air'?1.12:1))).toFixed(2)),effectiveRange=specification||tailored?a.range:range;
   const armor=a.armor,maxShield=a.maxShield||0,dps=damage/a.rate;
   const durability=(hp+maxShield*.65)/(1-armor),rangeBonus=Math.max(0,effectiveRange-2.5)*5;
   const support=(a.heal?10+a.heal*2.3:0)+(a.slow?8+a.slow*16:0)+(a.shieldRegen?3+a.shieldRegen*1.2:0)+(a.splash?8+a.splash*7:0)+(a.bonusVs?7:0)+(a.pierce||0)*15+Math.max(0,(a.capturePower||1)-1.5)*7;
   const movePremium=mv==='air'?24:mv==='terrain'?7:mv==='amphibie'?10:0;
-  const cost=Math.round((15+Math.sqrt(durability*dps)*.62+rangeBonus+support+movePremium+Math.max(0,speed-1)*10)/5)*5;
+  const armorPremium=role==='armor'?Math.max(0,hp-235)*.17:0;const cost=Math.round((15+Math.sqrt(durability*dps)*.62+rangeBonus+support+movePremium+armorPremium+Math.max(0,speed-1)*10)/5)*5;
   const capturePower=mv==='air'?0:a.capturePower,ability=mv==='air'?a.ability.replace(/Capture.*?\./,'')+' Vol direct, ne capture pas les bases.':a.ability;
   return cached[id]=Object.freeze({...a,role,roleName:a.name,hp,damage,cost,speed,range:effectiveRange,armor,maxShield,damageType:a.damageType||'physical',pierce:a.pierce||0,splash:a.splash||0,slow:a.slow||0,slowDuration:a.slowDuration||0,heal:a.heal||0,healRadius:a.healRadius||0,healTargets:a.healTargets||0,shieldRegen:a.shieldRegen||0,bonusVs:a.bonusVs||null,bonusMultiplier:a.bonusMultiplier||1,capturePower,ability:ability.trim(),mobility:mv,castleDamage:mv==='air'?Math.min(5,a.castleDamage):a.castleDamage,air:a.air||mv==='air'});
  }
@@ -1473,15 +1489,22 @@ const TroopData=(()=>{
 // collection, a teammate's units, PvE statistics or individual defense upgrades.
 
 const TroopUpgrades=(()=>{
- const MAX=3,cache=new Map();
+ const MAX=3,cache=new Map(),eraCache=new Map();
  const known=type=>typeof type==='string'&&Object.hasOwn(UNIT,type);
  const validPlayer=(s,p)=>s?.pvp&&Number.isInteger(p)&&p>=0&&!!s.boards?.[p];
- function configure(s){if(!s?.pvp)return;s.troopUpgrades=s.boards.map(()=>Object.create(null));}
+
+ // PvP evolution occurs every 75 seconds after combat begins; PvE remains unchanged.
+ function tier(s){return s?.pvp&&s.started?Math.min(10,Math.floor(Math.max(0,(s.clock||0)-(s.startedAt??20))/75)):0;}
+ function evolved(s,type,base){const n=tier(s);if(!n||!base)return base;const key=type+':'+(base.upgradeLevel||0)+':'+n;if(eraCache.has(key))return eraCache.get(key);
+  const next=Object.freeze({...base,hp:Math.round(base.hp*(1+.10*n)),damage:Math.round(base.damage*(1+.06*n)),maxShield:Math.round(base.maxShield*(1+.07*n)),shieldRegen:Number((base.shieldRegen*(1+.035*n)).toFixed(2)),heal:Number((base.heal*(1+.035*n)).toFixed(2)),castleDamage:Math.round(base.castleDamage*(1+.045*n)),evolutionTier:n});
+  eraCache.set(key,next);return next;
+ }
+ function configure(s){if(!s?.pvp)return;s.troopUpgrades=s.boards.map(()=>Object.create(null));s.troopEra=0;}
  function level(s,p,type){if(!validPlayer(s,p)||!known(type))return 0;const n=s.troopUpgrades?.[p]?.[type];return Number.isInteger(n)&&n>=0&&n<=MAX?n:0;}
  function scaled(type,n){if(!known(type))return null;if(!n)return TroopData.stats(type);const key=type+':'+n;if(cache.has(key))return cache.get(key);const b=TroopData.stats(type),heal=Number((b.heal*(1+.07*n)).toFixed(2)),shieldRegen=Number((b.shieldRegen*(1+.07*n)).toFixed(2)),maxShield=Math.round(b.maxShield*(1+.1*n)),ability=b.role==='medic'?'Répartit '+heal+' PV/s entre '+(b.healTargets||3)+' allié(s) blessé(s) à '+(b.healRadius||4)+' m, hors soigneurs.':b.role==='shield'?maxShield+' PV de bouclier ; recharge de '+shieldRegen+' PV/s après 3 s sans subir de dégâts.':b.ability,value=Object.freeze({...b,ability,hp:Math.round(b.hp*(1+.12*n)),damage:Math.round(b.damage*(1+.1*n)),maxShield,heal,shieldRegen,castleDamage:Math.min(b.castleDamage+2,Math.round(b.castleDamage*(1+.08*n))),upgradeLevel:n});cache.set(key,value);return value;}
- function stats(s,p,type){return scaled(type,level(s,p,type));}
+ function stats(s,p,type){return evolved(s,type,scaled(type,level(s,p,type)));}
  function cost(s,p,type){if(!validPlayer(s,p)||!known(type))return null;const n=level(s,p,type);if(n>=MAX)return null;return Math.max([80,140,220][n],Math.round(TroopData.stats(type).cost*[2.5,4.5,7][n]/5)*5);}
- function preview(s,p,type){if(!validPlayer(s,p)||!known(type))return null;const n=level(s,p,type);return n<MAX?scaled(type,n+1):null;}
+ function preview(s,p,type){if(!validPlayer(s,p)||!known(type))return null;const n=level(s,p,type);return n<MAX?evolved(s,type,scaled(type,n+1)):null;}
  function upgrade(s,p,data){
   if(!validPlayer(s,p))return 'Les améliorations de troupes sont réservées au PvP.';
   const b=s.boards[p],type=data?.type;
@@ -1491,7 +1514,7 @@ const TroopUpgrades=(()=>{
   if(!Number.isFinite(b.energy)||b.energy<price)return 'Énergie personnelle insuffisante pour cette amélioration.';
   // A single synchronous operation on the authoritative simulation prevents
   // overlapping commands from spending the same personal energy twice.
-  const next=scaled(type,before+1);b.energy-=price;s.troopUpgrades??=s.boards.map(()=>Object.create(null));s.troopUpgrades[p]??=Object.create(null);s.troopUpgrades[p][type]=before+1;
+  const next=evolved(s,type,scaled(type,before+1));b.energy-=price;s.troopUpgrades??=s.boards.map(()=>Object.create(null));s.troopUpgrades[p]??=Object.create(null);s.troopUpgrades[p][type]=before+1;
   for(const destination of s.boards)for(const m of destination.mobs||[]){
    if(m.dead||m.owner!==p||m.type!==type)continue;
    const hpFraction=m.maxHp>0?Math.max(0,Math.min(1,m.hp/m.maxHp)):0,shieldFraction=m.maxShield>0?Math.max(0,Math.min(1,m.shield/m.maxShield)):0;
@@ -1503,7 +1526,16 @@ const TroopUpgrades=(()=>{
   if(b.ev&&b.ev.length<120)b.ev.push({k:'build',x:b.W.cit.x,y:b.W.cit.y,r:1.4,c:'#d6bf78'});
   return true;
  }
- return{MAX,configure,level,cost,stats,preview,upgrade};
+
+ function sync(s){const n=tier(s);if(!s?.pvp||s.troopEra===n)return;s.troopEra=n;
+  for(const board of s.boards||[])for(const m of board.mobs||[]){
+   if(m.dead||!m.weapon||!Number.isInteger(m.owner)||!known(m.type))continue;
+   const next=stats(s,m.owner,m.type),healthFraction=m.maxHp>0?Math.max(0,Math.min(1,m.hp/m.maxHp)):1,shieldFraction=m.maxShield>0?Math.max(0,Math.min(1,m.shield/m.maxShield)):0;
+   m.maxHp=next.hp;m.hp=Math.max(1,Math.min(next.hp,Math.round(next.hp*healthFraction)));m.maxShield=next.maxShield;m.shield=Math.round(next.maxShield*shieldFraction);
+   m.weapon=next;m.def={...m.def,dmg:next.castleDamage};m.upgradeLevel=level(s,m.owner,m.type);
+  }
+ }
+ return{MAX,configure,level,cost,stats,preview,upgrade,sync,tier};
 })();
 
 
@@ -1587,7 +1619,7 @@ const SiegePvP=(()=>{
  function configure(s,self){const P=MAPS.find(m=>m.id===s.map),W=world(MapGen.get(P.id),s.players.length);let uid=1;s.pvp=true;s.world=W;s.started=false;s.deployCd={};s.incomeClock=0;s.botClock=0;s.outposts=W.outposts.map(o=>({id:o.id,owner:null,claimTeam:null,progress:0,contested:false}));
   s.boards=s.players.map((p,i)=>{const cit=W.bases[i],near=[W.sectorAt(cit.x,cit.y),...[...W.sectors].filter(z=>z.id!==W.sectorAt(cit.x,cit.y)).sort((a,b)=>distance(a,cit)-distance(b,cit)).slice(0,2).map(z=>z.id)],owned=W.sectors.map(z=>near.includes(z.id)),sectors=W.sectors.map(z=>({...z,name:z.id===W.sectorAt(cit.x,cit.y)?'Secteur de ta base':z.id===0?'Secteur sud':z.name,owned:owned[z.id],cost:Math.min(200,120+Math.round(distance(z,cit))),inf:0,passive:owned[z.id]?0:1.5})),world={...W,cit,sectors};const deck=(p.defenses||['gatling_0','canon_0','cryo_0','mortar_0','missile_0','forge_0']).filter(id=>CARD[id]).slice(0,6).map(id=>({id,lvl:1,setb:1})),b=Engine.create({preset:P,world,deck,seed:443+i});b.pvp=true;b.player=i;b.team=s.teams[i];b.maxHp=b.hp=100;b.wallets={[i]:300};b.viewer=i;Object.defineProperty(b,'energy',{enumerable:true,configurable:true,get(){return this.wallets[i];},set(v){this.wallets[i]=v;}});b.next=()=>uid++;b.playerBoard=i=>s.boards[i];b.allTowers=()=>s.boards.flatMap(q=>q.towers);b.troopDeck=TroopData.valid(p.troops||TroopData.starters);if(!b.troopDeck.length)b.troopDeck=[...TroopData.starters];return b;});TroopUpgrades.configure(s);
  }
- function start(s){if(s.started)return;s.started=true;s.nextWaveAt=null;for(const b of s.boards){b.phase='wave';b.wave=1;b.maxWave=1;}}
+ function start(s){if(s.started)return;s.started=true;s.startedAt=s.clock;s.troopEra=0;s.nextWaveAt=null;for(const b of s.boards){b.phase='wave';b.wave=1;b.maxWave=1;}}
  function board(s,player){return s.boards[s.pvp?player:s.teams[player]];}
  function cachedTerrainPath(W,start,end,amphibious){const key=(amphibious?'w:':'g:')+Math.floor(start.x*2)+','+Math.floor(start.y*2)+':'+end.x+','+end.y,cache=W._deployPaths||(W._deployPaths=new Map());if(cache.has(key)){const pts=cache.get(key);return [start,...pts.slice(1)];}const pts=terrainPath(W,start,end,amphibious);if(pts){if(cache.size>=96)cache.delete(cache.keys().next().value);cache.set(key,pts);}return pts;}
  function defaultSpawn(s,player,type,route=0,target){
@@ -1682,7 +1714,7 @@ const SiegePvP=(()=>{
    if(w.splash&&own.ev.length<120)own.ev.push({k:'boom',x:enemy.x,y:enemy.y,r:w.splash,c:'#d9aa6d'});
   }
  }
- function step(s,dt){if(s.ended)return;s.clock+=dt;if(!s.started&&s.clock>=s.nextWaveAt)start(s);if(!s.started)return;
+ function step(s,dt){if(s.ended)return;s.clock+=dt;if(!s.started&&s.clock>=s.nextWaveAt)start(s);if(!s.started)return;TroopUpgrades.sync(s);
   const all=s.boards.flatMap(b=>b.mobs).filter(m=>!m.dead&&s.boards[m.owner]?.phase!=='lose'&&s.boards[m.targetPlayer]?.phase!=='lose'),nearby=spatialIndex(all);
   combatStep(s,dt,all,nearby);
   captureStep(s,dt,all);
@@ -1877,8 +1909,8 @@ const Frontier = (()=>{
     if(!s.ended&&s.boards.every(b=>b.phase!=='wave')){if(s.nextWaveAt==null)s.nextWaveAt=s.clock+16;if(s.clock>=s.nextWaveAt)nextWave();}
     lastNet+=dt;if(room&&lastNet>.12&&!netBusy){lastNet=0;netBusy=true;const snap=snapshot();send('state',snap).catch(()=>{s.disconnected=true;Battle.hint('Connexion perdue : la partie est suspendue.');}).finally(()=>netBusy=false);}
   }
-  function snapshot(){const s=session;return {speed:s.speed,realClock:s.realClock,speedVote:s.speedVote,pvp:!!s.pvp,started:s.started,outposts:s.outposts,troopUpgrades:s.troopUpgrades,deployCd:s.deployCd,clock:s.clock,nextWaveAt:s.nextWaveAt,ended:s.ended,winner:s.winner,attackCd:s.attackCd,boards:s.boards.map((b,i)=>{const copy={};for(const k of ['speed','t','phase','wave','maxWave','hp','maxHp','energy','wallets','inf','owned','towers','mobs','shots','puddles','smokes','mines','kills','leaks','bosses','ab','stats','seen','team','player','troopDeck','coop'])copy[k]=b[k];copy.radarState=b.pvp?null:WaveRadar.describe(b);copy.ev=pendingEvents[i].splice(0);return JSON.parse(JSON.stringify(copy,(k,v)=>['def','path','lane','spots','_target','weapon','shieldQuiet','fireCd'].includes(k)?undefined:typeof v==='number'&&Number.isFinite(v)&&!Number.isInteger(v)?Math.round(v*1000)/1000:k==='tw'&&v&&typeof v==='object'?{__tw:v.id}:v));})};}
-  function applySnapshot(data){const s=session;if(!s||!data?.boards)return;s.clock=data.clock;s.speed=[1,2,3,4].includes(data.speed)?data.speed:1;s.realClock=data.realClock||0;s.speedVote=data.speedVote||null;s.started=data.started;s.outposts=data.outposts||s.outposts;s.troopUpgrades=data.troopUpgrades||s.troopUpgrades;s.deployCd=data.deployCd||{};s.nextWaveAt=data.nextWaveAt;s.attackCd=data.attackCd||{};
+  function snapshot(){const s=session;return {speed:s.speed,realClock:s.realClock,speedVote:s.speedVote,pvp:!!s.pvp,started:s.started,startedAt:s.startedAt,troopEra:s.troopEra,outposts:s.outposts,troopUpgrades:s.troopUpgrades,deployCd:s.deployCd,clock:s.clock,nextWaveAt:s.nextWaveAt,ended:s.ended,winner:s.winner,attackCd:s.attackCd,boards:s.boards.map((b,i)=>{const copy={};for(const k of ['speed','t','phase','wave','maxWave','hp','maxHp','energy','wallets','inf','owned','towers','mobs','shots','puddles','smokes','mines','kills','leaks','bosses','ab','stats','seen','team','player','troopDeck','coop'])copy[k]=b[k];copy.radarState=b.pvp?null:WaveRadar.describe(b);copy.ev=pendingEvents[i].splice(0);return JSON.parse(JSON.stringify(copy,(k,v)=>['def','path','lane','spots','_target','weapon','shieldQuiet','fireCd'].includes(k)?undefined:typeof v==='number'&&Number.isFinite(v)&&!Number.isInteger(v)?Math.round(v*1000)/1000:k==='tw'&&v&&typeof v==='object'?{__tw:v.id}:v));})};}
+  function applySnapshot(data){const s=session;if(!s||!data?.boards)return;s.clock=data.clock;s.speed=[1,2,3,4].includes(data.speed)?data.speed:1;s.realClock=data.realClock||0;s.speedVote=data.speedVote||null;s.started=data.started;s.startedAt=data.startedAt??s.startedAt;s.troopEra=data.troopEra??s.troopEra;s.outposts=data.outposts||s.outposts;s.troopUpgrades=data.troopUpgrades||s.troopUpgrades;s.deployCd=data.deployCd||{};s.nextWaveAt=data.nextWaveAt;s.attackCd=data.attackCd||{};
     data.boards.forEach((src,i)=>{const b=s.boards[i];if(!b)return;const old=new Map(b.mobs.map(m=>[m.id,m]));const events=[...b.ev,...src.ev];Object.assign(b,src);b.ev=events.slice(-300);for(const m of b.mobs){m.def=s.pvp?SiegePvP.combatDefinition(m.type,TroopUpgrades.stats(s,m.owner,m.type)):UNIT[m.type];const prior=old.get(m.id);if(prior&&!(globalThis.document?.hidden)){m._target={x:m.x,y:m.y};m.x=prior.x;m.y=prior.y;}}
       for(const arr of [b.shots,b.puddles,b.mines])for(const q of arr){if(q.tw?.__tw)q.tw=b.towers.find(t=>t.id===q.tw.__tw)||{id:0,card:'gatling_0',x:q.x,y:q.y};}
     });
