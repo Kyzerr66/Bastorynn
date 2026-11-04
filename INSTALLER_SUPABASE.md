@@ -22,14 +22,14 @@ Les comptes de l’ancienne version étaient dans le fichier local du serveur. U
 
 1. Se connecter depuis le premier appareil et noter niveau, crédits et quelques cartes du catalogue.
 2. Enregistrer un deck nommé « Test sauvegarde ».
-3. Ouvrir le profil → **Sauvegarder maintenant**. Attendre **Sauvegardé dans Supabase**.
+3. La sauvegarde est automatique. Attendre quelques secondes après la modification ; le profil affiche « Sauvegarde automatique activée ». Un problème de sauvegarde y apparaît séparément.
 4. Ouvrir le même site sur un autre appareil ou dans un navigateur privé. Choisir **Connexion**, avec le même identifiant et mot de passe (ne pas créer un autre compte).
 5. Vérifier le niveau, la collection et le deck. Fermer les parties avant de changer d’appareil.
 6. Pour tester un déploiement, garder les deux jeux fermés, redéployer, puis se reconnecter et vérifier à nouveau.
 
-Ne pas jouer simultanément sur deux appareils avec le même compte : la seconde écriture d’une ancienne version est refusée pour éviter d’écraser la progression récente. Le profil indique alors « Session modifiée ». Le bouton de sauvegarde exporte une copie de secours puis recharge la progression du serveur. Les copies locales en attente sont conservées ; elles ne remplacent jamais automatiquement une sauvegarde plus récente.
+Ne pas jouer simultanément sur deux appareils avec le même compte : la seconde écriture d’une ancienne version est refusée pour éviter d’écraser la progression récente. Le profil indique alors « Session modifiée ». Le bouton « Recharger la progression » recharge la progression du serveur sans exporter de fichier. Les copies locales en attente sont conservées ; elles ne remplacent jamais automatiquement une sauvegarde plus récente.
 
-Une coupure réseau affiche « Non synchronisé ». Garder la page ouverte et utiliser Sauvegarder maintenant après reconnexion. La fermeture immédiate d’un onglet avant l’accusé de sauvegarde ne garantit pas une copie en ligne. Le jeu conserve une copie locale et retente lors de la reconnexion.
+Une coupure réseau affiche « Sauvegarde en attente ». Garder la page ouverte : la sauvegarde reprend automatiquement après reconnexion, avec un bouton Réessayer en cas de besoin. La fermeture immédiate d’un onglet avant l’accusé de sauvegarde ne garantit pas une copie en ligne. Le jeu conserve une copie locale et retente lors de la reconnexion.
 
 ## Limites et entretien
 
@@ -39,7 +39,7 @@ Une coupure réseau affiche « Non synchronisé ». Garder la page ouverte et ut
 - Garder une seule instance du serveur de jeu : les salons actifs restent en mémoire. Les transactions protègent les comptes durant le chevauchement des déploiements.
 - Une table de sauvegarde sérialisée convient à une petite bêta. Pour une forte fréquentation, prévoir des lignes par joueur et une validation serveur des récompenses.
 - Exporter régulièrement les données de la base. Une base persistante ne remplace pas une sauvegarde indépendante.
-- L’export JSON du profil est une copie de secours ; aucun import manuel de fichier n’est proposé dans cette version.
+- Le profil ne propose aucun export JSON ; les copies de secours locales restent internes au jeu.
 - Les comptes existants utilisent identifiant + mot de passe ; aucun e-mail de récupération n’est configuré.
 
 ## Validation de cette livraison
