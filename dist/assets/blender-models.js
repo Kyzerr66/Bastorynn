@@ -16,7 +16,7 @@ window.CitadellesModels=(()=>{
  }
  function tower(card,level=1){if(!pack)return null;const levelKey=Math.max(1,Math.min(3,level)),data=pack.towers[card.fam]?.[levelKey];if(!data)return null;
   const key='tower|'+card.fam+'|'+card.r+'|'+levelKey;if(cache.has(key))return cache.get(key);
-  const result={...data.meta};for(const k of ['base','turret','barrel','spin'])result[k]=decode(data.parts[k],data.accent);
+  const result={...data.meta,accent:data.accent};for(const k of ['base','turret','barrel','spin'])result[k]=decode(data.parts[k],data.accent);
   // Rarity remains a subtle metal trim; element colours always keep the same meaning.
   const trim={commune:'#cda66d',rare:'#8fbfd2',epique:'#b5a7d2',legendaire:'#e8c87d',mythique:'#d3a8c7'}[card.r];
   if(trim&&result.base){const col=new T.Color(trim),a=result.base.attributes.color,ids=data.parts.base.m;for(let v=0;v<a.count;v++)if(ids[Math.floor(v/3)]===3)a.setXYZ(v,col.r,col.g,col.b);}
