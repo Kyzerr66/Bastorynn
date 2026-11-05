@@ -1,25 +1,38 @@
 /* Blender-authored, indexed and quantized mesh archive. No remote asset service. */
 window.CitadellesModels=(()=>{
  const T=R3.THREE,cache=new Map();let pack=null,disabled=false;
- function decode(data,accent,unitPaint,foliage=false){
+ const rarityTrim={
+  commune:'#777b6c',rare:'#647781',epique:'#796e83',legendaire:'#98865f',mythique:'#906e70'
+ };
+ function decode(data,accent,unitPaint,foliage=false,defenseTrim=null){
   if(!data)return null;
   const n=data.i.length,positions=new Float32Array(n*3),colors=new Float32Array(n*3),mr=new Float32Array(n*2),em=new Float32Array(n*2);
   const palette=pack.palette.map(c=>new T.Color(c));if(accent)palette[4]=new T.Color(accent);
+  if(defenseTrim){
+   const trim=new T.Color(defenseTrim),neutral=new T.Color();
+   for(let i=0;i<palette.length;i++){
+    const color=palette[i];
+    const luma=.2126*color.r+.7152*color.g+.0722*color.b;
+    neutral.setRGB(luma,luma,luma);
+    color.lerp(neutral,i===4 ? .68 : .37);
+    // Tint metal fittings and sand-colored brackets without repainting the hull.
+    if(i===3||['#bfb69b','#918a72'].includes(pack.palette[i]))color.lerp(trim,.29);
+   }
+  }
   if(unitPaint){palette[1].lerp(new T.Color(unitPaint[0]),.35);palette[2].lerp(new T.Color(unitPaint[1]),.2);}
   if(foliage){palette[1]=new T.Color('#527263');palette[2]=new T.Color('#91ab96');palette[0]=new T.Color('#385144');palette[3]=new T.Color('#776d50');}
   for(let v=0;v<n;v++){
    const from=data.i[v]*3,k=data.m[Math.floor(v/3)],col=palette[k]||palette[0];
    for(let a=0;a<3;a++)positions[v*3+a]=data.p[from+a]/10000;
-   colors.set([col.r,col.g,col.b],v*3);mr.set([k===3?.5:k===1?.35:.08,k===4?.55:.8],v*2);em.set([k===4?.16:0,0],v*2);
+   colors.set([col.r,col.g,col.b],v*3);mr.set([k===3?.5:k===1?.35:.08,k===4?.55:.8],v*2);em.set([k===4 ? (defenseTrim ? .07 : .16) : 0,0],v*2);
   }
   const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(positions,3));g.setAttribute('color',new T.BufferAttribute(colors,3));g.setAttribute('mr',new T.BufferAttribute(mr,2));g.setAttribute('em',new T.BufferAttribute(em,2));g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();g.userData.blender=true;return g;
  }
  function tower(card,level=1){if(!pack)return null;const levelKey=Math.max(1,Math.min(3,level)),data=pack.towers[card.fam]?.[levelKey];if(!data)return null;
   const key='tower|'+card.fam+'|'+card.r+'|'+levelKey;if(cache.has(key))return cache.get(key);
-  const result={...data.meta,accent:data.accent};for(const k of ['base','turret','barrel','spin'])result[k]=decode(data.parts[k],data.accent);
-  // Rarity remains a subtle metal trim; element colours always keep the same meaning.
-  const trim={commune:'#cda66d',rare:'#8fbfd2',epique:'#b5a7d2',legendaire:'#e8c87d',mythique:'#d3a8c7'}[card.r];
-  if(trim&&result.base){const col=new T.Color(trim),a=result.base.attributes.color,ids=data.parts.base.m;for(let v=0;v<a.count;v++)if(ids[Math.floor(v/3)]===3)a.setXYZ(v,col.r,col.g,col.b);}
+  const trim=rarityTrim[card.r]||rarityTrim.commune;
+  const result={...data.meta};
+  for(const k of ['base','turret','barrel','spin'])result[k]=decode(data.parts[k],data.accent,null,false,trim);
   cache.set(key,result);if(cache.size>256)cache.delete(cache.keys().next().value);return result;
  }
  function unit(type,paint){if(!pack?.units[type])return null;const key='unit|'+type+'|'+paint.join('|');if(cache.has(key))return cache.get(key);const result=pack.units[type].map(p=>({...p,g:decode(p.g,null,paint)}));cache.set(key,result);if(cache.size>256)cache.delete(cache.keys().next().value);return result;}
