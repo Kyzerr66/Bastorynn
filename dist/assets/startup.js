@@ -1,6 +1,6 @@
 /* Keep the first paint independent of the renderer, models and account database. */
 (()=>{
- const config={"renderer":"assets/renderer.js?v=923e4059e127","adapter":"assets/blender-models.js?v=4f111afce0eb","models":"assets/citadelles-pack.js?v=4f111afce0eb","engine":"assets/engine.js?v=fbf681541e8e"},message=document.getElementById('load-message'),retry=document.getElementById('load-retry');
+ const config={"renderer":"assets/renderer.js?v=3c6cf9f9cc66","adapter":"assets/blender-models.js?v=4f111afce0eb","models":"assets/citadelles-pack.js?v=4f111afce0eb","engine":"assets/engine.js?v=4772504c55e0"},message=document.getElementById('load-message'),retry=document.getElementById('load-retry');
  const state=window.BastorynnBoot={phase:'renderer',fallback:false};
  retry.onclick=()=>location.reload();
  function deadline(promise,ms,label){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(label)),ms);})]).finally(()=>clearTimeout(timer));}

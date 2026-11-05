@@ -32,7 +32,7 @@ const FAM = {
   sniper: { n: 'Tireur d\'élite', role: 'Très longue portée', kind: 'bullet', dt: 'phys', cost: 95, dmg: 40, rate: 2.0, range: 4.4, pierce: 0.3, crit: { c: 0.15, m: 2 }, air: true, prefer: 'strong', c: '#D9C7A0', desc: 'Un tir précis à très longue portée. Vise d\'abord les ennemis les plus résistants.' },
   flak: { n: 'DCA', role: 'Anti-aérien lourd', kind: 'flak', dt: 'phys', cost: 105, dmg: 22, rate: 0.85, range: 3.8, splash: 0.85, air: true, airOnly: true, c: '#9FB4C8', desc: 'Obus à fragmentation qui éclatent dans le ciel. Ne vise que les aériens, mais les déchiquette.' },
   mine: { n: 'Poseur de mines', role: 'Pièges sur la route', kind: 'mine', dt: 'phys', cost: 85, dmg: 70, rate: 2.4, range: 2.3, splash: 0.65, max: 4, air: false, c: '#C8A060', desc: 'Enterre des mines sur la route. Elles explosent au passage des troupes au sol.' },
-  drone: { n: 'Nid de drones', role: 'Essaim chasseur', kind: 'missile', dt: 'phys', cost: 115, dmg: 8, rate: 1.3, range: 3.9, salvo: 4, splash: 0, air: true, c: '#7FE0C0', desc: 'Lâche des micro-drones qui poursuivent leurs cibles, au sol comme dans les airs.' },
+  drone: { n: 'Nid de drones', role: 'Essaim chasseur', kind: 'drone', dt: 'phys', cost: 115, dmg: 8, rate: 1.3, range: 3.9, splash: 0, air: true, c: '#7FE0C0', desc: 'Lance des drones armés qui tirent sur les troupes au sol et en vol. Un appareil supplémentaire par amélioration, jusqu’à trois.' },
   mlrs: { n: 'Lance-roquettes multiple', role: 'Barrage d\'artillerie', kind: 'shell', dt: 'phys', cost: 150, dmg: 22, rate: 4.2, range: 5.4, splash: 0.7, split: 5, pierce: 0.3, air: false, c: '#E07A4A', desc: 'Une salve de roquettes qui couvre toute une zone, de très loin. Rechargement lent.' },
   emp: { n: 'Canon IEM', role: 'Neutralisation', kind: 'pulse', dt: 'energy', cost: 120, dmg: 10, rate: 2.4, range: 1.9, shieldMul: 3, vehStun: { c: 0.55, d: 1.2 }, air: true, c: '#6FA8FF', desc: 'Impulsion électromagnétique : pulvérise les boucliers et paralyse véhicules et drones.' },
   gas: { n: 'Gaz incapacitant', role: 'Anti-infanterie', kind: 'puddle', dt: 'acid', cost: 90, dmg: 6, rate: 2.6, range: 2.8, splash: 1.0, dur: 3.6, infMul: 2.2, vehMul: 0.5, slow: { p: 0.35, d: 1 }, air: false, c: '#C8D86A', desc: 'Un nuage qui ralentit l\'infanterie et lui inflige le double de dégâts. Peu efficace contre les blindés.' },
@@ -188,11 +188,11 @@ const CARD_DEF = {
     ['Terre brûlée', 'mythique', { burn: 1, splash: 0.8, maxAdd: 4, stun: { c: 0.4, d: 1 } }, 'Rien ne traverse.'],
   ],
   drone: [
-    ['Essaim', 'commune', {}, 'Quatre petits drones affamés.'],
-    ['Frelons', 'rare', { salvo: 1 }, 'Un drone de plus par salve.'],
-    ['Nuée de combat', 'epique', { salvo: 2, rateMul: 1.15 }, 'Le ciel bourdonne.'],
-    ['Meute autonome', 'legendaire', { salvo: 3, crit: { c: 0.2, m: 2 } }, 'Ils choisissent seuls leurs proies.'],
-    ['Ruche', 'mythique', { salvo: 6, burn: 0.4, rateMul: 1.3 }, 'Une colonne entière de drones.'],
+    ['Essaim', 'commune', {}, 'Déploie des drones armés selon le niveau du nid.'],
+    ['Frelons', 'rare', { rateMul: 1.08 }, 'Redéploie ses drones plus vite.'],
+    ['Nuée de combat', 'epique', { rateMul: 1.15 }, 'Déploiement accéléré.'],
+    ['Meute autonome', 'legendaire', { crit: { c: 0.2, m: 2 } }, 'Peut infliger des coups critiques.'],
+    ['Ruche', 'mythique', { burn: 0.4, rateMul: 1.3 }, 'Munitions incendiaires et déploiement accéléré.'],
   ],
   mlrs: [
     ['Katioucha', 'commune', {}, 'Les orgues de la guerre.'],
@@ -1412,7 +1412,9 @@ const Engine = (() => {
     for (const s of B.shots) {
       s.t += dt;
       if (s.t < 0) continue;
-      if (s.kind === 'missile') {
+      if (s.kind === 'drone') {
+        stepDefenseDrone(B, s, dt);
+      } else if (s.kind === 'missile') {
         const tg = Tactical.target(B,s.tg); if (tg) { s.tx = tg.x; s.ty = tg.y; }
         const a = Math.atan2(s.ty - s.y, s.tx - s.x); s.ang += clamp(((a - s.ang + Math.PI * 3) % (Math.PI * 2)) - Math.PI, -dt * 7, dt * 7);
         const px=s.x,py=s.y,v = 4 + s.t * 6; s.x += Math.cos(s.ang) * v * dt; s.y += Math.sin(s.ang) * v * dt;
@@ -1436,6 +1438,38 @@ const Engine = (() => {
     B.shots = B.shots.filter((s) => !s.done);
     B.mobs = B.mobs.filter((m) => !m.dead);
     if (!B.pvp && !B.queue.length && !B.mobs.length && B.phase === 'wave') endWave(B);
+  }
+  function stepDefenseDrone(B, drone, dt) {
+    const { tw, S } = drone;
+    if (!B.towers.includes(tw) || drone.t >= 5) { drone.done = true; return; }
+    let target = Tactical.target(B, drone.tg);
+    if (!target || !targetable(target, S) || !inFiringBand(tw, target, S)) {
+      target = pick(B, tw, 1)[0];
+      drone.tg = target?.id ?? null;
+    }
+    const returning = drone.rounds === 0 || drone.t >= 3.8;
+    const destination = returning ? tw : target || tw;
+    const bearing = Math.atan2(destination.y - tw.y, destination.x - tw.x);
+    const offset = returning ? 0 : (drone.slot - (tw.lvl - 1) / 2) * .55;
+    const dx = destination.x - Math.sin(bearing) * offset - drone.x;
+    const dy = destination.y + Math.cos(bearing) * offset - drone.y;
+    const distance = Math.hypot(dx, dy);
+    if (returning && distance < .15) { drone.done = true; return; }
+    const altitude = .58 + Math.min(1, drone.t / .42) * .72;
+    drone.h = returning && distance < .75 ? .58 + .72 * distance / .75 : altitude;
+    if (distance > (returning ? .1 : .84)) {
+      const travel = Math.min(distance, 2.65 * dt);
+      drone.ang = Math.atan2(dy, dx);
+      drone.x += dx / distance * travel;
+      drone.y += dy / distance * travel;
+    }
+    if (returning || tw.jam > 0 || !target || dist(drone, target) > 1.65 || drone.t < drone.nextFire) return;
+    drone.rounds--;
+    drone.nextFire = drone.t + .34;
+    B.ev.push({ k: 'droneShot', x: drone.x, y: drone.y, h: drone.h,
+      x2: target.x, y2: target.y, air: target.air, tw: tw.id, c: '#ffdb9a' });
+    hit(B, target, S.dmg * .72, { ...S, tw });
+    applyFx(B, target, S);
   }
   // ---------------- dégâts ----------------
   function markOf(m) { return Math.min(0.7, (m.acidT > 0 ? m.acidM : 0) + m.rMark); }
@@ -1545,6 +1579,25 @@ const Engine = (() => {
         tw.ang = Math.atan2(p.y - tw.y, p.x - tw.x);
         B.shots.push({ pid: String(B.player??B.team??0)+":"+(B.nextShotId=(B.nextShotId||0)+1), kind: 'shell', S, tw, x0: tw.x, y0: tw.y, x: tw.x, y: tw.y, tx: p.x, ty: p.y, t: 0, T: Tt, H: 1.2 + dd * 0.25 });
         B.ev.push({ k: 'muzzle', x: tw.x, y: tw.y, ang: tw.ang, c: '#F4A261', big: true, tw: tw.id });
+        return true;
+      }
+      case 'drone': {
+        const limit = clamp(tw.lvl, 1, 3);
+        const occupied = new Set();
+        for (const shot of B.shots) if (shot.kind === 'drone' && shot.tw === tw && !shot.done) occupied.add(shot.slot);
+        if (occupied.size >= limit) return false;
+        const targets = pick(B, tw, limit);
+        if (!targets.length) return false;
+        aim(tw, targets[0]);
+        for (let slot = 0; slot < limit; slot++) {
+          if (occupied.has(slot)) continue;
+          const target = targets[slot % targets.length];
+          B.shots.push({
+            pid: String(B.player ?? B.team ?? 0) + ':' + (B.nextShotId = (B.nextShotId || 0) + 1),
+            kind: 'drone', S, tw, tg: target.id, slot, x: tw.x, y: tw.y,
+            ang: tw.ang, t: -slot * .16, h: .58, rounds: 4, nextFire: .46,
+          });
+        }
         return true;
       }
       case 'missile': {
@@ -1737,6 +1790,7 @@ const Battle = (() => {
   }
   function sndEv(e) {
     switch (e.k) {
+      case 'droneShot': sp('gun2',e,.25,{gap:.055,max:4}); break;
       case 'muzzle': case 'tracer': { const tw = e.tw != null && B.towers.find((t) => t.id === e.tw); const f = tw ? CARD[tw.card].fam : e.fam; let m = FAMSND[f]; if (!m) return; let n = m[0]; if (n === 'gun0') n = 'gun' + ((Math.random() * 3) | 0); sp(n, e, m[1], { gap: m[2] / 2, max: m[3] }); break; }
       case 'boom': if (e.plasma) return; sp(e.mine ? 'boom_m' : e.small ? 'boom_s' : (e.r > 1.1 ? 'boom_m' : 'boom_s'), e, e.small ? 0.42 : 0.6, { gap: 0.06, max: 5 }); break;
       case 'flak': sp('flak', e, 0.5, { gap: 0.12, max: 3 }); break;
@@ -2182,8 +2236,9 @@ function cstats(c, lvl = 1) {
   if (S.kind === 'aura') out.push(['Bonus', '+' + Math.round(S.buffRate * 100) + '%']);
   else if (S.kind === 'eco') out.push(['Revenu', '+' + S.income]);
   else if (S.kind === 'radar') out.push(['Marque', '+' + Math.round(S.mark * 100) + '%']);
+  else if (S.kind === 'drone') out.push(['Dégâts / tir', Math.round(S.dmg * .72)], ['Drones actifs', '1 à 3']);
   else out.push(['Dégâts', Math.round(S.kind === 'beam' ? S.dmg : S.dmg * (S.kind === 'missile' ? S.salvo : S.multi))]);
-  if (S.rate) out.push(['Tirs/s', (1 / S.rate).toFixed(1)]);
+  if (S.rate) out.push(S.kind==='drone'?['Redéploiement', S.rate.toFixed(1)+' s']:['Tirs/s', (1 / S.rate).toFixed(1)]);
   out.push(['Portée', S.range > 50 ? '∞' : (S.minRange?S.minRange.toFixed(1)+'–':'')+S.range.toFixed(1)]);
   return out;
 }
@@ -4252,7 +4307,7 @@ const Frontier = (()=>{
     function frame(b,dt){if(dead||contextLost||document.hidden||!b)return;if(!surfaceReady&&!resize())return;
       dt=Math.max(0,Math.min(.1,Number(dt)||0));const speed=Math.max(1,Math.min(4,Number(b.speed)||1));time+=dt;motionTime+=dt*(b.paused?0:speed);
       const eventLimit=runtimeQuality.events||130;
-      for(const e of b.ev){if(['build','upgrade','boom','strike','pulse','stasis','tracer','chain','rail','leak'].includes(e.k))fx.push({...e,life:e.k==='build'?.85:.3,max:e.k==='build'?.85:.3});}
+      for(const e of b.ev){if(['build','upgrade','boom','strike','pulse','stasis','tracer','droneShot','chain','rail','leak'].includes(e.k))fx.push({...e,life:e.k==='build'?.85:.3,max:e.k==='build'?.85:.3});}
       if(fx.length>eventLimit)fx.splice(0,fx.length-eventLimit);b.ev.length=0;const elapsed=time-lastRender;lastRender=time;updateCam();background();ctx.setTransform(dpr,0,0,dpr,0,0);
       const q=collector(camera,canvas.width,canvas.height);q.add(coreGeo,transform(W.cit.x,citY+2.26+Math.sin(time)*.04,W.cit.y,time),'#77ffc5');
       const liveTowers=new Set(),liveUnits=new Set(),simplifiedUnits=[];let detailedUnits=0;const heavyBattle=!!b.pvp&&b.mobs.length>42;
@@ -4282,11 +4337,16 @@ const Frontier = (()=>{
       for(const t of b.towers)if(!rigs.get(t.id)?.frontBase)arc(t.x,t.y,Engine.radius(t.card),['#70e7b3','#ff977c','#87bfff','#deb3ff'][t.owner||0],.65);
       for(const t of b.towers)for(const beam of t.beams||[]){const origin=muzzle(t.id),target=b.mobs.find(m=>m.id===beam.id),x=target?.x??beam.x,z=target?.y??beam.y;if(!Number.isFinite(x)||!Number.isFinite(z))continue;
         const a=origin?project(origin.x,origin.z,origin.y):project(t.x,t.y,groundY(t.x,t.y)+.65),p=project(x,z,target?.air?(target._vy||3):groundY(x,z)+.3);ctx.strokeStyle=FAM[CARD[t.card].fam].c;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(p.x,p.y);ctx.stroke();}
+      for(const tower of b.towers)R3.forEachDefenseMote?.(CARD[tower.card]?.r,tower.lvl,time+tower.x*.51+tower.y*.31,(x,y,z,color,alpha)=>{
+        const pos=project(tower.x+x,tower.y+z,groundY(tower.x,tower.y)+y);
+        ctx.fillStyle=color;ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(pos.x,pos.y,1.7,0,Math.PI*2);ctx.fill();
+      });
+      ctx.globalAlpha=1;
       for(const m of b.mobs){if(m.dead||m.hp>=m.maxHp&&!m.def.boss)continue;const p=project(m.x,m.y,(m.air?3:groundY(m.x,m.y))+.5+m.def.r);ctx.fillStyle='#07171c';ctx.fillRect(p.x-14,p.y-2,28,5);ctx.fillStyle=m.hp/m.maxHp>.4?'#8ce4a2':'#ff8b78';ctx.fillRect(p.x-14,p.y-2,28*m.hp/m.maxHp,4);}
-      for(const sh of b.shots){if(sh.t<0)continue;const drone=sh.kind==='missile'&&CARD[sh.tw?.card]?.fam==='drone',launch=drone?.7:({shell:.3,flak:.6,missile:.9,plasma:.35}[sh.kind]??.45),offset=typeof ProjectileMotion!=='undefined'?ProjectileMotion.muzzleOffset(sh,muzzle(sh.tw?.id),groundY,launch):{x:0,y:0,z:0};
+      for(const sh of b.shots){if(sh.t<0)continue;if(sh.kind==='drone'){const p=project(sh.x,sh.y,groundY(sh.x,sh.y)+sh.h);ctx.fillStyle='#bacbc3';ctx.fillRect(p.x-5,p.y-2,10,4);ctx.fillRect(p.x-1,p.y-5,2,10);continue;}const drone=sh.kind==='missile'&&CARD[sh.tw?.card]?.fam==='drone',launch=drone?.7:({shell:.3,flak:.6,missile:.9,plasma:.35}[sh.kind]??.45),offset=typeof ProjectileMotion!=='undefined'?ProjectileMotion.muzzleOffset(sh,muzzle(sh.tw?.id),groundY,launch):{x:0,y:0,z:0};
         let h=groundY(sh.x,sh.y)+launch+offset.y;if(sh.kind==='shell')h+=(sh.h??Math.sin(Math.max(0,sh.t)/(sh.T||1)*Math.PI)*(sh.H||0))*1.4;else if(sh.kind==='flak'){const target=b.mobs.find(m=>m.id===sh.tg),u=Math.min(1,sh.t/sh.T),start=groundY(sh.x0,sh.y0)+.6;h=start+((target?target._vy||groundY(target.x,target.y)+.3:start)-start)*u+offset.y;}else if(sh.kind==='missile'&&!drone)h-=Math.min(.6,sh.t*.2);
         const p=project(sh.x+offset.x,sh.y+offset.z,h);ctx.fillStyle=sh.kind==='plasma'?'#9ff6ff':'#ffe6a4';ctx.beginPath();ctx.arc(p.x,p.y,sh.kind==='plasma'?3.5:2.5,0,7);ctx.fill();}
-      for(const e of fx){e.life-=elapsed;if(e.life<=0)continue;if(e.tw&&!e.origin)e.origin=muzzle(e.tw);const a=e.origin?project(e.origin.x,e.origin.z,e.origin.y):project(e.x,e.y,groundY(e.x,e.y)+.3);ctx.globalAlpha=e.life/e.max;if(e.k==='tracer'||e.k==='rail'){const p=project(e.x2,e.y2,groundY(e.x2,e.y2)+(e.air?2:.3));ctx.strokeStyle=e.c||'#ffe9a6';ctx.lineWidth=e.k==='rail'?3:1.5;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(p.x,p.y);ctx.stroke();}else if(e.k==='chain'&&e.pts){ctx.strokeStyle='#bfa1ff';ctx.lineWidth=2;ctx.beginPath();e.pts.forEach((p,i)=>{const v=!i&&e.origin?a:project(p.x,p.y,groundY(p.x,p.y)+.5);i?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y);});ctx.stroke();}else arc(e.x,e.y,(1-e.life/e.max)*(e.r||1.3)+.1,e.c||'#ffe4a0',e.life/e.max);ctx.globalAlpha=1;}fx=fx.filter(e=>e.life>0);
+      for(const e of fx){e.life-=elapsed;if(e.life<=0)continue;if(e.tw&&!e.origin)e.origin=muzzle(e.tw);const a=e.k==='droneShot'?project(e.x,e.y,groundY(e.x,e.y)+e.h):e.origin?project(e.origin.x,e.origin.z,e.origin.y):project(e.x,e.y,groundY(e.x,e.y)+.3);ctx.globalAlpha=e.life/e.max;if(e.k==='tracer'||e.k==='droneShot'||e.k==='rail'){const p=project(e.x2,e.y2,groundY(e.x2,e.y2)+(e.air?2:.3));ctx.strokeStyle=e.c||'#ffe9a6';ctx.lineWidth=e.k==='rail'?3:1.5;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(p.x,p.y);ctx.stroke();}else if(e.k==='chain'&&e.pts){ctx.strokeStyle='#bfa1ff';ctx.lineWidth=2;ctx.beginPath();e.pts.forEach((p,i)=>{const v=!i&&e.origin?a:project(p.x,p.y,groundY(p.x,p.y)+.5);i?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y);});ctx.stroke();}else arc(e.x,e.y,(1-e.life/e.max)*(e.r||1.3)+.1,e.c||'#ffe4a0',e.life/e.max);ctx.globalAlpha=1;}fx=fx.filter(e=>e.life>0);
       if(range){arc(range.x,range.y,range.r,range.color,.65);if(range.min>0)arc(range.x,range.y,range.min,'#ff8c65',.9);}
       // Wave crests are projected onto the actual horizontal water plane.
       ctx.lineWidth=1;ctx.strokeStyle='#b4e7ee';ctx.globalAlpha=.13;for(let i=0;i<45;i++){const x=(i*7.13+time*.12)%W.S,z=(i*5.37)%W.S;if(W.heightAt(x,z)>.01)continue;const a=project(x,z,-.08),p=project(x+.4,z,-.08);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(p.x,p.y);ctx.stroke();}ctx.globalAlpha=1;

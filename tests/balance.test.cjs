@@ -26,6 +26,26 @@ test('one orbital volley damages each overlapping target only once in both modes
 test('orbital lock is cancelled if its target enters the dead zone before impact',()=>{
  const {g,b,target}=setup(),m=target(10.1);g.Engine.step(b,1/30);assert.equal(b.shots.length,1);m.d=9.9;for(let i=0;i<30;i++)g.Engine.step(b,1/30);assert.equal(m.hp,100000);assert.equal(b.shots.length,0);
 });
+test('defense drones take off, fire from the air and respect each nest’s capacity',()=>{
+ for(const pvp of [false,true])for(const level of [1,2,3]){
+  const {g,b,t,target}=setup(pvp,'drone_0'),m=target(2.5);
+  t.lvl=level;g.Engine.refresh(b);
+  let peak=0,shots=0;
+  for(let tick=0;tick<120;tick++){
+   g.Engine.step(b,1/30);
+   peak=Math.max(peak,b.shots.filter(s=>s.kind==='drone').length);
+   for(const e of b.ev.splice(0)){
+    if(e.k!=='droneShot')continue;
+    assert.ok(e.h>1&&e.x>t.x&&e.x<m.x);
+    shots++;
+   }
+  }
+  assert.equal(peak,level);
+  assert.ok(shots>0&&m.hp<m.maxHp);
+  b.towers.length=0;g.Engine.step(b,1/30);
+  assert.equal(b.shots.filter(s=>s.kind==='drone'&&s.t>=0).length,0);
+ }
+});
 test('Courroux damage is reduced by fifteen percent from the previous raw profile',()=>{
  const {t}=setup();assert.ok(Math.abs(t.S.dmg-150*2.4*.85)<1e-8);
 });

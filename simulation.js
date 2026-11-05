@@ -30,7 +30,7 @@ const FAM = {
   sniper: { n: 'Tireur d\'élite', role: 'Très longue portée', kind: 'bullet', dt: 'phys', cost: 95, dmg: 40, rate: 2.0, range: 4.4, pierce: 0.3, crit: { c: 0.15, m: 2 }, air: true, prefer: 'strong', c: '#D9C7A0', desc: 'Un tir précis à très longue portée. Vise d\'abord les ennemis les plus résistants.' },
   flak: { n: 'DCA', role: 'Anti-aérien lourd', kind: 'flak', dt: 'phys', cost: 105, dmg: 22, rate: 0.85, range: 3.8, splash: 0.85, air: true, airOnly: true, c: '#9FB4C8', desc: 'Obus à fragmentation qui éclatent dans le ciel. Ne vise que les aériens, mais les déchiquette.' },
   mine: { n: 'Poseur de mines', role: 'Pièges sur la route', kind: 'mine', dt: 'phys', cost: 85, dmg: 70, rate: 2.4, range: 2.3, splash: 0.65, max: 4, air: false, c: '#C8A060', desc: 'Enterre des mines sur la route. Elles explosent au passage des troupes au sol.' },
-  drone: { n: 'Nid de drones', role: 'Essaim chasseur', kind: 'missile', dt: 'phys', cost: 115, dmg: 8, rate: 1.3, range: 3.9, salvo: 4, splash: 0, air: true, c: '#7FE0C0', desc: 'Lâche des micro-drones qui poursuivent leurs cibles, au sol comme dans les airs.' },
+  drone: { n: 'Nid de drones', role: 'Essaim chasseur', kind: 'drone', dt: 'phys', cost: 115, dmg: 8, rate: 1.3, range: 3.9, splash: 0, air: true, c: '#7FE0C0', desc: 'Lance des drones armés qui tirent sur les troupes au sol et en vol. Un appareil supplémentaire par amélioration, jusqu’à trois.' },
   mlrs: { n: 'Lance-roquettes multiple', role: 'Barrage d\'artillerie', kind: 'shell', dt: 'phys', cost: 150, dmg: 22, rate: 4.2, range: 5.4, splash: 0.7, split: 5, pierce: 0.3, air: false, c: '#E07A4A', desc: 'Une salve de roquettes qui couvre toute une zone, de très loin. Rechargement lent.' },
   emp: { n: 'Canon IEM', role: 'Neutralisation', kind: 'pulse', dt: 'energy', cost: 120, dmg: 10, rate: 2.4, range: 1.9, shieldMul: 3, vehStun: { c: 0.55, d: 1.2 }, air: true, c: '#6FA8FF', desc: 'Impulsion électromagnétique : pulvérise les boucliers et paralyse véhicules et drones.' },
   gas: { n: 'Gaz incapacitant', role: 'Anti-infanterie', kind: 'puddle', dt: 'acid', cost: 90, dmg: 6, rate: 2.6, range: 2.8, splash: 1.0, dur: 3.6, infMul: 2.2, vehMul: 0.5, slow: { p: 0.35, d: 1 }, air: false, c: '#C8D86A', desc: 'Un nuage qui ralentit l\'infanterie et lui inflige le double de dégâts. Peu efficace contre les blindés.' },
@@ -186,11 +186,11 @@ const CARD_DEF = {
     ['Terre brûlée', 'mythique', { burn: 1, splash: 0.8, maxAdd: 4, stun: { c: 0.4, d: 1 } }, 'Rien ne traverse.'],
   ],
   drone: [
-    ['Essaim', 'commune', {}, 'Quatre petits drones affamés.'],
-    ['Frelons', 'rare', { salvo: 1 }, 'Un drone de plus par salve.'],
-    ['Nuée de combat', 'epique', { salvo: 2, rateMul: 1.15 }, 'Le ciel bourdonne.'],
-    ['Meute autonome', 'legendaire', { salvo: 3, crit: { c: 0.2, m: 2 } }, 'Ils choisissent seuls leurs proies.'],
-    ['Ruche', 'mythique', { salvo: 6, burn: 0.4, rateMul: 1.3 }, 'Une colonne entière de drones.'],
+    ['Essaim', 'commune', {}, 'Déploie des drones armés selon le niveau du nid.'],
+    ['Frelons', 'rare', { rateMul: 1.08 }, 'Redéploie ses drones plus vite.'],
+    ['Nuée de combat', 'epique', { rateMul: 1.15 }, 'Déploiement accéléré.'],
+    ['Meute autonome', 'legendaire', { crit: { c: 0.2, m: 2 } }, 'Peut infliger des coups critiques.'],
+    ['Ruche', 'mythique', { burn: 0.4, rateMul: 1.3 }, 'Munitions incendiaires et déploiement accéléré.'],
   ],
   mlrs: [
     ['Katioucha', 'commune', {}, 'Les orgues de la guerre.'],
@@ -1273,7 +1273,9 @@ const Engine = (() => {
     for (const s of B.shots) {
       s.t += dt;
       if (s.t < 0) continue;
-      if (s.kind === 'missile') {
+      if (s.kind === 'drone') {
+        stepDefenseDrone(B, s, dt);
+      } else if (s.kind === 'missile') {
         const tg = Tactical.target(B,s.tg); if (tg) { s.tx = tg.x; s.ty = tg.y; }
         const a = Math.atan2(s.ty - s.y, s.tx - s.x); s.ang += clamp(((a - s.ang + Math.PI * 3) % (Math.PI * 2)) - Math.PI, -dt * 7, dt * 7);
         const px=s.x,py=s.y,v = 4 + s.t * 6; s.x += Math.cos(s.ang) * v * dt; s.y += Math.sin(s.ang) * v * dt;
@@ -1297,6 +1299,38 @@ const Engine = (() => {
     B.shots = B.shots.filter((s) => !s.done);
     B.mobs = B.mobs.filter((m) => !m.dead);
     if (!B.pvp && !B.queue.length && !B.mobs.length && B.phase === 'wave') endWave(B);
+  }
+  function stepDefenseDrone(B, drone, dt) {
+    const { tw, S } = drone;
+    if (!B.towers.includes(tw) || drone.t >= 5) { drone.done = true; return; }
+    let target = Tactical.target(B, drone.tg);
+    if (!target || !targetable(target, S) || !inFiringBand(tw, target, S)) {
+      target = pick(B, tw, 1)[0];
+      drone.tg = target?.id ?? null;
+    }
+    const returning = drone.rounds === 0 || drone.t >= 3.8;
+    const destination = returning ? tw : target || tw;
+    const bearing = Math.atan2(destination.y - tw.y, destination.x - tw.x);
+    const offset = returning ? 0 : (drone.slot - (tw.lvl - 1) / 2) * .55;
+    const dx = destination.x - Math.sin(bearing) * offset - drone.x;
+    const dy = destination.y + Math.cos(bearing) * offset - drone.y;
+    const distance = Math.hypot(dx, dy);
+    if (returning && distance < .15) { drone.done = true; return; }
+    const altitude = .58 + Math.min(1, drone.t / .42) * .72;
+    drone.h = returning && distance < .75 ? .58 + .72 * distance / .75 : altitude;
+    if (distance > (returning ? .1 : .84)) {
+      const travel = Math.min(distance, 2.65 * dt);
+      drone.ang = Math.atan2(dy, dx);
+      drone.x += dx / distance * travel;
+      drone.y += dy / distance * travel;
+    }
+    if (returning || tw.jam > 0 || !target || dist(drone, target) > 1.65 || drone.t < drone.nextFire) return;
+    drone.rounds--;
+    drone.nextFire = drone.t + .34;
+    B.ev.push({ k: 'droneShot', x: drone.x, y: drone.y, h: drone.h,
+      x2: target.x, y2: target.y, air: target.air, tw: tw.id, c: '#ffdb9a' });
+    hit(B, target, S.dmg * .72, { ...S, tw });
+    applyFx(B, target, S);
   }
   // ---------------- dégâts ----------------
   function markOf(m) { return Math.min(0.7, (m.acidT > 0 ? m.acidM : 0) + m.rMark); }
@@ -1406,6 +1440,25 @@ const Engine = (() => {
         tw.ang = Math.atan2(p.y - tw.y, p.x - tw.x);
         B.shots.push({ pid: String(B.player??B.team??0)+":"+(B.nextShotId=(B.nextShotId||0)+1), kind: 'shell', S, tw, x0: tw.x, y0: tw.y, x: tw.x, y: tw.y, tx: p.x, ty: p.y, t: 0, T: Tt, H: 1.2 + dd * 0.25 });
         B.ev.push({ k: 'muzzle', x: tw.x, y: tw.y, ang: tw.ang, c: '#F4A261', big: true, tw: tw.id });
+        return true;
+      }
+      case 'drone': {
+        const limit = clamp(tw.lvl, 1, 3);
+        const occupied = new Set();
+        for (const shot of B.shots) if (shot.kind === 'drone' && shot.tw === tw && !shot.done) occupied.add(shot.slot);
+        if (occupied.size >= limit) return false;
+        const targets = pick(B, tw, limit);
+        if (!targets.length) return false;
+        aim(tw, targets[0]);
+        for (let slot = 0; slot < limit; slot++) {
+          if (occupied.has(slot)) continue;
+          const target = targets[slot % targets.length];
+          B.shots.push({
+            pid: String(B.player ?? B.team ?? 0) + ':' + (B.nextShotId = (B.nextShotId || 0) + 1),
+            kind: 'drone', S, tw, tg: target.id, slot, x: tw.x, y: tw.y,
+            ang: tw.ang, t: -slot * .16, h: .58, rounds: 4, nextFire: .46,
+          });
+        }
         return true;
       }
       case 'missile': {
